@@ -1,0 +1,344 @@
+import React, { useState, useEffect } from "react";
+import {
+  Receipt, Plus, Search, Calendar, DollarSign, Eye, Filter
+} from "lucide-react";
+import { api } from "../../api/client";
+import { Expense, Staff } from "../../types";
+import { MetricCard } from "../../components/common/MetricCard";
+import { Modal } from "../../components/common/Modal";
+import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
+
+export const ExpensesList: React.FC = () => {
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [summary, setSummary] = useState<any>(null);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Add Expense Form State (Matching reference /shop/expenses/create)
+  const [formData, setFormData] = useState({
+    title: "",
+    category: "Rent",
+    amount: "",
+    paid_date: new Date().toISOString().split("T")[0],
+    payment_method: "Cash",
+    paid_by_name: "",
+    reference: "",
+    remarks: ""
+  });
+
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      const [exps, sum, cats, staff] = await Promise.all([
+        api.getExpenses({
+          search,
+          category: selectedCategory !== "All" ? selectedCategory : undefined,
+          date_from: dateFrom,
+          date_to: dateTo
+        }),
+        api.getExpensesSummary({ date_from: dateFrom, date_to: dateTo }),
+        api.getExpenseCategories(),
+        api.getStaff()
+      ]);
+      setExpenses(exps);
+      setSummary(sum);
+      setCategories(cats);
+      setStaffList(staff);
+    } catch (err) {
+      console.error("Expenses load error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [search, selectedCategory]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.createExpense({
+        ...formData,
+        amount: Number(formData.amount) || 0
+      });
+      setIsCreateOpen(false);
+      setFormData({
+        title: "",
+        category: "Rent",
+        amount: "",
+        paid_date: new Date().toISOString().split("T")[0],
+        payment_method: "Cash",
+        paid_by_name: "",
+        reference: "",
+        remarks: ""
+      });
+      loadData();
+    } catch (err: any) {
+      alert(err.message || "Failed to create expense");
+    }
+  };
+
+  return (
+    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold font-heading text-slate-900 tracking-tight">Expenses</h2>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            Track operational franchise overhead, utility bills, fuel allowances, and maintenance costs.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <ExportPrintButtons reportType="expenses" />
+          <button
+            onClick={() => setIsCreateOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Expense</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Summary Cards (Matching Reference App: Total Amount, Total Records, Total Categories, Paid By Staff) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <MetricCard
+          title="Total Amount"
+          value={summary?.total_amount ?? 0}
+          prefix="Rs. "
+          variant="red"
+          subtitle="Total operational costs"
+        />
+        <MetricCard
+          title="Total Records"
+          value={summary?.total_records ?? 0}
+          variant="blue"
+          subtitle="Expense vouchers logged"
+        />
+        <MetricCard
+          title="Total Categories"
+          value={summary?.total_categories ?? 0}
+          variant="purple"
+          subtitle="Active expense heads"
+        />
+        <MetricCard
+          title="Disbursed Via Cash"
+          value={expenses.filter(e => e.payment_method === "Cash").length}
+          variant="amber"
+          subtitle="Handover petty cash"
+        />
+      </div>
+
+      {/* Filter Bar (Matching Reference App: Search, From Date, To Date, Filter Button) */}
+      <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-wrap items-center gap-3">
+        <div className="flex-1 min-w-[200px]">
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Search</label>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Expense title or staff name..."
+            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          />
+        </div>
+
+        <div className="w-48">
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Category</label>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white"
+          >
+            <option value="All">All Categories</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">From Date</label>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white"
+          />
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">To Date</label>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white"
+          />
+        </div>
+
+        <div className="self-end">
+          <button
+            onClick={loadData}
+            className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+          >
+            Filter
+          </button>
+        </div>
+      </div>
+
+      {/* Expenses Table (Matching Reference Columns: S.No, Title, Amount Paid, Paid By, Paid Date, Actions) */}
+      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50/80 border-b border-slate-200/60 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+              <tr>
+                <th className="py-3 px-6">S.No</th>
+                <th className="py-3 px-6">Title / Description</th>
+                <th className="py-3 px-6">Category</th>
+                <th className="py-3 px-6">Amount Paid (PKR)</th>
+                <th className="py-3 px-6">Paid By</th>
+                <th className="py-3 px-6">Method</th>
+                <th className="py-3 px-6">Paid Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              {expenses.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-slate-400">
+                    No expense records found.
+                  </td>
+                </tr>
+              ) : (
+                expenses.map((e, idx) => (
+                  <tr key={e.id} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-3.5 px-6 text-slate-400">{idx + 1}</td>
+                    <td className="py-3.5 px-6 font-bold text-slate-900">{e.title}</td>
+                    <td className="py-3.5 px-6">
+                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
+                        {e.category}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-6 font-mono font-bold text-rose-700">
+                      Rs. {Number(e.amount).toLocaleString()}
+                    </td>
+                    <td className="py-3.5 px-6 text-slate-700">{e.paid_by_name || "Finance"}</td>
+                    <td className="py-3.5 px-6 text-slate-500">{e.payment_method}</td>
+                    <td className="py-3.5 px-6 text-slate-500">{e.paid_date}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Add Expense Modal (Matching Reference Fields: Expense Type, Amount, Paid Date, Method, Paid By) */}
+      <Modal
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        title="Add Expense"
+        subtitle="Record operational costs with immediate net profit and cash ledger reduction"
+        maxWidth="md"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">Expense Title *</label>
+            <input
+              type="text"
+              required
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder="e.g. September Fiber Internet Bill"
+              className="w-full px-3 py-2 rounded-xl border border-slate-200"
+            />
+          </div>
+
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">Expense Type / Category *</label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
+            >
+              {categories.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">Amount (PKR) *</label>
+            <input
+              type="number"
+              step="0.01"
+              required
+              value={formData.amount}
+              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              placeholder="0.00"
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono"
+            />
+          </div>
+
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">Paid Date *</label>
+            <input
+              type="date"
+              required
+              value={formData.paid_date}
+              onChange={(e) => setFormData({ ...formData, paid_date: e.target.value })}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
+            />
+          </div>
+
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">Method *</label>
+            <select
+              value={formData.payment_method}
+              onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
+            >
+              <option value="Cash">Cash</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Cheque">Cheque</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">Paid By (Staff Member)</label>
+            <input
+              type="text"
+              value={formData.paid_by_name}
+              onChange={(e) => setFormData({ ...formData, paid_by_name: e.target.value })}
+              placeholder="e.g. Rashid Qureshi"
+              className="w-full px-3 py-2 rounded-xl border border-slate-200"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => setIsCreateOpen(false)}
+              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold cursor-pointer shadow-md shadow-indigo-600/30"
+            >
+              Save Expense
+            </button>
+          </div>
+        </form>
+      </Modal>
+    </div>
+  );
+};

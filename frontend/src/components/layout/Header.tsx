@@ -1,0 +1,80 @@
+import React from "react";
+import { Bell, Search, ShoppingBag, Shield, MapPin, Sparkles } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+
+interface HeaderProps {
+  title: string;
+  subtitle?: string;
+  onOpenPos?: () => void;
+  lowStockCount?: number;
+  onNavigate?: (tab: string) => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({
+  title,
+  subtitle,
+  onOpenPos,
+  lowStockCount = 0,
+  onNavigate
+}) => {
+  const { user } = useAuth();
+
+  return (
+    <header className="h-16 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between shadow-xs sticky top-0 z-20">
+      <div className="flex items-center gap-4">
+        <div>
+          <h2 className="text-xl font-bold font-heading text-slate-800 tracking-tight flex items-center gap-2">
+            {title}
+          </h2>
+          {subtitle && (
+            <p className="text-xs text-slate-500 font-medium">{subtitle}</p>
+          )}
+        </div>
+
+        {/* Branch tag */}
+        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-medium">
+          <MapPin className="w-3.5 h-3.5 text-indigo-500" />
+          <span>Peshawar Saddar Branch</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        {/* Quick POS Terminal Button */}
+        {onOpenPos && (
+          <button
+            onClick={onOpenPos}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium text-xs shadow-md shadow-indigo-600/20 hover:from-indigo-700 hover:to-violet-700 active:scale-98 transition-all"
+          >
+            <ShoppingBag className="w-3.5 h-3.5" />
+            <span className="font-semibold tracking-wide">POS Terminal</span>
+          </button>
+        )}
+
+        {/* Low Stock Notification Bell */}
+        <button
+          onClick={() => onNavigate && onNavigate("stock")}
+          className="relative p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+          title="Stock Alerts"
+        >
+          <Bell className="w-5 h-5" />
+          {lowStockCount > 0 && (
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-pulse" />
+          )}
+        </button>
+
+        {/* User Pill */}
+        <div className="flex items-center gap-2.5 pl-3 border-l border-slate-200">
+          <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white text-sm shadow-sm ring-2 ring-indigo-100">
+            {user?.name ? user.name.charAt(0).toUpperCase() : "S"}
+          </div>
+          <div className="hidden sm:block text-left">
+            <p className="text-xs font-bold text-slate-800 leading-tight">{user?.name || "Shahid Khan"}</p>
+            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700">
+              {user?.role || "Franchise Owner"}
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
