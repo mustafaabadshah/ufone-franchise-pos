@@ -260,6 +260,22 @@ export interface RSODailyReport {
   denominations: CashDenomination[];
 }
 
+export interface RSOSalary {
+  id: number;
+  rso_id?: number;
+  rso_name: string;
+  month: string;
+  basic_salary: number;
+  fuel_amount: number;
+  kpi_comm: number;
+  evc_comm: number;
+  bcards_comm: number;
+  fca_comm: number;
+  bonus: number;
+  gross_total: number;
+  created_at: string;
+}
+
 export interface EasyLoadTransaction {
   id: number;
   date: string;

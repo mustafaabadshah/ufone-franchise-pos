@@ -412,6 +412,24 @@ class CashDenomination(Base):
 
     report = relationship("RSODailyReport", back_populates="denominations")
 
+class RSOSalary(Base):
+    __tablename__ = "rso_salaries"
+    id = Column(Integer, primary_key=True, index=True)
+    rso_id = Column(Integer, ForeignKey("rsos.id"), nullable=True)
+    rso_name = Column(String(120), nullable=False)
+    month = Column(String(50), default="August 2026", nullable=False)
+    basic_salary = Column(Numeric(12, 2), default=Decimal("0.00"), nullable=False)
+    fuel_amount = Column(Numeric(12, 2), default=Decimal("0.00"), nullable=False)
+    kpi_comm = Column(Numeric(12, 2), default=Decimal("0.00"), nullable=False)
+    evc_comm = Column(Numeric(12, 2), default=Decimal("0.00"), nullable=False)
+    bcards_comm = Column(Numeric(12, 2), default=Decimal("0.00"), nullable=False)
+    fca_comm = Column(Numeric(12, 2), default=Decimal("0.00"), nullable=False)
+    bonus = Column(Numeric(12, 2), default=Decimal("0.00"), nullable=False)
+    gross_total = Column(Numeric(12, 2), default=Decimal("0.00"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    rso = relationship("RSO")
+
 class EasyLoadTransaction(Base):
     __tablename__ = "easyload_transactions"
     id = Column(Integer, primary_key=True, index=True)

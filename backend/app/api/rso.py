@@ -7,10 +7,11 @@ from sqlalchemy import func
 from app.core.database import get_db
 from app.models.models import (
     RSO, RSODailyReport, RSOItem, CashDenomination, Product, StockMovement,
-    StockMovementType, AuditLog
+    StockMovementType, AuditLog, RSOSalary
 )
 from app.schemas.schemas import (
-    RSOCreate, RSOUpdate, RSOOut, RSODailyReportCreate, RSODailyReportOut
+    RSOCreate, RSOUpdate, RSOOut, RSODailyReportCreate, RSODailyReportOut,
+    RSOSalaryCreate, RSOSalaryOut
 )
 
 router = APIRouter(prefix="/rso", tags=["RSO Management"])
@@ -231,3 +232,32 @@ def get_rso_daily_report(report_id: int, db: Session = Depends(get_db)):
     r_dict["items"] = [{c.name: getattr(i, c.name) for c in i.__table__.columns} for i in r.items]
     r_dict["denominations"] = [{c.name: getattr(d, c.name) for c in d.__table__.columns} for d in r.denominations]
     return RSODailyReportOut(**r_dict)
+
+# --- RSO SALARIES (August 2026 Sheet Structure) ---
+@router.get("/salaries/all", response_model=List[RSOSalaryOut])
+def list_rso_salaries(month: Optional[str] = None, db: Session = Depends(get_db)):
+    q = db.query(RSOSalary)
+    if month:
+        q = q.filter(RSOSalary.month.ilike(f"%{month}%"))
+    return q.order_by(RSOSalary.id.asc()).all()
+
+@router.post("/salaries", response_model=RSOSalaryOut)
+def create_rso_salary(data: RSOSalaryCreate, db: Session = Depends(get_db)):
+    sal = RSOSalary(
+        rso_id=data.rso_id,
+        rso_name=data.rso_name,
+        month=data.month,
+        basic_salary=data.basic_salary,
+        fuel_amount=data.fuel_amount,
+        kpi_comm=data.kpi_comm,
+        evc_comm=data.evc_comm,
+        bcards_comm=data.bcards_comm,
+        fca_comm=data.fca_comm,
+        bonus=data.bonus,
+        gross_total=data.gross_total
+    )
+    db.add(sal)
+    db.commit()
+    db.refresh(sal)
+    return sal
+

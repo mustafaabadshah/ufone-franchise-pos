@@ -139,6 +139,8 @@ export const api = {
   },
   createRsoDailyReport: (data: any) => apiFetch<any>("/rso/reports/daily", { method: "POST", body: JSON.stringify(data) }),
   getRsoDailyReport: (id: number) => apiFetch<any>(`/rso/reports/daily/${id}`),
+  getRsoSalaries: (month?: string) => apiFetch<any[]>(`/rso/salaries/all${month ? `?month=${month}` : ''}`),
+  createRsoSalary: (data: any) => apiFetch<any>("/rso/salaries", { method: "POST", body: JSON.stringify(data) }),
 
   // EasyLoad
   getEasyloadTransactions: (params?: { msisdn?: string; retailer_id?: number; rso_id?: number; date_from?: string; date_to?: string }) => {

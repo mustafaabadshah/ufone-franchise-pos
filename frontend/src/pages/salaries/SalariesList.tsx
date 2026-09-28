@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { DollarSign, Plus, Search, Calendar, UserCheck, Eye } from "lucide-react";
 import { api } from "../../api/client";
-import { Salary, Staff } from "../../types";
+import { Salary, Staff, RSOSalary } from "../../types";
 import { MetricCard } from "../../components/common/MetricCard";
 import { Modal } from "../../components/common/Modal";
 import { StatusBadge } from "../../components/common/StatusBadge";
@@ -11,6 +11,8 @@ export const SalariesList: React.FC = () => {
   const [salaries, setSalaries] = useState<Salary[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [rsoSalaries, setRsoSalaries] = useState<RSOSalary[]>([]);
+  const [activeTab, setActiveTab] = useState<'rso_sheet' | 'all'>('rso_sheet');
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -36,14 +38,16 @@ export const SalariesList: React.FC = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [sals, sum, staff] = await Promise.all([
+      const [sals, sum, staff, rsoSals] = await Promise.all([
         api.getSalaries({ search, date_from: dateFrom, date_to: dateTo }),
         api.getSalariesSummary({ date_from: dateFrom, date_to: dateTo }),
-        api.getStaff()
+        api.getStaff(),
+        api.getRsoSalaries()
       ]);
       setSalaries(sals);
       setSummary(sum);
       setStaffList(staff);
+      setRsoSalaries(rsoSals);
     } catch (err) {
       console.error("Salaries load error:", err);
     } finally {
@@ -200,8 +204,123 @@ export const SalariesList: React.FC = () => {
         </div>
       </div>
 
-      {/* Salaries Table (Matching Reference Columns: S.No, Staff Name, Salary, Salary Given, Remaining, Paid On, Paid By, Payment Method, Actions) */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
+      {/* View Switcher Tabs */}
+      <div className="flex items-center gap-2 border-b border-slate-200">
+        <button
+          onClick={() => setActiveTab('rso_sheet')}
+          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+            activeTab === 'rso_sheet'
+              ? 'border-indigo-600 text-indigo-700 bg-indigo-50/50 rounded-t-lg'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <span>RSO Salary Aug 26 (Audit Sheet)</span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700">Rs. 108,024</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('all')}
+          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+            activeTab === 'all'
+              ? 'border-indigo-600 text-indigo-700 bg-indigo-50/50 rounded-t-lg'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <span>All Payroll Vouchers (Office & RSO)</span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">{salaries.length}</span>
+        </button>
+      </div>
+
+      {/* RSO SALARY SHEET (Exact Monthly Audit View from August.xlsx) */}
+      {activeTab === 'rso_sheet' ? (
+        <div id="rso-salary-sheet" className="rounded-2xl bg-white border border-slate-300 shadow-sm overflow-hidden">
+          {/* Header Banner */}
+          <div className="bg-slate-200 text-slate-900 py-3.5 px-6 border-b border-slate-300 text-center font-bold text-base sm:text-lg tracking-wide uppercase font-serif">
+            RSO Salary Aug 26
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-center text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-300 font-bold text-slate-800 text-[11px]">
+                  <th className="py-3 px-4 border-r border-slate-300 text-left font-bold">Salesman</th>
+                  <th className="py-3 px-3 border-r border-slate-300">Basic Salary</th>
+                  <th className="py-3 px-3 border-r border-slate-300">Fuel Amount</th>
+                  <th className="py-3 px-3 border-r border-slate-300">KPI Comm</th>
+                  <th className="py-3 px-3 border-r border-slate-300">EVC Comm</th>
+                  <th className="py-3 px-3 border-r border-slate-300">B-Cards Comm</th>
+                  <th className="py-3 px-3 border-r border-slate-300">FCA Comm</th>
+                  <th className="py-3 px-3 border-r border-slate-300">Bonus</th>
+                  <th className="py-3 px-4 font-black text-slate-900 text-sm">G -Total</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 text-slate-800 font-medium">
+                {rsoSalaries.map((row, idx) => (
+                  <tr key={row.id || idx} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4 border-r border-slate-300 text-left font-bold text-slate-900">
+                      {idx + 1}- {row.rso_name}
+                    </td>
+                    <td className="py-3 px-3 border-r border-slate-300 font-mono font-semibold">
+                      {Number(row.basic_salary).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-3 border-r border-slate-300 font-mono">
+                      {Number(row.fuel_amount).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-3 border-r border-slate-300 font-mono">
+                      {Number(row.kpi_comm).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-3 border-r border-slate-300 font-mono font-semibold text-indigo-700">
+                      {Number(row.evc_comm).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-3 border-r border-slate-300 font-mono text-slate-400">
+                      {Number(row.bcards_comm).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-3 border-r border-slate-300 font-mono">
+                      {Number(row.fca_comm).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-3 border-r border-slate-300 font-mono text-slate-400">
+                      {Number(row.bonus).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-4 font-mono font-black text-slate-900 text-sm bg-slate-50/60">
+                      {Number(row.gross_total).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-slate-200 font-black text-slate-900 text-xs border-t-2 border-slate-400">
+                  <td className="py-3.5 px-4 border-r border-slate-300 text-left font-bold text-sm">Total</td>
+                  <td className="py-3.5 px-3 border-r border-slate-300 font-mono font-bold">
+                    {rsoSalaries.reduce((acc, r) => acc + Number(r.basic_salary), 0).toLocaleString()}
+                  </td>
+                  <td className="py-3.5 px-3 border-r border-slate-300 font-mono font-bold">
+                    {rsoSalaries.reduce((acc, r) => acc + Number(r.fuel_amount), 0).toLocaleString()}
+                  </td>
+                  <td className="py-3.5 px-3 border-r border-slate-300 font-mono font-bold">
+                    {rsoSalaries.reduce((acc, r) => acc + Number(r.kpi_comm), 0).toLocaleString()}
+                  </td>
+                  <td className="py-3.5 px-3 border-r border-slate-300 font-mono font-bold text-indigo-900">
+                    {rsoSalaries.reduce((acc, r) => acc + Number(r.evc_comm), 0).toLocaleString()}
+                  </td>
+                  <td className="py-3.5 px-3 border-r border-slate-300 font-mono font-bold">
+                    {rsoSalaries.reduce((acc, r) => acc + Number(r.bcards_comm), 0).toLocaleString()}
+                  </td>
+                  <td className="py-3.5 px-3 border-r border-slate-300 font-mono font-bold">
+                    {rsoSalaries.reduce((acc, r) => acc + Number(r.fca_comm), 0).toLocaleString()}
+                  </td>
+                  <td className="py-3.5 px-3 border-r border-slate-300 font-mono font-bold">
+                    {rsoSalaries.reduce((acc, r) => acc + Number(r.bonus), 0).toLocaleString()}
+                  </td>
+                  <td className="py-3.5 px-4 font-mono font-black text-slate-950 text-base bg-slate-300/80">
+                    {rsoSalaries.reduce((acc, r) => acc + Number(r.gross_total), 0).toLocaleString()}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      ) : (
+        /* Standard Salaries Table */
+        <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200/60 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
@@ -253,6 +372,7 @@ export const SalariesList: React.FC = () => {
           </table>
         </div>
       </div>
+      )}
 
       {/* Add Salary Modal (Matching Reference Fields: Staff Name, Salary, Salary Given, Paid On, Paid By, Payment Method, Remaining) */}
       <Modal

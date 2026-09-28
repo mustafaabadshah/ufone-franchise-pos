@@ -534,6 +534,37 @@ class RSODailyReportOut(BaseModel):
     class Config:
         from_attributes = True
 
+# --- RSO SALARIES ---
+class RSOSalaryCreate(BaseModel):
+    rso_id: Optional[int] = None
+    rso_name: str
+    month: str = "August 2026"
+    basic_salary: Decimal = Decimal("0.00")
+    fuel_amount: Decimal = Decimal("0.00")
+    kpi_comm: Decimal = Decimal("0.00")
+    evc_comm: Decimal = Decimal("0.00")
+    bcards_comm: Decimal = Decimal("0.00")
+    fca_comm: Decimal = Decimal("0.00")
+    bonus: Decimal = Decimal("0.00")
+    gross_total: Decimal = Decimal("0.00")
+
+class RSOSalaryOut(BaseModel):
+    id: int
+    rso_id: Optional[int] = None
+    rso_name: str
+    month: str
+    basic_salary: Decimal
+    fuel_amount: Decimal
+    kpi_comm: Decimal
+    evc_comm: Decimal
+    bcards_comm: Decimal
+    fca_comm: Decimal
+    bonus: Decimal
+    gross_total: Decimal
+    created_at: dt_datetime
+    class Config:
+        from_attributes = True
+
 # --- EASYLOAD ---
 class EasyLoadCreate(BaseModel):
     date: dt_date = Field(default_factory=dt_date.today)

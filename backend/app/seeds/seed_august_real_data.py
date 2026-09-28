@@ -12,7 +12,7 @@ from app.models.models import (
     CompanyCreditAccount, CompanyCreditTransaction, Purchase, PurchaseItem,
     Sale, SaleItem, Return, ReturnItem, Expense, Salary, Investment,
     Commission, EasyLoadTransaction, RetailerCollection, AuditLog,
-    LedgerAccount, LedgerTransaction, LedgerEntry
+    LedgerAccount, LedgerTransaction, LedgerEntry, RSOSalary
 )
 
 def wipe_dummy_data_keep_credentials(db: Session):
@@ -39,6 +39,7 @@ def wipe_dummy_data_keep_credentials(db: Session):
         "rso_items",
         "rso_reports",
         "retailers",
+        "rso_salaries",
         "staff",
         "rsos",
         "products",
@@ -267,8 +268,8 @@ def seed_august_real_data():
             rsos_dict[r_name] = rso
         db.commit()
 
-        # 7. Real Office Staff (Row 74-82 of August.xlsx)
-        print("Seeding Dargai Office personnel...")
+        # 7. Real Personnel (Row 74-82 Office Staff + Row 63-71 RSO Field Agents of August.xlsx)
+        print("Seeding Dargai Office personnel and RSO Officers...")
         staff_data = [
             ("Shahid Khan", "shahidkhan@pos.com", "+92 333 9123456", "Franchise Incharge", Decimal("35000.00")),
             ("Shahab Badshah", "shahab@pos.com", "+92 333 9002001", "Office Staff", Decimal("27000.00")),
@@ -276,6 +277,11 @@ def seed_august_real_data():
             ("Israr Badshah", "israr@pos.com", "+92 333 9002003", "Accounts Staff", Decimal("20000.00")),
             ("Arshad OB", "arshad@pos.com", "+92 333 9002004", "Office Boy / Dispatch", Decimal("15000.00")),
             ("Watch Man", "guard@pos.com", "+92 333 9002005", "Security Guard", Decimal("300.00")),
+            # RSO Field Officers from Row 63-71
+            ("Muhammad Riaz", "riaz.rso@pos.com", "03339001001", "RSO Officer", Decimal("15000.00")),
+            ("Muhammad Khizer", "khizer.rso@pos.com", "03339001002", "RSO Officer", Decimal("13500.00")),
+            ("Muhammad Maaz", "maaz.rso@pos.com", "03339001003", "RSO Officer", Decimal("15000.00")),
+            ("Sabir-U-Allah", "sabir.rso@pos.com", "03339001004", "RSO Officer", Decimal("10000.00")),
         ]
         staff_dict = {}
         for s_name, s_email, s_phone, s_role, s_salary in staff_data:
@@ -293,26 +299,32 @@ def seed_august_real_data():
             staff_dict[s_name] = st
         db.commit()
 
-        # 8. Salaries (Paid for August 2026 per sheet: Row 76-81)
-        print("Seeding August salaries...")
+        # 8. Salaries (Paid for August 2026 per sheet: Office Staff + RSO Salary Aug 26)
+        print("Seeding August staff and RSO salaries...")
         salaries_data = [
-            ("Israr Badshah", Decimal("20000.00"), Decimal("0.00"), Decimal("0.00"), Decimal("20000.00")),
-            ("Shahab Badshah", Decimal("27000.00"), Decimal("0.00"), Decimal("0.00"), Decimal("27000.00")),
-            ("Shakil Ahmad", Decimal("34000.00"), Decimal("1500.00"), Decimal("0.00"), Decimal("35500.00")),
-            ("Arshad OB", Decimal("15000.00"), Decimal("0.00"), Decimal("0.00"), Decimal("15000.00")),
-            ("Shahid Khan", Decimal("35000.00"), Decimal("11500.00"), Decimal("0.00"), Decimal("46500.00")),
-            ("Watch Man", Decimal("300.00"), Decimal("0.00"), Decimal("0.00"), Decimal("300.00")),
+            # Office Staff (Row 76-81)
+            ("Israr Badshah", Decimal("20000.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("20000.00"), "August 2026 salary for Israr Badshah"),
+            ("Shahab Badshah", Decimal("27000.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("27000.00"), "August 2026 salary for Shahab Badshah"),
+            ("Shakil Ahmad", Decimal("34000.00"), Decimal("0.00"), Decimal("1500.00"), Decimal("0.00"), Decimal("0.00"), Decimal("35500.00"), "August 2026 salary for Shakil Ahmad"),
+            ("Arshad OB", Decimal("15000.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("15000.00"), "August 2026 salary for Arshad OB"),
+            ("Shahid Khan", Decimal("35000.00"), Decimal("0.00"), Decimal("11500.00"), Decimal("0.00"), Decimal("0.00"), Decimal("46500.00"), "August 2026 salary for Shahid Khan"),
+            ("Watch Man", Decimal("300.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("300.00"), "August 2026 salary for Watch Man"),
+            # RSO Field Officers (Row 63-71: RSO Salary Aug 26)
+            ("Muhammad Riaz", Decimal("15000.00"), Decimal("6000.00"), Decimal("0.00"), Decimal("0.00"), Decimal("9760.00"), Decimal("30760.00"), "RSO Salary Aug 26: Fuel: 6000 | KPI Comm: 3000 | EVC Comm: 4760 | FCA Comm: 2000"),
+            ("Muhammad Khizer", Decimal("13500.00"), Decimal("6000.00"), Decimal("0.00"), Decimal("0.00"), Decimal("14702.00"), Decimal("34202.00"), "RSO Salary Aug 26: Fuel: 6000 | KPI Comm: 3000 | EVC Comm: 9702 | FCA Comm: 2000"),
+            ("Muhammad Maaz", Decimal("15000.00"), Decimal("5000.00"), Decimal("0.00"), Decimal("0.00"), Decimal("8430.00"), Decimal("28430.00"), "RSO Salary Aug 26: Fuel: 5000 | KPI Comm: 3000 | EVC Comm: 3430 | FCA Comm: 2000"),
+            ("Sabir-U-Allah", Decimal("10000.00"), Decimal("2000.00"), Decimal("0.00"), Decimal("0.00"), Decimal("2632.00"), Decimal("14632.00"), "RSO Salary Aug 26: Fuel: 2000 | EVC Comm: 2632"),
         ]
-        for s_name, basic, bonus, ded, net in salaries_data:
+        for s_name, basic, allow, bonus, ded, comm, net, rem in salaries_data:
             st_obj = staff_dict[s_name]
             sal = Salary(
                 staff_id=st_obj.id,
                 month="August 2026",
                 basic_salary=basic,
-                allowances=Decimal("0.00"),
+                allowances=allow,
                 deductions=ded,
                 bonus=bonus,
-                commission=Decimal("0.00"),
+                commission=comm,
                 net_salary=net,
                 salary_given=net,
                 remaining=Decimal("0.00"),
@@ -320,9 +332,36 @@ def seed_august_real_data():
                 paid_by="Admin",
                 payment_method="Cash",
                 status="Paid",
-                remarks=f"August 2026 salary disbursement for {s_name}"
+                remarks=rem
             )
             db.add(sal)
+        db.commit()
+
+        # 8B. RSO Salary Aug 26 Dedicated Table Breakdown
+        print("Seeding dedicated RSO Salary Aug 26 records (Rs. 108,024)...")
+        rso_sal_rows = [
+            ("Muhammad Riaz", Decimal("15000.00"), Decimal("6000.00"), Decimal("3000.00"), Decimal("4760.00"), Decimal("0.00"), Decimal("2000.00"), Decimal("0.00"), Decimal("30760.00")),
+            ("Muhammad Khizer", Decimal("13500.00"), Decimal("6000.00"), Decimal("3000.00"), Decimal("9702.00"), Decimal("0.00"), Decimal("2000.00"), Decimal("0.00"), Decimal("34202.00")),
+            ("Muhammad Maaz", Decimal("15000.00"), Decimal("5000.00"), Decimal("3000.00"), Decimal("3430.00"), Decimal("0.00"), Decimal("2000.00"), Decimal("0.00"), Decimal("28430.00")),
+            ("Sabir-U-Allah", Decimal("10000.00"), Decimal("2000.00"), Decimal("0.00"), Decimal("2632.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("14632.00")),
+            ("Office", Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), Decimal("0.00")),
+        ]
+        for r_name, b_sal, fuel, kpi, evc, bc, fca, bon, g_tot in rso_sal_rows:
+            r_obj = rsos_dict.get(r_name)
+            rs = RSOSalary(
+                rso_id=r_obj.id if r_obj else None,
+                rso_name=r_name,
+                month="August 2026",
+                basic_salary=b_sal,
+                fuel_amount=fuel,
+                kpi_comm=kpi,
+                evc_comm=evc,
+                bcards_comm=bc,
+                fca_comm=fca,
+                bonus=bon,
+                gross_total=g_tot
+            )
+            db.add(rs)
         db.commit()
 
         # 9. Real Retailers & Market Receivables (Credit Details from Row 23-34 & Row 84-106 of August.xlsx)
