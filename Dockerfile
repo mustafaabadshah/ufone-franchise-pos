@@ -12,9 +12,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 COPY backend/requirements.txt /app/backend/requirements.txt
 RUN pip install --no-cache-dir -r /app/backend/requirements.txt
 
-# Copy application files and pre-built static bundle
+# Copy application files (backend contains pre-built production assets in backend/static)
 COPY backend /app/backend
-COPY frontend/dist /app/frontend/dist
+
+# Mirror static build into frontend/dist for dual-path resilience
+RUN mkdir -p /app/frontend && cp -r /app/backend/static /app/frontend/dist
 
 WORKDIR /app/backend
 
