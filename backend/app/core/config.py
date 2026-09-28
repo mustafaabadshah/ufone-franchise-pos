@@ -11,10 +11,10 @@ class Settings(BaseSettings):
     
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./franchise_pos.db")
     
-    DEFAULT_FRANCHISE_NAME: str = "Ufone 4G Authorized Franchise"
-    DEFAULT_BRANCH: str = "Central Plaza Branch, Peshawar"
+    DEFAULT_FRANCHISE_NAME: str = "Ufone Franchise - Dargai Office"
+    DEFAULT_BRANCH: str = "Dargai Office"
     DEFAULT_CURRENCY: str = "PKR"
-    DEFAULT_PHONE: str = "+92 333 1234567"
+    DEFAULT_PHONE: str = "+92 333 9123456"
     
     class Config:
         case_sensitive = True

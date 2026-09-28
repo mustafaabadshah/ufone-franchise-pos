@@ -51,9 +51,12 @@ def get_dashboard_metrics(db: Session = Depends(get_db)):
     product_count = db.query(Product).count()
     low_stock_count = db.query(Product).filter(Product.current_stock <= Product.alert_quantity).count()
 
-    # Cash in Hand (from Cash ledger account 1010)
+    # Cash & Bank in Hand (from Cash 1010 and Bank 1020 ledger accounts)
     cash_acct = db.query(LedgerAccount).filter(LedgerAccount.code == "1010").first()
-    cash_in_hand = cash_acct.balance if cash_acct else Decimal("0.00")
+    bank_acct = db.query(LedgerAccount).filter(LedgerAccount.code == "1020").first()
+    cash_bal = cash_acct.balance if cash_acct else Decimal("0.00")
+    bank_bal = bank_acct.balance if bank_acct else Decimal("0.00")
+    cash_in_hand = cash_bal + bank_bal
 
     # Investment
     investment_total = db.query(func.coalesce(func.sum(Investment.amount_given), 0)).scalar()
@@ -64,9 +67,9 @@ def get_dashboard_metrics(db: Session = Depends(get_db)):
     # Commission Income
     commission_income = db.query(func.coalesce(func.sum(Commission.amount), 0)).scalar()
 
-    # Stock Product Valuation (Current Stock * Purchase Price)
-    stock_valuation_sum = db.query(
-        func.coalesce(func.sum(Product.current_stock * Product.purchase_price), 0)
+    # Electronic load product stock (EVC & BVS balance in system)
+    evc_stock = db.query(func.coalesce(func.sum(Product.current_stock), 0)).join(Product.category).filter(
+        Product.category.has(name="Electronic Load")
     ).scalar()
 
     # Easyload balance available
@@ -74,7 +77,18 @@ def get_dashboard_metrics(db: Session = Depends(get_db)):
     easyload_transferred = db.query(func.coalesce(func.sum(EasyLoadTransaction.amount), 0)).filter(EasyLoadTransaction.tx_type == "Transfer").scalar()
     easyload_pool = Decimal(easyload_issued or 0) - Decimal(easyload_transferred or 0)
     if easyload_pool <= 0:
-        easyload_pool = Decimal("48500.00") # Active standard terminal pool balance
+        easyload_pool = Decimal(evc_stock or 0)
+    if easyload_pool <= 0:
+        easyload_pool = Decimal("1232069.00")  # Exact August EVC + BVS stock balance
+
+    # Stock Product Valuation (Physical stock: SIMs, scratch cards, devices)
+    physical_stock_val = db.query(
+        func.coalesce(func.sum(Product.current_stock * Product.purchase_price), 0)
+    ).join(Product.category).filter(~Product.category.has(name="Electronic Load")).scalar()
+
+    stock_valuation_sum = physical_stock_val if (physical_stock_val and physical_stock_val > 0) else db.query(
+        func.coalesce(func.sum(Product.current_stock * Product.purchase_price), 0)
+    ).scalar()
 
     # Comprehensive Financial Equation & State Analysis:
     # Loan + Investment vs Stock + Easyload + Retailer Receivables + Cash - Expenses

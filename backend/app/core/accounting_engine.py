@@ -7,7 +7,7 @@ from app.models.models import (
     Product, StockMovement, StockMovementType, Purchase, PurchaseItem,
     Sale, SaleItem, Return, ReturnItem, Expense, Salary, CompanyCreditAccount,
     CompanyCreditTransaction, LedgerAccount, LedgerTransaction, LedgerEntry,
-    EntryTypeEnum, AuditLog
+    EntryTypeEnum, AuditLog, Commission
 )
 
 SYSTEM_ACCOUNTS = [
@@ -455,10 +455,17 @@ def calculate_profit_and_loss(
     returns_cogs_reversed = sum((r.cogs_reversed for r in returns), Decimal("0.00"))
     net_cogs = max(Decimal("0.00"), sales_cogs - returns_cogs_reversed)
 
-    # Commission income
+    # Commission income (Direct sale commission + HQ/Company Commission Inflows)
     sales_commission = sum((s.commission for s in sales), Decimal("0.00"))
+    commissions_q = db.query(Commission)
+    if start_date:
+        commissions_q = commissions_q.filter(Commission.date >= start_date)
+    if end_date:
+        commissions_q = commissions_q.filter(Commission.date <= end_date)
+    hq_commissions = sum((c.amount for c in commissions_q.all()), Decimal("0.00"))
+    total_commission = sales_commission + hq_commissions
 
-    gross_profit = net_revenue - net_cogs + sales_commission
+    gross_profit = net_revenue - net_cogs + total_commission
 
     total_expenses = sum((e.amount for e in expenses), Decimal("0.00"))
     total_salaries = sum((s.salary_given for s in salaries), Decimal("0.00"))
@@ -472,7 +479,7 @@ def calculate_profit_and_loss(
         "sales_returns": float(sales_returns_amount),
         "net_revenue": float(net_revenue),
         "cogs": float(net_cogs),
-        "commission_income": float(sales_commission),
+        "commission_income": float(total_commission),
         "gross_profit": float(gross_profit),
         "expenses": float(total_expenses),
         "salaries": float(total_salaries),
