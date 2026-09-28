@@ -63,16 +63,28 @@ const TAB_CONFIG: Record<string, { title: string; subtitle: string }> = {
 
 function MainApp() {
   const { user, isLoading } = useAuth();
+  const isViewer = user?.role?.toLowerCase() === 'viewer';
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [lowStockCount, setLowStockCount] = useState<number>(0);
 
+  // Default viewer to reports tab on initial login
   useEffect(() => {
     if (user) {
+      if (user.role?.toLowerCase() === 'viewer') {
+        setCurrentTab('reports');
+      } else {
+        setCurrentTab('dashboard');
+      }
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user && !isViewer) {
       api.getLowStockAlerts()
         .then((alerts) => setLowStockCount(alerts.length))
         .catch(() => {});
     }
-  }, [user]);
+  }, [user, isViewer]);
 
   if (isLoading) {
     return (
@@ -89,12 +101,33 @@ function MainApp() {
     return <Login />;
   }
 
+  const allowedViewerTabs = ['reports', 'dashboard', 'pnl', 'ledger', 'rso-daily', 'rso-weekly', 'rso-monthly'];
+
+  const handleNavigate = (tabId: string) => {
+    if (isViewer && !allowedViewerTabs.includes(tabId)) {
+      setCurrentTab('reports');
+      return;
+    }
+    setCurrentTab(tabId);
+  };
+
   const tabMeta = TAB_CONFIG[currentTab] || { title: 'Franchise Management', subtitle: '' };
 
   const renderContent = () => {
+    if (isViewer && !allowedViewerTabs.includes(currentTab)) {
+      return (
+        <div className="space-y-6">
+          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm font-medium flex items-center justify-between">
+            <span>You are logged in as <strong>Islam Badshah (Viewer Only)</strong>. Operational and administrative modules are restricted. You can view all reports, financial statements, and print/download documents below.</span>
+          </div>
+          <ReportCenter />
+        </div>
+      );
+    }
+
     switch (currentTab) {
       case 'dashboard':
-        return <Dashboard onNavigate={setCurrentTab} />;
+        return <Dashboard onNavigate={handleNavigate} />;
       case 'products':
       case 'categories':
         return <ProductsList />;
@@ -144,7 +177,7 @@ function MainApp() {
       case 'audit-logs':
         return <AuditLogsPage />;
       default:
-        return <Dashboard onNavigate={setCurrentTab} />;
+        return <Dashboard onNavigate={handleNavigate} />;
     }
   };
 
@@ -153,7 +186,7 @@ function MainApp() {
       {/* Dark Sidebar */}
       <Sidebar
         currentTab={currentTab}
-        onNavigate={(tab) => setCurrentTab(tab)}
+        onNavigate={handleNavigate}
         lowStockCount={lowStockCount}
       />
 
@@ -162,13 +195,29 @@ function MainApp() {
         <Header
           title={tabMeta.title}
           subtitle={tabMeta.subtitle}
-          onOpenPos={() => setCurrentTab('sales')}
+          onOpenPos={() => handleNavigate('sales')}
           lowStockCount={lowStockCount}
-          onNavigate={(tab) => setCurrentTab(tab)}
+          onNavigate={handleNavigate}
         />
 
         <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-100/70">
           <div className="max-w-7xl mx-auto">
+            {isViewer && (
+              <div className="mb-6 p-3.5 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 shadow-xs flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-xs font-semibold text-emerald-900">
+                    Logged in as <strong>Islam Badshah</strong> (Role: Reports Viewer). You have access to view all reports, financial summaries, and print or download documents.
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleNavigate('reports')}
+                  className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer"
+                >
+                  Go to Report Center
+                </button>
+              </div>
+            )}
             {renderContent()}
           </div>
         </main>

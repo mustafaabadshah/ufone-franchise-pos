@@ -36,7 +36,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onNavigate, lowSto
     }));
   };
 
-  const sections: NavSection[] = [
+  const isViewer = user?.role?.toLowerCase() === "viewer";
+
+  const allSections: NavSection[] = [
     {
       title: "Operations",
       items: [
@@ -95,6 +97,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onNavigate, lowSto
     }
   ];
 
+  const viewerSections: NavSection[] = [
+    {
+      title: "Reports & Audits (View Only)",
+      items: [
+        { id: "reports", label: "Executive Report Hub", icon: FileSpreadsheet },
+        { id: "pnl", label: "Profit & Loss Statement", icon: TrendingUp },
+        { id: "ledger", label: "General Ledger", icon: BookOpen },
+        { id: "rso-daily", label: "RSO Daily Report", icon: CalendarDays },
+        { id: "rso-weekly", label: "RSO Weekly Report", icon: CalendarDays },
+        { id: "rso-monthly", label: "RSO Monthly Report", icon: CalendarDays },
+      ]
+    }
+  ];
+
+  const sections = isViewer ? viewerSections : allSections;
+
   return (
     <aside className="w-72 bg-gradient-to-b from-[#17153b] via-[#1e1b4b] to-[#12102e] text-slate-200 h-screen flex flex-col flex-shrink-0 shadow-2xl border-r border-indigo-950/60 select-none z-30">
       {/* Brand Header */}
@@ -109,6 +127,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onNavigate, lowSto
           </div>
         </div>
       </div>
+
+      {isViewer && (
+        <div className="mx-3 mt-3 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11px] font-semibold flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+          <span className="leading-snug">Islam Badshah (Reports & Print Only)</span>
+        </div>
+      )}
 
       {/* Main Navigation */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5 text-xs">

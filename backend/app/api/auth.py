@@ -28,6 +28,14 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise credentials_exception
     return user
 
+def require_non_viewer(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role and current_user.role.name.lower() == "viewer":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Read-only access: Viewer role (Islam Badshah) is restricted to viewing reports and printing/downloading only."
+        )
+    return current_user
+
 @router.post("/login", response_model=Token)
 def login(login_data: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == login_data.email).first()

@@ -80,6 +80,23 @@ def run_seed():
             )
             db.add(finance_user)
 
+        viewer_email = "islambadshah@pos.com"
+        viewer_user = db.query(User).filter(User.email == viewer_email).first()
+        if not viewer_user:
+            viewer_user = User(
+                name="Islam Badshah",
+                email=viewer_email,
+                hashed_password=hash_password("posUfone@123"),
+                role_id=roles_dict["Viewer"].id,
+                phone="+92 333 1122334",
+                is_active=True
+            )
+            db.add(viewer_user)
+        else:
+            viewer_user.role_id = roles_dict["Viewer"].id
+            viewer_user.name = "Islam Badshah"
+            viewer_user.hashed_password = hash_password("posUfone@123")
+
         db.commit()
 
         # 3. Categories

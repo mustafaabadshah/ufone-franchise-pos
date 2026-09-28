@@ -93,5 +93,6 @@ If you want an immediate live link on the internet right now from your running m
 |---|---|---|
 | **Franchise Owner / Admin** | `shahidkhan@pos.com` | `posUfone@123` |
 | **Manager** | `manager@pos.com` | `posUfone@123` |
+| **Reports Viewer (Islam Badshah)** | `islambadshah@pos.com` | `posUfone@123` |
 | **Cashier / POS** | `cashier@pos.com` | `posUfone@123` |
 | **RSO Officer** | `rso1@pos.com` | `posUfone@123` |

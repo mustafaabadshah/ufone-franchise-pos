@@ -39,8 +39,8 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Quick POS Terminal Button */}
-        {onOpenPos && (
+        {/* Quick POS Terminal Button (Hidden for Read-Only Viewers) */}
+        {onOpenPos && user?.role?.toLowerCase() !== "viewer" && (
           <button
             onClick={onOpenPos}
             className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium text-xs shadow-md shadow-indigo-600/20 hover:from-indigo-700 hover:to-violet-700 active:scale-98 transition-all"
@@ -51,26 +51,34 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         {/* Low Stock Notification Bell */}
-        <button
-          onClick={() => onNavigate && onNavigate("stock")}
-          className="relative p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-          title="Stock Alerts"
-        >
-          <Bell className="w-5 h-5" />
-          {lowStockCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-pulse" />
-          )}
-        </button>
+        {user?.role?.toLowerCase() !== "viewer" && (
+          <button
+            onClick={() => onNavigate && onNavigate("stock")}
+            className="relative p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+            title="Stock Alerts"
+          >
+            <Bell className="w-5 h-5" />
+            {lowStockCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-pulse" />
+            )}
+          </button>
+        )}
 
         {/* User Pill */}
         <div className="flex items-center gap-2.5 pl-3 border-l border-slate-200">
-          <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white text-sm shadow-sm ring-2 ring-indigo-100">
+          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-sm ring-2 ${
+            user?.role?.toLowerCase() === "viewer" ? "bg-emerald-600 ring-emerald-100" : "bg-indigo-600 ring-indigo-100"
+          }`}>
             {user?.name ? user.name.charAt(0).toUpperCase() : "S"}
           </div>
           <div className="hidden sm:block text-left">
             <p className="text-xs font-bold text-slate-800 leading-tight">{user?.name || "Shahid Khan"}</p>
-            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700">
-              {user?.role || "Franchise Owner"}
+            <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+              user?.role?.toLowerCase() === "viewer"
+                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                : "bg-indigo-50 text-indigo-700"
+            }`}>
+              {user?.role?.toLowerCase() === "viewer" ? "Reports Viewer" : (user?.role || "Franchise Owner")}
             </span>
           </div>
         </div>
