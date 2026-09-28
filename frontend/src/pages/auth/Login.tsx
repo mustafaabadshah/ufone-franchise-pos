@@ -102,52 +102,6 @@ export const Login: React.FC = () => {
               )}
             </button>
           </form>
-
-          {/* Quick Demo Autofill Hint */}
-          <div className="mt-6 pt-5 border-t border-slate-100 text-center">
-            <p className="text-xs text-slate-500 mb-2 font-medium">Default Live System Credentials (Click to Auto-fill):</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-left">
-              <button
-                type="button"
-                onClick={() => { setEmail("shahidkhan@pos.com"); setPassword("posUfone@123"); }}
-                className="p-2.5 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-[11px] text-slate-700 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-slate-900 group-hover:text-indigo-700">Admin</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 font-semibold">Full</span>
-                </div>
-                <p className="text-slate-600 font-mono text-[10px] truncate">shahidkhan@pos.com</p>
-                <p className="text-slate-400 font-mono text-[10px]">posUfone@123</p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { setEmail("manager@pos.com"); setPassword("posUfone@123"); }}
-                className="p-2.5 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-[11px] text-slate-700 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-slate-900 group-hover:text-indigo-700">Manager</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 font-semibold">Ops</span>
-                </div>
-                <p className="text-slate-600 font-mono text-[10px] truncate">manager@pos.com</p>
-                <p className="text-slate-400 font-mono text-[10px]">posUfone@123</p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { setEmail("islambadshah@pos.com"); setPassword("posUfone@123"); }}
-                className="p-2.5 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200 hover:border-emerald-300 text-[11px] text-slate-700 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-emerald-950">Islam Badshah</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-200 text-emerald-900 font-bold uppercase">Viewer</span>
-                </div>
-                <p className="text-emerald-800 font-mono text-[10px] truncate">islambadshah@pos.com</p>
-                <p className="text-slate-400 font-mono text-[10px]">posUfone@123</p>
-              </button>
-            </div>
-            <p className="text-[10px] text-slate-400 mt-2 font-medium">Click any card above to auto-fill email and password</p>
-          </div>
         </div>
       </div>
     </div>

@@ -34,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Branch tag */}
         <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-medium">
           <MapPin className="w-3.5 h-3.5 text-indigo-500" />
-          <span>Peshawar Saddar Branch</span>
+          <span>Dargai Malakand Branch</span>
         </div>
       </div>
 
@@ -66,18 +66,16 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* User Pill */}
         <div className="flex items-center gap-2.5 pl-3 border-l border-slate-200">
-          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-sm ring-2 ${
-            user?.role?.toLowerCase() === "viewer" ? "bg-emerald-600 ring-emerald-100" : "bg-indigo-600 ring-indigo-100"
-          }`}>
+          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-sm ring-2 ${user?.role?.toLowerCase() === "viewer" ? "bg-emerald-600 ring-emerald-100" : "bg-indigo-600 ring-indigo-100"
+            }`}>
             {user?.name ? user.name.charAt(0).toUpperCase() : "S"}
           </div>
           <div className="hidden sm:block text-left">
             <p className="text-xs font-bold text-slate-800 leading-tight">{user?.name || "Shahid Khan"}</p>
-            <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${
-              user?.role?.toLowerCase() === "viewer"
+            <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${user?.role?.toLowerCase() === "viewer"
                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                 : "bg-indigo-50 text-indigo-700"
-            }`}>
+              }`}>
               {user?.role?.toLowerCase() === "viewer" ? "Reports Viewer" : (user?.role || "Franchise Owner")}
             </span>
           </div>
