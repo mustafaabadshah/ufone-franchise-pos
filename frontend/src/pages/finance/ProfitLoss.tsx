@@ -113,8 +113,8 @@ export const ProfitLoss: React.FC = () => {
       <div className="rounded-2xl bg-white border border-slate-200/80 shadow-sm p-8 space-y-6 print-container">
         {/* Document Header */}
         <div className="text-center pb-5 border-b-2 border-slate-900">
-          <h1 className="text-xl font-extrabold uppercase tracking-wide">Ufone 4G Authorized Franchise</h1>
-          <p className="text-xs text-slate-600">Saddar Commercial Center, Peshawar</p>
+          <h1 className="text-xl font-extrabold uppercase tracking-wide">Ufone Franchise - Dargai Office</h1>
+          <p className="text-xs text-slate-600">Main Bazar, Dargai, Malakand, KP</p>
           <h2 className="text-base font-bold uppercase tracking-wider text-indigo-900 mt-2">Statement of Profit & Loss</h2>
           <p className="text-xs text-slate-500 font-medium">
             Period: {dateFrom ? `${dateFrom} to ${dateTo || 'Present'}` : "All Time Records"}
@@ -194,11 +194,11 @@ export const ProfitLoss: React.FC = () => {
                 : "bg-emerald-50 border-emerald-400 text-emerald-800"
             }`}>
               <div className="font-sans">
-                <span>{pnl.is_loss ? "NET LOSS" : "NET PROFIT"}:</span>
+                <span>{pnl.is_loss ? "NET OPERATING LOSS" : "NET OPERATING PROFIT"}:</span>
                 <p className="text-xs font-normal font-sans text-slate-600 mt-0.5">
                   {pnl.is_loss
                     ? "Operating expenses exceed gross profit. Negative earnings shown explicitly."
-                    : "Net bottom line earnings after all inventory cost and operating overhead."}
+                    : "Net operating bottom-line earnings after weighted inventory cost (COGS), staff/RSO payroll, and operational overhead."}
                 </p>
               </div>
               <div className="text-xl font-mono">
@@ -209,6 +209,38 @@ export const ProfitLoss: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* 5. FINANCING, EQUITY & CAPITAL CASH MOVEMENTS (Reconciliation with Excel Row 59 Cash Outflows) */}
+            {(pnl.loan_repayments > 0 || pnl.drawings > 0 || pnl.capital_inventory > 0) && (
+              <div className="space-y-1.5 pt-4 mt-6 border-t border-dashed border-slate-300">
+                <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
+                  <span className="font-sans">5. FINANCING & CAPITAL CASH MOVEMENTS (NON-OPERATING)</span>
+                  <span>(PKR)</span>
+                </div>
+                {pnl.loan_repayments > 0 && (
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">Loan Principal Repayment (Haris Badshah Settlement):</span>
+                    <span className="text-slate-700">Rs. {Number(pnl.loan_repayments).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                )}
+                {pnl.drawings > 0 && (
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">Owner Personal Drawings (Islam Badshah Sb Household, IESCO/SNGPL, Driver):</span>
+                    <span className="text-slate-700">Rs. {Number(pnl.drawings).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                )}
+                {pnl.capital_inventory > 0 && (
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">Merchandise Stock Inflow (Paired & Loose SIM Orders Ufone HQ):</span>
+                    <span className="text-slate-700">Rs. {Number(pnl.capital_inventory).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1.5 border-t border-slate-300 bg-slate-50 p-2 rounded-lg">
+                  <span className="font-sans">TOTAL CASH OUTFLOWS (Operating + Financing + Equity):</span>
+                  <span>Rs. {Number(pnl.total_cash_outflows || (Number(pnl.expenses) + Number(pnl.salaries) + Number(pnl.loan_repayments || 0) + Number(pnl.drawings || 0) + Number(pnl.capital_inventory || 0))).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                </div>
+              </div>
+            )}
 
             {/* Audit & Signatures */}
             <div className="pt-10 grid grid-cols-2 gap-10 text-center font-sans">

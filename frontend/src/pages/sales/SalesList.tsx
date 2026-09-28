@@ -553,9 +553,9 @@ export const SalesList: React.FC<SalesListProps> = ({ initialOpenPos = false }) 
         {selectedSale && (
           <div className="space-y-4 text-xs font-mono">
             <div className="text-center pb-3 border-b border-dashed border-slate-300 font-sans">
-              <h3 className="text-base font-bold text-slate-900">Ufone 4G Authorized Franchise</h3>
-              <p className="text-[11px] text-slate-500">Saddar Commercial Center, Peshawar</p>
-              <p className="text-[11px] text-slate-500">Ph: +92 91 5271234 &bull; NTN: 8847120-1</p>
+              <h3 className="text-base font-bold text-slate-900">Ufone Franchise - Dargai Office</h3>
+              <p className="text-[11px] text-slate-500">Main Bazar, Dargai, Malakand, KP</p>
+              <p className="text-[11px] text-slate-500">Ph: +92 333 9123456</p>
             </div>
 
             <div className="space-y-1">

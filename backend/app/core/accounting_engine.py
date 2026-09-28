@@ -467,10 +467,19 @@ def calculate_profit_and_loss(
 
     gross_profit = net_revenue - net_cogs + total_commission
 
-    total_expenses = sum((e.amount for e in expenses), Decimal("0.00"))
+    # Operating expenses exclude non-operating categories (Drawings, Loan Repayment, Salaries, Inventory)
+    non_operating_cats = ["Drawings", "Loan Repayment", "Salaries", "Inventory"]
+    operating_expenses = sum((e.amount for e in expenses if e.category not in non_operating_cats), Decimal("0.00"))
+    
+    # Below-the-line / Financing & Capital cash movements
+    drawings = sum((e.amount for e in expenses if e.category == "Drawings"), Decimal("0.00"))
+    loan_repayments = sum((e.amount for e in expenses if e.category == "Loan Repayment"), Decimal("0.00"))
+    capital_inventory = sum((e.amount for e in expenses if e.category == "Inventory"), Decimal("0.00"))
+
     total_salaries = sum((s.salary_given for s in salaries), Decimal("0.00"))
 
-    net_profit = gross_profit - total_expenses - total_salaries
+    # Net Operating Profit
+    net_profit = gross_profit - operating_expenses - total_salaries
     is_loss = net_profit < Decimal("0.00")
 
     return {
@@ -481,9 +490,14 @@ def calculate_profit_and_loss(
         "cogs": float(net_cogs),
         "commission_income": float(total_commission),
         "gross_profit": float(gross_profit),
-        "expenses": float(total_expenses),
+        "expenses": float(operating_expenses),
         "salaries": float(total_salaries),
+        "operating_expenses": float(operating_expenses),
         "net_profit": float(net_profit),
         "is_loss": is_loss,
-        "loss_amount": float(abs(net_profit)) if is_loss else 0.0
+        "loss_amount": float(abs(net_profit)) if is_loss else 0.0,
+        "drawings": float(drawings),
+        "loan_repayments": float(loan_repayments),
+        "capital_inventory": float(capital_inventory),
+        "total_cash_outflows": float(operating_expenses + total_salaries + drawings + loan_repayments + capital_inventory)
     }

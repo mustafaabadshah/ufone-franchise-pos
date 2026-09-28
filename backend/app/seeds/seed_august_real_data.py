@@ -236,6 +236,69 @@ def seed_august_real_data():
             db.add(prod)
             db.flush()
             prods_dict[p["sku"]] = prod
+        # 5B. Company Supplier & Stock Invoices (Purchases from Ufone HQ)
+        print("Seeding Ufone Headquarters company and stock purchases (Rs. 221,250)...")
+        company = db.query(Company).filter(Company.code == "UF-HQ").first()
+        if not company:
+            company = Company(
+                name="Ufone PTCL Headquarters",
+                code="UF-HQ",
+                contact_person="Regional Telecom Distribution KP",
+                phone="+92 51 111 333 100",
+                address="PTCL / Ufone Head Office, Blue Area, Islamabad"
+            )
+            db.add(company)
+            db.flush()
+
+        pur1 = Purchase(
+            invoice_number="UF-PUR-AUG-001",
+            company_id=company.id,
+            company_name="Ufone PTCL Headquarters",
+            purchase_date=date(2026, 8, 10),
+            subtotal=Decimal("172500.00"),
+            total_amount=Decimal("172500.00"),
+            paid_amount=Decimal("172500.00"),
+            due_amount=Decimal("0.00"),
+            payment_method="Bank Transfer",
+            payment_status="Paid",
+            remarks="Paired SIMs Order Ufone HQ (1,500 pieces @ 115)"
+        )
+        db.add(pur1)
+        db.flush()
+        pi1 = PurchaseItem(
+            purchase_id=pur1.id,
+            product_id=prods_dict["SIM-PAIRED-01"].id,
+            quantity=Decimal("1500.00"),
+            purchase_price=Decimal("115.00"),
+            sale_price=Decimal("130.00"),
+            total_amount=Decimal("172500.00")
+        )
+        db.add(pi1)
+
+        pur2 = Purchase(
+            invoice_number="UF-PUR-AUG-002",
+            company_id=company.id,
+            company_name="Ufone PTCL Headquarters",
+            purchase_date=date(2026, 8, 14),
+            subtotal=Decimal("48750.00"),
+            total_amount=Decimal("48750.00"),
+            paid_amount=Decimal("48750.00"),
+            due_amount=Decimal("0.00"),
+            payment_method="Bank Transfer",
+            payment_status="Paid",
+            remarks="Loose SIMs Order Ufone HQ (750 pieces @ 65)"
+        )
+        db.add(pur2)
+        db.flush()
+        pi2 = PurchaseItem(
+            purchase_id=pur2.id,
+            product_id=prods_dict["SIM-LOOSE-01"].id,
+            quantity=Decimal("750.00"),
+            purchase_price=Decimal("65.00"),
+            sale_price=Decimal("80.00"),
+            total_amount=Decimal("48750.00")
+        )
+        db.add(pi2)
         db.commit()
 
         # 6. Real RSOs (Retail Sales Officers from August.xlsx)
@@ -439,10 +502,11 @@ def seed_august_real_data():
             db.add(inv)
         db.commit()
 
-        # 11. Real Expenses (Expenditure Details from Row 38-59, 109-155 of August.xlsx totaling Rs. 1,653,620)
-        print("Seeding August operating expenditures (Rs. 1,653,620)...")
+        # 11. Real Expenditures & Cash Outflows (Rows 38-59 of August.xlsx totaling Rs. 1,653,620)
+        # Note: Staff payroll (144,300) and RSO salaries (108,024) are recorded in the dedicated Salaries & RSOSalaries tables!
+        # Haris Badshah Loan (500k) is Loan Repayment, Islam Badshah (103.9k) is Drawings, and SIM orders (221.25k) are Inventory purchases.
+        print("Seeding August operating expenditures & below-the-line outflows (Rs. 1,653,620 total)...")
         expenses_data = [
-            ("Pay of Office Staff (Consolidated Payroll)", "Salaries", Decimal("144300.00"), date(2026, 8, 31), "Cash", "Disbursement of August 2026 office staff salaries"),
             ("Pay of FCA (Field Customer Agents & Kiosks)", "Commissions", Decimal("339700.00"), date(2026, 8, 31), "Bank Transfer", "FCA commissions (301,300) and daily promo incentives (38,400)"),
             ("Office Communication & Connectivity", "Communication", Decimal("15460.00"), date(2026, 8, 25), "Cash", "PTCL bill (6,110), staff official SIM loads and packages (9,350)"),
             ("Office Rent (Dargai Office August Rent)", "Rent", Decimal("25300.00"), date(2026, 8, 5), "Cash", "August 2026 franchise building rent"),
@@ -451,11 +515,11 @@ def seed_august_real_data():
             ("Local Transport & Travel", "Transport", Decimal("300.00"), date(2026, 8, 18), "Cash", "Field conveyance allowance"),
             ("Stationery & Photostat", "Office", Decimal("30.00"), date(2026, 8, 12), "Cash", "Document photocopying and forms"),
             ("Utility Bills (Office Electricity / Bijjli)", "Electricity", Decimal("8000.00"), date(2026, 8, 20), "Bank Transfer", "Dargai Office electricity bill"),
-            ("Tax Adjustment (August Sales / WHT)", "Financial", Decimal("90176.00"), date(2026, 8, 31), "Bank Transfer", "Federal & Provincial telecom tax withholding adjustment"),
-            ("Haris Badshah Loan Return / Settlement", "Financial", Decimal("500000.00"), date(2026, 8, 26), "Bank Transfer", "Partial repayment of working capital loan to Haris Badshah"),
-            ("Drawings of Islam Badshah Sb (Household & Personal)", "Drawings", Decimal("103910.00"), date(2026, 8, 31), "Bank Transfer", "Owner drawings: IESCO/SNGPL bills (49,060), driver salary (32,000), home & maintenance (22,850)"),
+            ("Tax Adjustment (August Sales / WHT)", "Tax", Decimal("90176.00"), date(2026, 8, 31), "Bank Transfer", "Federal & Provincial telecom tax withholding adjustment"),
             ("Loading FCA August 2026", "Commissions", Decimal("52300.00"), date(2026, 8, 29), "Cash", "FCA loading and incentive adjustments"),
             ("Office Maintenance & Miscellaneous Supplies", "Maintenance", Decimal("28650.00"), date(2026, 8, 27), "Cash", "BVS Software (6,000), partnership share (17,000), laptop charger, cooler ice, cleaning supplies"),
+            ("Haris Badshah Loan Return / Settlement", "Loan Repayment", Decimal("500000.00"), date(2026, 8, 26), "Bank Transfer", "Partial repayment of working capital loan to Haris Badshah"),
+            ("Drawings of Islam Badshah Sb (Household & Personal)", "Drawings", Decimal("103910.00"), date(2026, 8, 31), "Bank Transfer", "Owner drawings: IESCO/SNGPL bills (49,060), driver salary (32,000), home & maintenance (22,850)"),
             ("Paired SIMs Order Ufone HQ", "Inventory", Decimal("172500.00"), date(2026, 8, 10), "Bank Transfer", "Inward stock purchase of Paired SIMs from Ufone"),
             ("Loose SIMs Order Ufone HQ", "Inventory", Decimal("48750.00"), date(2026, 8, 14), "Bank Transfer", "Inward stock purchase of Loose SIMs from Ufone"),
         ]
