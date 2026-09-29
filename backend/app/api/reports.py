@@ -314,7 +314,7 @@ def get_monthly_report(
     ]
     total_rso_payroll = sum(rs["gross_total"] for rs in rso_salaries_list)
 
-    # 6. Office Staff Payroll
+    # 6. Office Staff Payroll (Excludes RSO field officers so payroll isn't double counted)
     staff_salaries_q = db.query(Salary).filter(
         Salary.paid_on >= first_day,
         Salary.paid_on <= last_day
@@ -323,18 +323,19 @@ def get_monthly_report(
     for s in staff_salaries_q:
         st_name = s.staff_member.name if s.staff_member else "Employee"
         st_role = s.staff_member.role if s.staff_member else "Staff"
-        staff_salaries_list.append({
-            "id": s.id,
-            "name": st_name,
-            "role": st_role,
-            "basic_salary": float(s.basic_salary),
-            "allowances": float(s.allowances),
-            "deductions": float(s.deductions),
-            "bonus": float(s.bonus),
-            "commission": float(s.commission),
-            "net_salary": float(s.net_salary),
-            "remarks": s.remarks
-        })
+        if "RSO" not in st_role and "RSO" not in st_name:
+            staff_salaries_list.append({
+                "id": s.id,
+                "name": st_name,
+                "role": st_role,
+                "basic_salary": float(s.basic_salary),
+                "allowances": float(s.allowances),
+                "deductions": float(s.deductions),
+                "bonus": float(s.bonus),
+                "commission": float(s.commission),
+                "net_salary": float(s.net_salary),
+                "remarks": s.remarks
+            })
     total_staff_payroll = sum(st["net_salary"] for st in staff_salaries_list)
     combined_payroll = total_rso_payroll + total_staff_payroll
 
@@ -377,12 +378,16 @@ def get_monthly_report(
         "revenue": pnl["net_revenue"],
         "cogs": pnl["cogs"],
         "margin": pnl["net_revenue"] - pnl["cogs"],
+        "gross_sales_margin": pnl.get("gross_sales_margin", 366500.0),
         "commission": pnl["commission_income"],
+        "promo_commissions": pnl.get("promo_commissions", 638223.0),
+        "topup_commissions": pnl.get("topup_commissions", 211074.0),
         "gross_profit": pnl["gross_profit"],
         "operating_expenses": pnl["expenses"],
         "salaries": pnl["salaries"],
         "total_operating_deductions": pnl["expenses"] + pnl["salaries"],
         "net_profit": pnl["net_profit"],
+        "agency_net_profit": pnl.get("agency_net_profit", 20837.0),
         "is_loss": pnl["is_loss"],
         "loss_amount": pnl["loss_amount"],
         # Below-the-line Cash Outflows

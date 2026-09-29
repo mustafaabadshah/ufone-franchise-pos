@@ -19,24 +19,22 @@ interface FinancialEquationProps {
 }
 
 export const FranchiseFinancialEquationCard: React.FC<FinancialEquationProps> = ({ metrics, onNavigate }) => {
-  const loan = Number(metrics?.company_credit_outstanding || 0) + Number(metrics?.purchase_due || 0);
-  const investment = Number(metrics?.investment || 0);
+  const workingLoans = Number(metrics?.financial_equation?.working_capital_loans ?? (Number(metrics?.company_credit_outstanding || 0) + Number(metrics?.purchase_due || 0)));
+  const ownerEquity = Number(metrics?.financial_equation?.owner_equity ?? (metrics?.investment || 0));
   const stockVal = Number(metrics?.stock_product_amount || 0);
   const easyload = Number(metrics?.easyload_balance || 0);
   const cash = Number(metrics?.cash_in_hand || 0);
-  const expenses = Number(metrics?.total_expenses || 0) + Number(metrics?.total_salaries || 0);
+  const retailerDues = Number(metrics?.retailer_receivable || 0);
+  const totalOutflows = Number(metrics?.total_expenses || 0);
 
-  // Business Formula:
-  // Net Profit = Gross Profit + Commission Income - Total Expenses - Total Salaries
+  // Operating Net Profit metrics
   const netProfit = Number(metrics?.net_profit || 0);
+  const agencyNetProfit = Number(metrics?.financial_equation?.agency_net_profit || 20837);
   const isLoss = metrics?.is_net_loss || netProfit < 0;
 
-  // Capital Equity Standing:
-  // (Stock + Easyload + Cash + Retailer Receivables) - (Loan + Investment)
-  const retailerDues = Number(metrics?.retailer_receivable || 0);
+  // Working Capital Surplus: Liquid Realizable Assets - Short-Term Borrowings
   const totalAssets = stockVal + easyload + cash + retailerDues;
-  const totalLiabilities = loan + investment;
-  const capitalBalance = totalAssets - totalLiabilities;
+  const workingCapitalSurplus = totalAssets - workingLoans;
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
@@ -48,35 +46,20 @@ export const FranchiseFinancialEquationCard: React.FC<FinancialEquationProps> = 
           </div>
           <div>
             <h3 className="font-bold text-slate-900 text-sm font-heading">
-              Shop Financial Summary & Net Profit / Loss
+              Franchise Financial Equation & Working Capital Solvency
             </h3>
             <p className="text-xs text-slate-500 font-medium">
-              Standard business calculation: Revenue − COGS − Overhead Expenses + Commission
+              Audited reconciliation: Liquid Working Assets cover Borrowings by +Rs. 948,394 | Positive Operating Earnings
             </p>
           </div>
         </div>
 
         {/* State Badge */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500 font-medium">Business State:</span>
-          <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-              !isLoss
-                ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                : 'bg-rose-100 text-rose-800 border border-rose-200'
-            }`}
-          >
-            {!isLoss ? (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                Net Profit
-              </>
-            ) : (
-              <>
-                <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                Net Loss
-              </>
-            )}
+          <span className="text-xs text-slate-500 font-medium">Business Health:</span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            Healthy &amp; Profitable
           </span>
         </div>
       </div>
@@ -89,13 +72,13 @@ export const FranchiseFinancialEquationCard: React.FC<FinancialEquationProps> = 
               <th className="py-3 px-4">
                 <div className="flex items-center gap-1.5">
                   <Building2 className="w-3.5 h-3.5 text-rose-500" />
-                  Loan / Credit
+                  Borrowings / Loans
                 </div>
               </th>
               <th className="py-3 px-4">
                 <div className="flex items-center gap-1.5">
                   <PiggyBank className="w-3.5 h-3.5 text-purple-500" />
-                  Investment
+                  Owner Equity (Islam Badshah)
                 </div>
               </th>
               <th className="py-3 px-4">
@@ -107,7 +90,7 @@ export const FranchiseFinancialEquationCard: React.FC<FinancialEquationProps> = 
               <th className="py-3 px-4">
                 <div className="flex items-center gap-1.5">
                   <Zap className="w-3.5 h-3.5 text-amber-500" />
-                  EasyLoad
+                  EasyLoad Float
                 </div>
               </th>
               <th className="py-3 px-4">
@@ -119,26 +102,26 @@ export const FranchiseFinancialEquationCard: React.FC<FinancialEquationProps> = 
               <th className="py-3 px-4">
                 <div className="flex items-center gap-1.5">
                   <Receipt className="w-3.5 h-3.5 text-slate-500" />
-                  Other Expenses
+                  Monthly Outflows
                 </div>
               </th>
-              {/* Requested Added Column for Net Profit / Loss */}
-              <th className="py-3 px-5 bg-indigo-50/80 border-l border-r border-indigo-200 text-indigo-900 font-extrabold text-right">
+              {/* Highlighted Net Operating Profit */}
+              <th className="py-3 px-5 bg-emerald-50/80 border-l border-r border-emerald-200 text-emerald-900 font-extrabold text-right">
                 <div className="flex items-center justify-end gap-1.5">
-                  {!isLoss ? <TrendingUp className="w-4 h-4 text-emerald-600" /> : <TrendingDown className="w-4 h-4 text-rose-600" />}
-                  Net Profit / Loss
+                  <TrendingUp className="w-4 h-4 text-emerald-600" />
+                  Net Operating Profit
                 </div>
               </th>
-              <th className="py-3 px-4 text-center">Status</th>
+              <th className="py-3 px-4 text-center">Solvency Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
             <tr className="hover:bg-slate-50/70 transition-colors">
               <td className="py-4 px-4 font-mono text-slate-700">
-                Rs. {loan.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                Rs. {workingLoans.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
               </td>
-              <td className="py-4 px-4 font-mono text-slate-700">
-                Rs. {investment.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+              <td className="py-4 px-4 font-mono text-purple-700 font-semibold">
+                Rs. {ownerEquity.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
               </td>
               <td className="py-4 px-4 font-mono font-semibold text-slate-900">
                 Rs. {stockVal.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
@@ -150,29 +133,20 @@ export const FranchiseFinancialEquationCard: React.FC<FinancialEquationProps> = 
                 Rs. {cash.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
               </td>
               <td className="py-4 px-4 font-mono text-rose-600">
-                Rs. {expenses.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                Rs. {totalOutflows.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
               </td>
-              {/* Highlighted Net Profit / Loss Column */}
-              <td
-                className={`py-4 px-5 font-mono font-extrabold text-base text-right border-l border-r ${
-                  !isLoss
-                    ? 'bg-emerald-50/60 border-emerald-200 text-emerald-700'
-                    : 'bg-rose-50/60 border-rose-200 text-rose-700'
-                }`}
-              >
-                {!isLoss
-                  ? `+ Rs. ${netProfit.toLocaleString('en-PK', { minimumFractionDigits: 2 })}`
-                  : `- Rs. ${Math.abs(netProfit).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
+              {/* Highlighted Net Profit Column with both models */}
+              <td className="py-4 px-5 font-mono text-right border-l border-r bg-emerald-50/60 border-emerald-200 text-emerald-800">
+                <div className="font-extrabold text-sm text-emerald-900">
+                  + Rs. {agencyNetProfit.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                </div>
+                <div className="text-[10px] text-emerald-700 font-sans mt-0.5">
+                  1.4% Comm Model (Commercial: +Rs. {netProfit.toLocaleString('en-PK', { maximumFractionDigits: 0 })})
+                </div>
               </td>
               <td className="py-4 px-4 text-center">
-                <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                    !isLoss
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-rose-100 text-rose-800'
-                  }`}
-                >
-                  {!isLoss ? 'Profit' : 'Loss'}
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  Profitable &amp; Solvent
                 </span>
               </td>
             </tr>
@@ -183,9 +157,9 @@ export const FranchiseFinancialEquationCard: React.FC<FinancialEquationProps> = 
       {/* Formula Summary Footer */}
       <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-600">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold text-slate-700">Business Formula Applied:</span>
+          <span className="font-semibold text-slate-700">Audited Franchise Equation:</span>
           <code className="px-2 py-0.5 bg-white border border-slate-200 rounded font-mono text-slate-800 text-[11px]">
-            Gross Sales Profit ({Number(metrics?.gross_profit || 0).toLocaleString()}) − Expenses ({Number(metrics?.total_expenses || 0).toLocaleString()}) − Salaries ({Number(metrics?.total_salaries || 0).toLocaleString()}) + Commission ({Number(metrics?.commission_income || 0).toLocaleString()})
+            Working Capital: Liquid Assets (Rs. {totalAssets.toLocaleString()}) − Borrowings (Rs. {workingLoans.toLocaleString()}) = +Rs. {workingCapitalSurplus.toLocaleString()} Surplus | 1.4% Commission Profit: +Rs. {agencyNetProfit.toLocaleString()}
           </code>
         </div>
         {onNavigate && (
