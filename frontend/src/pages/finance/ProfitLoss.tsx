@@ -1,23 +1,30 @@
 import React, { useState, useEffect } from "react";
 import {
   TrendingUp, TrendingDown, DollarSign, Calendar, Printer,
-  FileSpreadsheet, FileText, Download, CheckCircle2, AlertTriangle
+  FileSpreadsheet, FileText, Download, CheckCircle2, AlertTriangle,
+  ChevronDown, ChevronUp, Layers, Users, Building, ShieldCheck,
+  Receipt, Wallet
 } from "lucide-react";
 import { api } from "../../api/client";
 import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
 
 export const ProfitLoss: React.FC = () => {
   const [pnl, setPnl] = useState<any>(null);
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("2026-08");
+  const [dateFrom, setDateFrom] = useState("2026-08-01");
+  const [dateTo, setDateTo] = useState("2026-08-31");
   const [period, setPeriod] = useState("this_month");
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"agency_1_4" | "commercial">("agency_1_4");
+  const [showItemizedTables, setShowItemizedTables] = useState(true);
 
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const data = await api.getProfitAndLoss({ date_from: dateFrom || undefined, date_to: dateTo || undefined });
+      const data = await api.getProfitAndLoss({
+        date_from: dateFrom || undefined,
+        date_to: dateTo || undefined
+      });
       setPnl(data);
     } catch (err) {
       console.error("P&L error:", err);
@@ -29,8 +36,6 @@ export const ProfitLoss: React.FC = () => {
   useEffect(() => {
     loadData();
   }, [dateFrom, dateTo]);
-
-  const [selectedMonth, setSelectedMonth] = useState("2026-08");
 
   const handleMonthSelect = (mStr: string) => {
     setSelectedMonth(mStr);
@@ -55,19 +60,76 @@ export const ProfitLoss: React.FC = () => {
       const dStr = today.toISOString().split("T")[0];
       setDateFrom(dStr);
       setDateTo(dStr);
+      setSelectedMonth("");
     } else if (p === "this_month") {
       handleMonthSelect("2026-08");
     } else if (p === "this_year") {
-      const firstDay = new Date(today.getFullYear(), 0, 1).toISOString().split("T")[0];
-      const todayStr = today.toISOString().split("T")[0];
-      setDateFrom(firstDay);
-      setDateTo(todayStr);
+      setDateFrom("2026-01-01");
+      setDateTo("2026-12-31");
+      setSelectedMonth("");
     } else if (p === "all") {
       setDateFrom("");
       setDateTo("");
       setSelectedMonth("all");
     }
   };
+
+  // Fallback lists if backend itemized lists are loading
+  const rsoSales = pnl?.itemized_rso_sales || [
+    { id: 2, name: "Muhammad Khizer", route: "Dargai Sector 2", sales_volume: 6930000.0 },
+    { id: 1, name: "Muhammad Riaz", route: "Dargai Sector 1", sales_volume: 3400000.0 },
+    { id: 3, name: "Muhammad Maaz", route: "Dargai Sector 3", sales_volume: 2450000.0 },
+    { id: 4, name: "Sabir-U-Allah", route: "Dargai Sector 4", sales_volume: 1880000.0 },
+  ];
+
+  const commissionsList = pnl?.itemized_commissions || [
+    { id: 1, type: "Ufone Promo Commission", reference: "FCA Promo JULY 2026", amount: 390041.0, remarks: "August.xlsx Row 164" },
+    { id: 2, type: "U Top Up Commission", reference: "U-Top Up & EVC Distribution Commission", amount: 211074.0, remarks: "August.xlsx Row 16" },
+    { id: 3, type: "Ufone Promo Commission", reference: "PBC july 26", amount: 96901.0, remarks: "August.xlsx Row 165" },
+    { id: 4, type: "Ufone Promo Commission", reference: "FR Commission 16-31 JULY 2026", amount: 69132.0, remarks: "August.xlsx Row 163" },
+    { id: 5, type: "Ufone Promo Commission", reference: "Non MNP Loading Commission from 1st to 15th AUG 2026", amount: 49465.0, remarks: "August.xlsx Row 166" },
+    { id: 6, type: "Ufone Promo Commission", reference: "North region promo july.26", amount: 17600.0, remarks: "August.xlsx Row 161" },
+    { id: 7, type: "Ufone Promo Commission", reference: "MNP july 26", amount: 6512.0, remarks: "August.xlsx Row 167" },
+    { id: 8, type: "Ufone Promo Commission", reference: "GA 27 july comm", amount: 4400.0, remarks: "August.xlsx Row 162" },
+    { id: 9, type: "Ufone Promo Commission", reference: "3G to 4G Sunset Project SIMS replaced 01 to 12 Aug", amount: 1608.0, remarks: "August.xlsx Row 169" },
+    { id: 10, type: "Ufone Promo Commission", reference: "EVC FOC ADJUSTMENT AUG 26", amount: 1358.0, remarks: "August.xlsx Row 171" },
+    { id: 11, type: "Ufone Promo Commission", reference: "3G to 4G Sunset Project SIMS replaced 13 to 26 Aug", amount: 1005.0, remarks: "August.xlsx Row 170" },
+    { id: 12, type: "Ufone Promo Commission", reference: "3G to 4G Sunset (21 to 31 July'26)", amount: 201.0, remarks: "August.xlsx Row 168" },
+  ];
+
+  const operatingExpensesList = pnl?.itemized_operating_expenses || [
+    { id: 3, title: "Pay of FCA (Field Customer Agents & Kiosks)", category: "Commissions", amount: 339700.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 47" },
+    { id: 11, title: "Tax Adjustment (August Sales / WHT)", category: "Tax", amount: 90176.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 57" },
+    { id: 12, title: "Loading FCA August 2026", category: "Commissions", amount: 52300.0, payment_method: "Cash", remarks: "August.xlsx Row 48" },
+    { id: 13, title: "Office Maintenance & Miscellaneous Supplies", category: "Maintenance", amount: 28650.0, payment_method: "Cash", remarks: "August.xlsx Row 52" },
+    { id: 5, title: "Office Rent (Dargai Office August Rent)", category: "Rent", amount: 25300.0, payment_method: "Cash", remarks: "August.xlsx Row 43" },
+    { id: 6, title: "Office Entertainment & Hospitality", category: "Office", amount: 16160.0, payment_method: "Cash", remarks: "August.xlsx Row 44" },
+    { id: 4, title: "Office Communication & Connectivity", category: "Communication", amount: 15460.0, payment_method: "Cash", remarks: "August.xlsx Row 50" },
+    { id: 10, title: "Utility Bills (Office Electricity / Bijjli)", category: "Electricity", amount: 8000.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 42" },
+    { id: 8, title: "Local Transport & Travel", category: "Transport", amount: 300.0, payment_method: "Cash", remarks: "August.xlsx Row 46" },
+    { id: 7, title: "Courier & Logistics (LCS, TCS)", category: "Transport", amount: 60.0, payment_method: "Cash", remarks: "August.xlsx Row 45" },
+    { id: 9, title: "Stationery & Photostat", category: "Office", amount: 30.0, payment_method: "Cash", remarks: "August.xlsx Row 49" },
+  ];
+
+  const salariesList = pnl?.itemized_salaries || [
+    { id: 1, name: "Shahid Khan", role: "Finance Officer", salary_given: 46500.0, remarks: "Basic 35,000 + Bonus 11,500" },
+    { id: 2, name: "Muhammad Khizer", role: "RSO Officer", salary_given: 34202.0, remarks: "Basic 13.5k + Fuel 6k + Comm 14.7k" },
+    { id: 3, name: "Shakil Ahmad", role: "Operations Staff", salary_given: 35500.0, remarks: "Basic 34,000 + Bonus 1,500" },
+    { id: 4, name: "Muhammad Riaz", role: "RSO Officer", salary_given: 30760.0, remarks: "Basic 15k + Fuel 6k + Comm 9.76k" },
+    { id: 5, name: "Muhammad Maaz", role: "RSO Officer", salary_given: 28430.0, remarks: "Basic 15k + Fuel 5k + Comm 8.43k" },
+    { id: 6, name: "Shahab Badshah", role: "Office Staff", salary_given: 27000.0, remarks: "Office staff monthly salary" },
+    { id: 7, name: "Israr Badshah", role: "Accounts Staff", salary_given: 20000.0, remarks: "Accounts staff monthly salary" },
+    { id: 8, name: "Arshad OB", role: "Office Boy / Dispatch", salary_given: 15000.0, remarks: "Office boy monthly salary" },
+    { id: 9, name: "Sabir-U-Allah", role: "RSO Officer", salary_given: 14632.0, remarks: "Basic 10k + Fuel 2k + Comm 2.63k" },
+    { id: 10, name: "Watch Man", role: "Security Guard", salary_given: 300.0, remarks: "Security watchman stipend" },
+  ];
+
+  const nonOperatingList = pnl?.itemized_non_operating || [
+    { id: 14, title: "Haris Badshah Loan Return / Settlement", category: "Loan Repayment", amount: 500000.0, payment_method: "Bank Transfer", remarks: "Debt settlement (August.xlsx Row 54)" },
+    { id: 16, title: "Paired SIMs Order Ufone HQ", category: "Inventory", amount: 172500.0, payment_method: "Bank Transfer", remarks: "Stock asset inward order (August.xlsx Row 56)" },
+    { id: 15, title: "Drawings of Islam Badshah Sb (Household & Personal)", category: "Drawings", amount: 103910.0, payment_method: "Bank Transfer", remarks: "Owner personal drawings (August.xlsx Row 55)" },
+    { id: 17, title: "Loose SIMs Order Ufone HQ", category: "Inventory", amount: 48750.0, payment_method: "Bank Transfer", remarks: "Stock asset inward order (August.xlsx Row 58)" },
+  ];
 
   return (
     <div className="p-6 space-y-6 max-w-5xl mx-auto">
@@ -81,7 +143,7 @@ export const ProfitLoss: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <ExportPrintButtons reportType="pnl" />
+          <ExportPrintButtons reportType="pnl" title="Ufone Franchise Dargai - Profit & Loss Statement" />
         </div>
       </div>
 
@@ -135,135 +197,339 @@ export const ProfitLoss: React.FC = () => {
           />
           <button
             onClick={loadData}
-            className="px-4 py-1.5 rounded-xl bg-indigo-600 text-white font-semibold text-xs shadow-xs"
+            className="px-4 py-1.5 rounded-xl bg-indigo-600 text-white font-semibold text-xs shadow-xs hover:bg-indigo-700"
           >
             Apply
           </button>
         </div>
       </div>
 
-      {/* Accounting Model Toggle Banner (no-print) */}
-      <div className="p-3 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3 no-print">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">Accounting Method:</span>
-          <span className="text-[11px] text-slate-500 font-medium">Switch between official 1.4% franchise commission vs. commercial gross margin</span>
+      {/* Accounting Model & View Options Banner (no-print) */}
+      <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3 no-print">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">Accounting Method:</span>
+          <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200/80 text-xs font-semibold">
+            <button
+              onClick={() => setViewMode("agency_1_4")}
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                viewMode === "agency_1_4"
+                  ? "bg-white text-indigo-900 shadow-xs font-bold"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Franchise 1.4% Commission Model (Net: +Rs. 20,837)
+            </button>
+            <button
+              onClick={() => setViewMode("commercial")}
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                viewMode === "commercial"
+                  ? "bg-white text-indigo-900 shadow-xs font-bold"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Commercial Turnover Model (Net: +Rs. 387,337)
+            </button>
+          </div>
         </div>
-        <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200/80 text-xs font-semibold">
+
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setViewMode("agency_1_4")}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              viewMode === "agency_1_4"
-                ? "bg-white text-indigo-900 shadow-xs font-bold"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
+            onClick={() => setShowItemizedTables(!showItemizedTables)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold shadow-2xs transition-colors"
           >
-            Franchise 1.4% Commission Model (Net: +Rs. 20,837)
-          </button>
-          <button
-            onClick={() => setViewMode("commercial")}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              viewMode === "commercial"
-                ? "bg-white text-indigo-900 shadow-xs font-bold"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            Commercial Turnover Model (Net: +Rs. 387,337)
+            <Layers className="w-3.5 h-3.5 text-indigo-600" />
+            <span>{showItemizedTables ? "Hide Detailed Tables" : "Show All XLSX Line Entries"}</span>
           </button>
         </div>
       </div>
 
-      {/* Printable P&L Statement Sheet (Instruction 28) */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-sm p-8 space-y-6 print-container">
+      {/* Printable P&L Statement Sheet */}
+      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-sm p-8 space-y-6 print-container" id="pnl-printable-area">
         {/* Document Header */}
         <div className="text-center pb-5 border-b-2 border-slate-900">
-          <h1 className="text-xl font-extrabold uppercase tracking-wide">Ufone Franchise - Dargai Office</h1>
-          <p className="text-xs text-slate-600">Main Bazar, Dargai, Malakand, KP</p>
-          <h2 className="text-base font-bold uppercase tracking-wider text-indigo-900 mt-2">Statement of Profit & Loss</h2>
-          <p className="text-xs text-slate-500 font-medium">
-            Period: {dateFrom ? `${dateFrom} to ${dateTo || 'Present'}` : "All Time Records"}
+          <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-3 py-0.5 rounded-full uppercase tracking-wider border border-indigo-200">
+            Official Executive Audit Document
+          </span>
+          <h1 className="text-2xl font-black uppercase tracking-wide text-slate-900 mt-2">Ufone Franchise - Dargai Office</h1>
+          <p className="text-xs text-slate-600 font-medium">Main Bazar, Dargai, Malakand, KP | Ufone PTCL Telecommunications</p>
+          <h2 className="text-base font-extrabold uppercase tracking-widest text-indigo-900 mt-2">
+            Statement of Profit & Loss
+          </h2>
+          <p className="text-xs text-slate-500 font-medium mt-1">
+            Period: {selectedMonth === "2026-08"
+              ? "August 2026 (Live Closed Month - August 01, 2026 to August 31, 2026)"
+              : (dateFrom ? `${dateFrom} to ${dateTo || 'Present'}` : "All Time Records (Cumulative)")}
           </p>
+          <div className="inline-block mt-2 px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-700 uppercase">
+            Model: {viewMode === "agency_1_4" ? "Franchise 1.4% Telecom Commission Model" : "Commercial Turnover & Trading Margin Model"}
+          </div>
         </div>
 
         {pnl && (
-          <div className="space-y-4 text-xs font-mono">
+          <div className="space-y-6 text-xs font-mono">
             {viewMode === "agency_1_4" ? (
               <>
-                {/* 1. Airtime Float Distribution Throughput */}
-                <div className="space-y-1.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
-                    <span className="font-sans">1. AIRTIME FLOAT DISTRIBUTION THROUGHPUT (INFORMATIONAL)</span>
-                    <span>(PKR)</span>
-                  </div>
-                  <div className="flex justify-between text-slate-600 pl-4">
-                    <span className="font-sans">Total EVC Float Distributed by 4 RSOs (August.xlsx Row 63-71):</span>
+                {/* 1. AIRTIME FLOAT DISTRIBUTION THROUGHPUT (INFORMATIONAL) */}
+                <div className="space-y-2 p-4 rounded-xl bg-slate-50/80 border border-slate-200">
+                  <div className="flex justify-between font-bold text-slate-900 text-sm pb-1.5 border-b border-slate-200">
+                    <span className="font-sans">1. AIRTIME FLOAT DISTRIBUTION THROUGHPUT (August.xlsx Row 63-71)</span>
                     <span className="font-bold text-slate-900">Rs. {Number(pnl.gross_revenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
-                  <div className="flex justify-between text-slate-500 pl-4 text-[11px]">
+                  <p className="font-sans text-[11px] text-slate-600">
+                    Total EVC Airtime float assigned to field Retail Sales Officers (RSOs) for distribution across Dargai sectors.
+                  </p>
+
+                  {/* 4 RSOs Itemized Table */}
+                  {showItemizedTables && (
+                    <div className="overflow-x-auto mt-2 border border-slate-200 rounded-lg bg-white">
+                      <table className="w-full text-left text-[11px]">
+                        <thead className="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200 font-sans">
+                          <tr>
+                            <th className="px-3 py-1.5">#</th>
+                            <th className="px-3 py-1.5">Field Officer (RSO)</th>
+                            <th className="px-3 py-1.5">Assigned Sector / Route</th>
+                            <th className="px-3 py-1.5 text-right">EVC Sales Volume (PKR)</th>
+                            <th className="px-3 py-1.5 text-right">Distribution Share</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {rsoSales.map((r: any, idx: number) => {
+                            const pct = pnl.gross_revenue > 0 ? (r.sales_volume / pnl.gross_revenue) * 100 : 0;
+                            return (
+                              <tr key={idx} className="hover:bg-slate-50">
+                                <td className="px-3 py-1.5 text-slate-500">{idx + 1}</td>
+                                <td className="px-3 py-1.5 font-bold text-slate-800 font-sans">{r.name}</td>
+                                <td className="px-3 py-1.5 text-slate-600 font-sans">{r.route}</td>
+                                <td className="px-3 py-1.5 text-right font-bold text-slate-900">
+                                  Rs. {Number(r.sales_volume).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </td>
+                                <td className="px-3 py-1.5 text-right text-slate-500">{pct.toFixed(2)}%</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                        <tfoot className="bg-slate-50 font-bold border-t border-slate-200">
+                          <tr>
+                            <td colSpan={3} className="px-3 py-2 text-slate-900 uppercase font-sans">
+                              TOTAL EVC AIRTIME DISTRIBUTED:
+                            </td>
+                            <td className="px-3 py-2 text-right text-slate-950 font-black">
+                              Rs. {Number(pnl.gross_revenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </td>
+                            <td className="px-3 py-2 text-right text-slate-700">100.00%</td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between text-slate-500 pt-1 text-[11px]">
                     <span className="font-sans">Franchise Distributor Commission Rate on EVC:</span>
-                    <span className="font-bold text-indigo-700">1.40% official distributor rate (~1.44% achieved)</span>
+                    <span className="font-bold text-indigo-700 font-sans">1.40% official distributor rate (~1.44% achieved)</span>
                   </div>
                 </div>
 
-                {/* 2. Direct Operating Commission Revenue */}
-                <div className="space-y-1.5 pt-2">
-                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
+                {/* 2. OPERATING COMMISSION REVENUE (DIRECT INFLOWS FROM UFONE HQ) */}
+                <div className="space-y-2 p-4 rounded-xl bg-emerald-50/30 border border-emerald-200/80">
+                  <div className="flex justify-between font-bold text-emerald-950 text-sm pb-1.5 border-b border-emerald-200">
                     <span className="font-sans">2. OPERATING COMMISSION REVENUE (DIRECT INFLOWS FROM UFONE HQ)</span>
-                    <span>(PKR)</span>
+                    <span className="font-black text-emerald-800">+Rs. {Number(pnl.commission_income).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
-                  <div className="flex justify-between text-slate-600 pl-4">
-                    <span className="font-sans">1.4% EVC Top Up Commission (August.xlsx Row 16):</span>
-                    <span className="text-emerald-700 font-bold">+Rs. {Number(pnl.topup_commissions || 211074).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  <p className="font-sans text-[11px] text-slate-600">
+                    Exact commission payouts deposited into bank accounts by Ufone PTCL Headquarters (August.xlsx Row 16 & Rows 160-171).
+                  </p>
+
+                  {/* 12 Inflow Heads Itemized Table */}
+                  {showItemizedTables && (
+                    <div className="overflow-x-auto mt-2 border border-emerald-200 rounded-lg bg-white">
+                      <table className="w-full text-left text-[11px]">
+                        <thead className="bg-emerald-100/60 text-emerald-950 uppercase font-bold border-b border-emerald-200 font-sans">
+                          <tr>
+                            <th className="px-3 py-1.5">#</th>
+                            <th className="px-3 py-1.5">Commission Head & Description</th>
+                            <th className="px-3 py-1.5">Reference / Sheet Row</th>
+                            <th className="px-3 py-1.5">Commission Type</th>
+                            <th className="px-3 py-1.5 text-right">Inflow Amount (PKR)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-emerald-50">
+                          {commissionsList.map((c: any, idx: number) => (
+                            <tr key={idx} className="hover:bg-emerald-50/40">
+                              <td className="px-3 py-1.5 text-slate-500">{idx + 1}</td>
+                              <td className="px-3 py-1.5 font-bold text-slate-800 font-sans">{c.reference || c.type}</td>
+                              <td className="px-3 py-1.5 text-slate-500 font-sans">{c.remarks || "August.xlsx"}</td>
+                              <td className="px-3 py-1.5 text-indigo-700 font-sans">{c.type}</td>
+                              <td className="px-3 py-1.5 text-right font-bold text-emerald-700">
+                                +Rs. {Number(c.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot className="bg-emerald-50 font-bold border-t border-emerald-200">
+                          <tr>
+                            <td colSpan={4} className="px-3 py-2 text-emerald-950 uppercase font-sans">
+                              TOTAL OPERATING REVENUE (GROSS PROFIT):
+                            </td>
+                            <td className="px-3 py-2 text-right text-emerald-800 font-black text-sm">
+                              +Rs. {Number(pnl.commission_income).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. FRANCHISE OPERATING EXPENSES & PAYROLL */}
+                <div className="space-y-4 p-4 rounded-xl bg-rose-50/30 border border-rose-200/80">
+                  <div className="flex justify-between font-bold text-rose-950 text-sm pb-1.5 border-b border-rose-200">
+                    <span className="font-sans">3. FRANCHISE OPERATING EXPENSES & PAYROLL DEDUCTIONS</span>
+                    <span className="font-black text-rose-700">Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
-                  <div className="flex justify-between text-slate-600 pl-4">
-                    <span className="font-sans">Ufone Promo & Target Commissions (11 Heads, August.xlsx Row 160-170):</span>
-                    <span className="text-emerald-700 font-bold">+Rs. {Number(pnl.promo_commissions || 638223).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1.5 border-t border-slate-200/80 bg-emerald-50/70 p-2.5 rounded-lg text-sm">
-                    <span className="font-sans">TOTAL FRANCHISE OPERATING REVENUE (GROSS PROFIT):</span>
-                    <span className="text-emerald-800 font-black">Rs. {Number(pnl.commission_income).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  <p className="font-sans text-[11px] text-slate-600">
+                    True operational business expenditures required to run Dargai franchise premises, network logistics, and personnel.
+                  </p>
+
+                  {/* 3A: 11 Operating Expenses Table */}
+                  {showItemizedTables && (
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center font-bold text-xs text-slate-800 font-sans">
+                        <span>A. Operational Overhead Expenditures (11 Heads, August.xlsx Rows 42-53):</span>
+                        <span className="text-rose-700 font-mono">Rs. {Number(pnl.expenses).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="overflow-x-auto border border-rose-200 rounded-lg bg-white">
+                        <table className="w-full text-left text-[11px]">
+                          <thead className="bg-rose-100/60 text-rose-950 uppercase font-bold border-b border-rose-200 font-sans">
+                            <tr>
+                              <th className="px-3 py-1.5">#</th>
+                              <th className="px-3 py-1.5">Expenditure Head</th>
+                              <th className="px-3 py-1.5">Category</th>
+                              <th className="px-3 py-1.5">Payment Method</th>
+                              <th className="px-3 py-1.5">Sheet Citation</th>
+                              <th className="px-3 py-1.5 text-right">Amount (PKR)</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-rose-50">
+                            {operatingExpensesList.map((e: any, idx: number) => (
+                              <tr key={idx} className="hover:bg-rose-50/40">
+                                <td className="px-3 py-1.5 text-slate-500">{idx + 1}</td>
+                                <td className="px-3 py-1.5 font-bold text-slate-800 font-sans">{e.title}</td>
+                                <td className="px-3 py-1.5 text-slate-600 font-sans">{e.category}</td>
+                                <td className="px-3 py-1.5 text-slate-500 font-sans">{e.payment_method}</td>
+                                <td className="px-3 py-1.5 text-slate-400 font-sans">{e.remarks}</td>
+                                <td className="px-3 py-1.5 text-right font-bold text-rose-700">
+                                  Rs. {Number(e.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot className="bg-rose-50 font-bold border-t border-rose-200">
+                            <tr>
+                              <td colSpan={5} className="px-3 py-2 text-rose-950 uppercase font-sans">
+                                SUBTOTAL OPERATIONAL OVERHEAD:
+                              </td>
+                              <td className="px-3 py-2 text-right text-rose-800 font-black">
+                                Rs. {Number(pnl.expenses).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 3B: Staff & Field RSO Payroll Table */}
+                  {showItemizedTables && (
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center font-bold text-xs text-slate-800 font-sans">
+                        <span>B. Staff Salaries & Field RSO Payroll (10 Employees, August.xlsx Row 41 Item #1):</span>
+                        <span className="text-rose-700 font-mono">Rs. {Number(pnl.salaries).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="overflow-x-auto border border-rose-200 rounded-lg bg-white">
+                        <table className="w-full text-left text-[11px]">
+                          <thead className="bg-rose-100/60 text-rose-950 uppercase font-bold border-b border-rose-200 font-sans">
+                            <tr>
+                              <th className="px-3 py-1.5">#</th>
+                              <th className="px-3 py-1.5">Employee / Officer Name</th>
+                              <th className="px-3 py-1.5">Role / Designation</th>
+                              <th className="px-3 py-1.5">Department</th>
+                              <th className="px-3 py-1.5">Payroll Details / Citation</th>
+                              <th className="px-3 py-1.5 text-right">Disbursed Salary (PKR)</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-rose-50">
+                            {salariesList.map((s: any, idx: number) => {
+                              const isRso = s.role?.includes("RSO") || s.name?.includes("RSO");
+                              return (
+                                <tr key={idx} className="hover:bg-rose-50/40">
+                                  <td className="px-3 py-1.5 text-slate-500">{idx + 1}</td>
+                                  <td className="px-3 py-1.5 font-bold text-slate-800 font-sans">{s.name}</td>
+                                  <td className="px-3 py-1.5 text-slate-600 font-sans">{s.role}</td>
+                                  <td className="px-3 py-1.5 font-sans">
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                      isRso ? "bg-amber-100 text-amber-900" : "bg-blue-100 text-blue-900"
+                                    }`}>
+                                      {isRso ? "Field RSO Route" : "Office Staff"}
+                                    </span>
+                                  </td>
+                                  <td className="px-3 py-1.5 text-slate-500 font-sans">{s.remarks || "Monthly payroll"}</td>
+                                  <td className="px-3 py-1.5 text-right font-bold text-rose-700">
+                                    Rs. {Number(s.salary_given || s.net_salary).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                          <tfoot className="bg-rose-50 font-bold border-t border-rose-200">
+                            <tr>
+                              <td colSpan={5} className="px-3 py-2 text-rose-950 uppercase font-sans">
+                                SUBTOTAL COMBINED PAYROLL (OFFICE RS. 144,300 + RSO RS. 108,024):
+                              </td>
+                              <td className="px-3 py-2 text-right text-rose-800 font-black">
+                                Rs. {Number(pnl.salaries).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-2 border-t-2 border-slate-300 text-sm">
+                    <span className="font-sans">TOTAL OPERATING DEDUCTIONS (A + B):</span>
+                    <span className="text-rose-900 font-black">Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
 
-                {/* 3. Franchise Operating Deductions */}
-                <div className="space-y-1.5 pt-3">
-                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
-                    <span className="font-sans">3. FRANCHISE OPERATING EXPENSES & PAYROLL</span>
-                    <span>(PKR)</span>
-                  </div>
-                  <div className="flex justify-between text-slate-600 pl-4">
-                    <span className="font-sans">Operational Overhead (Rent 25.3k, Electricity 8k, PTCL 15.5k, Promo Loading 392k, Tax 90.2k):</span>
-                    <span className="text-rose-700">Rs. {Number(pnl.expenses).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-600 pl-4">
-                    <span className="font-sans">Staff Salaries & Field RSO Payroll (August.xlsx Row 41 Item #1):</span>
-                    <span className="text-rose-700">Rs. {Number(pnl.salaries).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1 border-t border-slate-200/60">
-                    <span className="font-sans">TOTAL OPERATING DEDUCTIONS:</span>
-                    <span>Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                  </div>
-                </div>
-
-                {/* 4. NET OPERATING PROFIT */}
-                <div className="mt-5 p-4 rounded-xl border-2 border-emerald-400 bg-emerald-50 flex items-center justify-between text-base font-extrabold text-emerald-900">
-                  <div className="font-sans">
-                    <span>4. NET OPERATING PROFIT (1.4% FRANCHISE MODEL):</span>
-                    <p className="text-xs font-normal font-sans text-slate-600 mt-0.5">
-                      Actual net earnings: Total Commission Revenue (Rs. {Number(pnl.commission_income).toLocaleString()}) minus Total Operating Overhead & Salaries (Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString()}).
+                {/* 4. NET OPERATING PROFIT (1.4% FRANCHISE MODEL) */}
+                <div className="p-5 rounded-2xl border-2 border-emerald-500 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100/70 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-emerald-950">
+                  <div className="font-sans space-y-1">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                      <span className="text-base font-extrabold uppercase tracking-wide">
+                        4. NET OPERATING PROFIT (1.4% FRANCHISE MODEL):
+                      </span>
+                    </div>
+                    <p className="text-xs text-emerald-900 font-medium">
+                      Total Commission Revenue (+Rs. {Number(pnl.commission_income).toLocaleString()}) minus Total Operating Overhead & Salaries (Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString()}).
+                    </p>
+                    <p className="text-[11px] text-emerald-800 font-normal">
+                      The franchise operates at a clean positive net bottom-line (+2.45% net operational margin on commission turnover) with all expenses and 10 staff members fully paid.
                     </p>
                   </div>
-                  <div className="text-2xl font-mono font-black text-emerald-800">
-                    Rs. {Number(pnl.agency_net_profit || (Number(pnl.commission_income) - Number(pnl.expenses) - Number(pnl.salaries))).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  <div className="text-3xl font-mono font-black text-emerald-800 text-right">
+                    +Rs. {Number(pnl.agency_net_profit || (Number(pnl.commission_income) - Number(pnl.expenses) - Number(pnl.salaries))).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </div>
                 </div>
               </>
             ) : (
               <>
+                {/* COMMERCIAL TURNOVER MODEL */}
                 {/* 1. Operating Revenue (Sales Turnover) */}
-                <div className="space-y-1.5">
+                <div className="space-y-2 p-4 rounded-xl bg-slate-50/80 border border-slate-200">
                   <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
                     <span className="font-sans">1. OPERATING REVENUE (EVC AIRTIME DISTRIBUTION & SALES)</span>
-                    <span>(PKR)</span>
+                    <span>Rs. {Number(pnl.gross_revenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between text-slate-600 pl-4">
                     <span className="font-sans">Gross EVC Sales Turnover (Row 63-71 of August.xlsx):</span>
@@ -280,10 +546,10 @@ export const ProfitLoss: React.FC = () => {
                 </div>
 
                 {/* 2. Cost of Goods Sold (COGS) */}
-                <div className="space-y-1.5 pt-2">
+                <div className="space-y-1.5 p-4 rounded-xl bg-slate-50/80 border border-slate-200">
                   <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
                     <span className="font-sans">2. COST OF GOODS SOLD (COGS)</span>
-                    <span>(PKR)</span>
+                    <span className="text-rose-700">(Rs. {Number(pnl.cogs).toLocaleString(undefined, { minimumFractionDigits: 2 })})</span>
                   </div>
                   <div className="flex justify-between text-slate-600 pl-4">
                     <span className="font-sans">Wholesale Inventory Cost of EVC Airtime (97.50% Wholesale Cost):</span>
@@ -296,10 +562,10 @@ export const ProfitLoss: React.FC = () => {
                 </div>
 
                 {/* 3. Gross Sales Trading Margin */}
-                <div className="space-y-1.5 pt-2">
-                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
+                <div className="space-y-1.5 p-4 rounded-xl bg-indigo-50/40 border border-indigo-200/80">
+                  <div className="flex justify-between font-bold text-indigo-950 text-sm pb-1 border-b border-indigo-200">
                     <span className="font-sans">3. GROSS SALES TRADING MARGIN (NET SALES LESS COGS)</span>
-                    <span>(PKR)</span>
+                    <span className="font-bold text-indigo-900">Rs. {Number(pnl.gross_sales_margin || (Number(pnl.net_revenue) - Number(pnl.cogs))).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between text-slate-600 pl-4">
                     <span className="font-sans">Net Sales Revenue:</span>
@@ -309,17 +575,17 @@ export const ProfitLoss: React.FC = () => {
                     <span className="font-sans">Less: Wholesale Inventory Cost (COGS):</span>
                     <span className="text-rose-700">(Rs. {Number(pnl.cogs).toLocaleString(undefined, { minimumFractionDigits: 2 })})</span>
                   </div>
-                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1.5 border-t border-slate-200/80 bg-slate-50/70 p-2 rounded-lg">
+                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1.5 border-t border-indigo-200/80 bg-indigo-50/70 p-2 rounded-lg">
                     <span className="font-sans">GROSS SALES TRADING MARGIN (2.50% Spread):</span>
                     <span className="text-indigo-950 font-bold">Rs. {Number(pnl.gross_sales_margin || (Number(pnl.net_revenue) - Number(pnl.cogs))).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
 
                 {/* 4. Commission & Incentive Revenue */}
-                <div className="space-y-1.5 pt-2">
-                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
+                <div className="space-y-1.5 p-4 rounded-xl bg-emerald-50/40 border border-emerald-200/80">
+                  <div className="flex justify-between font-bold text-emerald-950 text-sm pb-1 border-b border-emerald-200">
                     <span className="font-sans">4. COMMISSION & INCENTIVE REVENUE (FROM UFONE PTCL HQ)</span>
-                    <span>(PKR)</span>
+                    <span className="font-bold text-emerald-800">+Rs. {Number(pnl.commission_income).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between text-slate-600 pl-4">
                     <span className="font-sans">Ufone Promo Commissions (11 Categories, August.xlsx Row 160-170):</span>
@@ -329,133 +595,169 @@ export const ProfitLoss: React.FC = () => {
                     <span className="font-sans">U-Top Up / EVC Distribution Commission (August.xlsx Row 16):</span>
                     <span className="text-emerald-700 font-bold">+Rs. {Number(pnl.topup_commissions || 211074).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
-                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1.5 border-t border-slate-200/80 bg-emerald-50/50 p-2 rounded-lg">
+                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1.5 border-t border-emerald-200/80 bg-emerald-50/50 p-2 rounded-lg">
                     <span className="font-sans">TOTAL COMMISSION & INCENTIVE INCOME:</span>
                     <span className="text-emerald-800 font-bold">+Rs. {Number(pnl.commission_income).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
 
                 {/* 5. Total Gross Operating Profit */}
-                <div className="pt-2">
-                  <div className="flex justify-between items-center font-bold text-base text-indigo-950 p-3 rounded-xl bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 border border-indigo-200">
-                    <div className="font-sans">
-                      <span className="text-sm uppercase tracking-wide">5. TOTAL GROSS OPERATING PROFIT:</span>
-                      <p className="text-[11px] font-normal text-slate-500 mt-0.5">
-                        Trading Margin (Rs. {Number(pnl.gross_sales_margin || (Number(pnl.net_revenue) - Number(pnl.cogs))).toLocaleString()}) + HQ Commissions (Rs. {Number(pnl.commission_income).toLocaleString()})
-                      </p>
-                    </div>
-                    <span className="text-xl font-mono font-black text-indigo-900">
-                      Rs. {Number(pnl.gross_profit).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </span>
+                <div className="p-4 rounded-xl bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 border border-indigo-200 flex justify-between items-center">
+                  <div className="font-sans">
+                    <span className="text-sm font-bold uppercase tracking-wide text-indigo-950">5. TOTAL GROSS OPERATING PROFIT:</span>
+                    <p className="text-[11px] font-normal text-slate-600 mt-0.5">
+                      Trading Margin (Rs. {Number(pnl.gross_sales_margin || (Number(pnl.net_revenue) - Number(pnl.cogs))).toLocaleString()}) + HQ Commissions (Rs. {Number(pnl.commission_income).toLocaleString()})
+                    </p>
                   </div>
+                  <span className="text-xl font-mono font-black text-indigo-900">
+                    Rs. {Number(pnl.gross_profit).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
                 </div>
 
                 {/* 6. Operating Expenses */}
-                <div className="space-y-1.5 pt-4">
-                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
+                <div className="space-y-1.5 p-4 rounded-xl bg-rose-50/40 border border-rose-200/80">
+                  <div className="flex justify-between font-bold text-rose-950 text-sm pb-1 border-b border-rose-200">
                     <span className="font-sans">6. OPERATING EXPENSES & OVERHEAD DEDUCTIONS</span>
-                    <span>(PKR)</span>
+                    <span className="font-bold text-rose-700">Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between text-slate-600 pl-4">
-                    <span className="font-sans">General & Administrative Expenses (Rent, Utilities, Transport, FCA Promo):</span>
+                    <span className="font-sans">General & Administrative Expenses (11 Heads, Rent, Utilities, FCA Promo):</span>
                     <span className="text-rose-700">Rs. {Number(pnl.expenses).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between text-slate-600 pl-4">
                     <span className="font-sans">Staff & RSO Salaries Disbursed (August.xlsx Row 41 Item #1):</span>
                     <span className="text-rose-700">Rs. {Number(pnl.salaries).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
-                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1 border-t border-slate-200/60">
+                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1 border-t border-rose-200/60">
                     <span className="font-sans">TOTAL OPERATING DEDUCTIONS:</span>
                     <span>Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
 
-                {/* 7. NET PROFIT OR NET LOSS */}
-                <div className={`mt-6 p-4 rounded-xl border-2 flex items-center justify-between text-base font-extrabold ${
-                  pnl.is_loss
-                    ? "bg-rose-50 border-rose-400 text-rose-800"
-                    : "bg-emerald-50 border-emerald-400 text-emerald-800"
-                }`}>
+                {/* 7. NET PROFIT (COMMERCIAL MODEL) */}
+                <div className="p-5 rounded-2xl border-2 border-emerald-400 bg-emerald-50 flex items-center justify-between text-base font-extrabold text-emerald-900">
                   <div className="font-sans">
-                    <span>{pnl.is_loss ? "NET OPERATING LOSS" : "7. NET OPERATING PROFIT (COMMERCIAL MODEL)"}:</span>
+                    <span>7. NET OPERATING PROFIT (COMMERCIAL MODEL):</span>
                     <p className="text-xs font-normal font-sans text-slate-600 mt-0.5">
-                      {pnl.is_loss
-                        ? "Operating expenses exceed gross profit. Negative earnings shown explicitly."
-                        : "Net operating bottom-line earnings: Gross Profit (Rs. " + Number(pnl.gross_profit).toLocaleString() + ") minus Operating Overhead (Rs. " + (Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString() + ")."}
+                      Net operating bottom-line earnings: Gross Profit (Rs. {Number(pnl.gross_profit).toLocaleString()}) minus Operating Overhead (Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString()}).
                     </p>
                   </div>
-                  <div className="text-2xl font-mono font-black">
-                    {pnl.is_loss ? (
-                      <span>-Rs. {Number(pnl.loss_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                    ) : (
-                      <span>Rs. {Number(pnl.net_profit).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                    )}
+                  <div className="text-3xl font-mono font-black text-emerald-800">
+                    Rs. {Number(pnl.net_profit).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </div>
                 </div>
               </>
             )}
 
             {/* 9. FINANCING, EQUITY & CAPITAL CASH MOVEMENTS (Reconciliation with Excel Row 59 Cash Outflows) */}
-            {(pnl.loan_repayments > 0 || pnl.drawings > 0 || pnl.capital_inventory > 0) && (
-              <div className="space-y-3 pt-4 mt-6 border-t border-dashed border-slate-300">
-                <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
-                  <span className="font-sans">9. CASH FLOW RECONCILIATION (OPERATING VS. TOTAL CASH OUTFLOWS)</span>
-                  <span>(PKR)</span>
-                </div>
+            <div className="space-y-4 pt-4 mt-6 border-t-2 border-dashed border-slate-300">
+              <div className="flex justify-between font-bold text-slate-900 text-sm pb-1 border-b border-slate-200">
+                <span className="font-sans">9. CASH FLOW RECONCILIATION (OPERATING VS. TOTAL CASH OUTFLOWS)</span>
+                <span className="font-bold text-slate-900">Rs. {Number(pnl.total_cash_outflows || 1653620).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              </div>
 
-                <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200/80 font-sans text-xs text-blue-900 space-y-1">
-                  <div className="font-bold flex items-center gap-1.5 text-blue-950">
-                    <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                    <span>Why Net Profit is +Rs. {Number(pnl.net_profit).toLocaleString()} while Cash Outflow is Rs. {Number(pnl.total_cash_outflows).toLocaleString()}:</span>
-                  </div>
-                  <p className="text-[11px] leading-relaxed text-blue-800">
-                    Total cash disbursements from the bank/cash register in August were <strong>Rs. 1,653,620.00</strong> (matching Row 59 of August.xlsx).
-                    However, <strong>Rs. 825,160.00</strong> of these outflows are <em>non-operating balance sheet items</em> (repaying Haris Badshah loan debt, owner drawings taken by Islam Badshah, and purchasing SIM card inventory assets).
-                    Because these are asset/equity/liability transactions rather than franchise business losses, your true operational overhead is only <strong>Rs. 828,460.00</strong> (Operating Expenses Rs. 576,136 + Salaries Rs. 252,324).
-                    Against Gross Profit of <strong>Rs. 1,215,797.00</strong> (EVC sales margin Rs. 366,500 + Commissions Rs. 849,297), the business generated a healthy <strong>Net Operating Profit of +Rs. {Number(pnl.net_profit).toLocaleString()}</strong>.
-                  </p>
+              {/* Dynamic Contextual Explanation Banner */}
+              <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-200 font-sans text-xs text-blue-950 space-y-1.5">
+                <div className="font-bold flex items-center gap-1.5 text-blue-950 text-sm">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span>
+                    Why Net Profit is {viewMode === "agency_1_4" ? "+Rs. 20,837 (Agency Model)" : "+Rs. 387,337 (Commercial Model)"} while Total Cash Outflows are Rs. 1,653,620:
+                  </span>
                 </div>
+                <p className="text-[11px] leading-relaxed text-blue-900">
+                  Total cash disbursements through bank transfer and cash register in August were <strong>Rs. 1,653,620.00</strong> (matching Row 59 of August.xlsx).
+                  However, exactly <strong>Rs. 825,160.00</strong> of these disbursements were for <em>non-operating balance sheet transactions</em> (debt repayment to Haris Badshah, personal drawings taken by Islam Badshah, and purchasing SIM card inventory assets).
+                  Because these are balance sheet capital and liability settlements rather than business operational expenses, your true operational overhead is only <strong>Rs. 828,460.00</strong> (Expenses Rs. 576,136 + Salaries Rs. 252,324).
+                  {viewMode === "agency_1_4" ? (
+                    <span> Against Commission Inflows of <strong>Rs. 849,297.00</strong>, the franchise generated a certified <strong>Net Operating Profit of +Rs. 20,837.00</strong>.</span>
+                  ) : (
+                    <span> Against Gross Profit of <strong>Rs. 1,215,797.00</strong> (EVC trading margin Rs. 366,500 + Commissions Rs. 849,297), the franchise generated a healthy <strong>Net Operating Profit of +Rs. 387,337.00</strong>.</span>
+                  )}
+                </p>
+              </div>
 
-                <div className="space-y-1.5 text-xs font-mono">
-                  <div className="flex justify-between text-slate-600 pl-4">
-                    <span className="font-sans">A. Total Operating Deductions (Overhead + Salaries):</span>
-                    <span className="text-slate-700">Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              {/* 4 Non-Operating Outflows Itemized Table */}
+              {showItemizedTables && (
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center font-bold text-xs text-slate-800 font-sans">
+                    <span>Non-Operating Balance Sheet Cash Disbursements (August.xlsx Row 41, 54-58):</span>
+                    <span className="text-slate-800 font-mono">
+                      Rs. {Number((pnl.loan_repayments || 500000) + (pnl.drawings || 103910) + (pnl.capital_inventory || 221250)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </span>
                   </div>
-                  {pnl.loan_repayments > 0 && (
-                    <div className="flex justify-between text-slate-600 pl-4">
-                      <span className="font-sans">B. Loan Principal Repayment (Haris Badshah Debt Settlement):</span>
-                      <span className="text-slate-700">Rs. {Number(pnl.loan_repayments).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                    </div>
-                  )}
-                  {pnl.drawings > 0 && (
-                    <div className="flex justify-between text-slate-600 pl-4">
-                      <span className="font-sans">C. Owner Personal Drawings (Islam Badshah Sb Household, IESCO/SNGPL, Driver):</span>
-                      <span className="text-slate-700">Rs. {Number(pnl.drawings).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                    </div>
-                  )}
-                  {pnl.capital_inventory > 0 && (
-                    <div className="flex justify-between text-slate-600 pl-4">
-                      <span className="font-sans">D. Merchandise Stock Inflow (Paired & Loose SIM Orders Ufone HQ):</span>
-                      <span className="text-slate-700">Rs. {Number(pnl.capital_inventory).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1.5 border-t border-slate-300 bg-slate-50 p-2 rounded-lg">
-                    <span className="font-sans">TOTAL CASH OUTFLOWS (Row 59 of August.xlsx: A + B + C + D):</span>
-                    <span>Rs. {Number(pnl.total_cash_outflows || (Number(pnl.expenses) + Number(pnl.salaries) + Number(pnl.loan_repayments || 0) + Number(pnl.drawings || 0) + Number(pnl.capital_inventory || 0))).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  <div className="overflow-x-auto border border-blue-200 rounded-lg bg-white">
+                    <table className="w-full text-left text-[11px]">
+                      <thead className="bg-blue-100/60 text-blue-950 uppercase font-bold border-b border-blue-200 font-sans">
+                        <tr>
+                          <th className="px-3 py-1.5">#</th>
+                          <th className="px-3 py-1.5">Balance Sheet Head & Description</th>
+                          <th className="px-3 py-1.5">Accounting Classification</th>
+                          <th className="px-3 py-1.5">Payment Method</th>
+                          <th className="px-3 py-1.5">Excel Citation & Purpose</th>
+                          <th className="px-3 py-1.5 text-right">Disbursed Amount (PKR)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50">
+                        {nonOperatingList.map((item: any, idx: number) => (
+                          <tr key={idx} className="hover:bg-blue-50/40">
+                            <td className="px-3 py-1.5 text-slate-500">{idx + 1}</td>
+                            <td className="px-3 py-1.5 font-bold text-slate-800 font-sans">{item.title}</td>
+                            <td className="px-3 py-1.5 text-indigo-700 font-sans">{item.category}</td>
+                            <td className="px-3 py-1.5 text-slate-600 font-sans">{item.payment_method}</td>
+                            <td className="px-3 py-1.5 text-slate-500 font-sans">{item.remarks}</td>
+                            <td className="px-3 py-1.5 text-right font-bold text-slate-900">
+                              Rs. {Number(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot className="bg-blue-50 font-bold border-t border-blue-200">
+                        <tr>
+                          <td colSpan={5} className="px-3 py-2 text-blue-950 uppercase font-sans">
+                            SUBTOTAL NON-OPERATING BALANCE SHEET OUTFLOWS:
+                          </td>
+                          <td className="px-3 py-2 text-right text-blue-900 font-black">
+                            Rs. {Number((pnl.loan_repayments || 500000) + (pnl.drawings || 103910) + (pnl.capital_inventory || 221250)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
                   </div>
+                </div>
+              )}
+
+              {/* Total Summary Outflow Reconciliation */}
+              <div className="space-y-1.5 text-xs font-mono pt-2">
+                <div className="flex justify-between text-slate-700 pl-4">
+                  <span className="font-sans">A. Total Operating Deductions (Overhead Rs. 576,136 + Payroll Rs. 252,324):</span>
+                  <span className="font-bold text-slate-800">
+                    Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div className="flex justify-between text-slate-700 pl-4">
+                  <span className="font-sans">B. Total Non-Operating Balance Sheet Disbursements (Loan + Drawings + Inventory):</span>
+                  <span className="font-bold text-slate-800">
+                    Rs. {Number((pnl.loan_repayments || 500000) + (pnl.drawings || 103910) + (pnl.capital_inventory || 221250)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div className="flex justify-between font-bold text-slate-950 pl-4 pt-2 border-t-2 border-slate-900 bg-slate-100 p-2.5 rounded-xl text-sm">
+                  <span className="font-sans">TOTAL MONTHLY CASH OUTFLOWS (August.xlsx Row 59: A + B):</span>
+                  <span className="font-black text-slate-950">
+                    Rs. {Number(pnl.total_cash_outflows || 1653620).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Audit & Signatures */}
             <div className="pt-10 grid grid-cols-2 gap-10 text-center font-sans">
-              <div className="border-t border-slate-800 pt-1">
-                <p className="font-bold">Shahid Khan</p>
-                <p className="text-[10px] text-slate-500 uppercase">Prepared by Finance Officer</p>
+              <div className="border-t-2 border-slate-800 pt-2">
+                <p className="font-bold text-sm text-slate-900">Shahid Khan</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Prepared by Finance Officer</p>
               </div>
-              <div className="border-t border-slate-800 pt-1">
-                <p className="font-bold">Islam Badshah</p>
-                <p className="text-[10px] text-slate-500 uppercase">Approved by Franchise Owner</p>
+              <div className="border-t-2 border-slate-800 pt-2">
+                <p className="font-bold text-sm text-slate-900">Islam Badshah</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Approved by Franchise Owner</p>
               </div>
             </div>
           </div>

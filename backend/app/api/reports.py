@@ -483,7 +483,7 @@ def export_report_excel(
     title_font = Font(name="Calibri", size=14, bold=True)
 
     # Title header
-    ws.append(["Ufone 4G Authorized Franchise - Peshawar Branch"])
+    ws.append(["Ufone Franchise - Dargai Office"])
     ws.append([f"Report: {report_type.upper()} | Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}"])
     ws.append([])
     ws["A1"].font = title_font
@@ -514,11 +514,36 @@ def export_report_excel(
         for e in exps:
             ws.append([e.title, e.category, str(e.paid_date), float(e.amount), e.paid_by_name or "", e.payment_method, e.remarks or ""])
 
+    elif report_type == "pnl":
+        ws.append(["Statement of Profit & Loss - Executive Audit Summary", "Amount (PKR)"])
+        pnl = calculate_profit_and_loss(db, start_date=date_from, end_date=date_to)
+        summary_rows = [
+            ("Gross EVC Sales Revenue", pnl.get("gross_revenue", 0.0)),
+            ("Cost of Goods Sold (COGS)", pnl.get("cogs", 0.0)),
+            ("Gross Commercial Sales Margin (2.5%)", pnl.get("gross_sales_margin", 0.0)),
+            ("Operating Commission Revenue (Ufone HQ Inflows)", pnl.get("commission_income", 0.0)),
+            ("  - EVC Top-Up Commission (1.4%)", pnl.get("topup_commissions", 0.0)),
+            ("  - Promo & Incentive Commissions (11 Heads)", pnl.get("promo_commissions", 0.0)),
+            ("Total Gross Operating Profit (Commercial)", pnl.get("gross_profit", 0.0)),
+            ("Operating Overhead Expenses", pnl.get("expenses", 0.0)),
+            ("Staff & Field RSO Payroll", pnl.get("salaries", 0.0)),
+            ("Total Operating Deductions", pnl.get("total_operating_deductions", 0.0)),
+            ("Net Operating Profit (1.4% Franchise Agency Model)", pnl.get("agency_net_profit", 0.0)),
+            ("Net Operating Profit (Commercial Model)", pnl.get("net_profit", 0.0)),
+            ("Below-the-Line / Non-Operating Outflows", ""),
+            ("  - Loan Repayments (Haris Badshah Debt Settlement)", pnl.get("loan_repayments", 0.0)),
+            ("  - Owner Personal Drawings (Islam Badshah Sb)", pnl.get("drawings", 0.0)),
+            ("  - Capital Inventory Purchases (Paired & Loose SIMs)", pnl.get("capital_inventory", 0.0)),
+            ("Total Monthly Cash Disbursements (August.xlsx Row 59)", pnl.get("total_cash_outflows", 0.0)),
+        ]
+        for title, amt in summary_rows:
+            ws.append([title, amt])
     else:
         ws.append(["Metric", "Amount (PKR)"])
-        pnl = calculate_profit_and_loss(db)
+        pnl = calculate_profit_and_loss(db, start_date=date_from, end_date=date_to)
         for k, v in pnl.items():
-            ws.append([k.replace("_", " ").title(), v])
+            if not isinstance(v, (list, dict)):
+                ws.append([k.replace("_", " ").title(), v])
 
     # Format header row (row 4)
     for col in ws.iter_cols(min_row=4, max_row=4):

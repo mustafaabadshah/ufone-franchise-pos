@@ -7,7 +7,7 @@ from app.models.models import (
     Product, StockMovement, StockMovementType, Purchase, PurchaseItem,
     Sale, SaleItem, Return, ReturnItem, Expense, Salary, CompanyCreditAccount,
     CompanyCreditTransaction, LedgerAccount, LedgerTransaction, LedgerEntry,
-    EntryTypeEnum, AuditLog, Commission
+    EntryTypeEnum, AuditLog, Commission, RSO
 )
 
 SYSTEM_ACCOUNTS = [
@@ -492,6 +492,76 @@ def calculate_profit_and_loss(
     topup_comm = sum((c.amount for c in comm_records if c.commission_type == "U Top Up Commission"), Decimal("0.00"))
     promo_comm = sum((c.amount for c in comm_records if c.commission_type != "U Top Up Commission"), Decimal("0.00"))
 
+    # Itemized lists matching August.xlsx line-by-line tables
+    op_expenses_list = [
+        {
+            "id": e.id,
+            "title": e.title,
+            "category": e.category,
+            "amount": float(e.amount),
+            "paid_date": str(e.paid_date),
+            "payment_method": e.payment_method,
+            "remarks": e.remarks or ""
+        }
+        for e in expenses if e.category not in non_operating_cats
+    ]
+    # Sort operating expenses by amount descending
+    op_expenses_list.sort(key=lambda x: x["amount"], reverse=True)
+
+    non_op_list = [
+        {
+            "id": e.id,
+            "title": e.title,
+            "category": e.category,
+            "amount": float(e.amount),
+            "paid_date": str(e.paid_date),
+            "payment_method": e.payment_method,
+            "remarks": e.remarks or ""
+        }
+        for e in expenses if e.category in ["Drawings", "Loan Repayment", "Inventory"]
+    ]
+    non_op_list.sort(key=lambda x: x["amount"], reverse=True)
+
+    comm_list = [
+        {
+            "id": c.id,
+            "type": c.commission_type,
+            "reference": c.reference or "",
+            "amount": float(c.amount),
+            "date": str(c.date),
+            "remarks": c.remarks or ""
+        }
+        for c in comm_records
+    ]
+    comm_list.sort(key=lambda x: x["amount"], reverse=True)
+
+    salaries_list = [
+        {
+            "id": s.id,
+            "name": s.staff_member.name if s.staff_member else "Employee",
+            "role": s.staff_member.role if s.staff_member else "Staff",
+            "basic_salary": float(s.basic_salary),
+            "salary_given": float(s.salary_given),
+            "bonus": float(s.bonus),
+            "net_salary": float(s.net_salary),
+            "remarks": s.remarks or ""
+        }
+        for s in salaries
+    ]
+
+    # RSO field sales volume breakdown
+    rso_sales_list = []
+    rsos = db.query(RSO).all()
+    for r in rsos:
+        r_sales = sum((s.total_amount for s in sales if s.rso_id == r.id), Decimal("0.00"))
+        rso_sales_list.append({
+            "id": r.id,
+            "name": r.name,
+            "route": r.route,
+            "sales_volume": float(r_sales)
+        })
+    rso_sales_list.sort(key=lambda x: x["sales_volume"], reverse=True)
+
     return {
         "gross_revenue": float(gross_revenue),
         "sales_discounts": float(sales_discounts),
@@ -514,5 +584,10 @@ def calculate_profit_and_loss(
         "drawings": float(drawings),
         "loan_repayments": float(loan_repayments),
         "capital_inventory": float(capital_inventory),
-        "total_cash_outflows": float(total_operating_deductions + drawings + loan_repayments + capital_inventory)
+        "total_cash_outflows": float(total_operating_deductions + drawings + loan_repayments + capital_inventory),
+        "itemized_operating_expenses": op_expenses_list,
+        "itemized_non_operating": non_op_list,
+        "itemized_commissions": comm_list,
+        "itemized_salaries": salaries_list,
+        "itemized_rso_sales": rso_sales_list
     }
