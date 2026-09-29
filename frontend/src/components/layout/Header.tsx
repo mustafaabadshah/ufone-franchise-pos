@@ -76,7 +76,11 @@ export const Header: React.FC<HeaderProps> = ({
                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                 : "bg-indigo-50 text-indigo-700"
               }`}>
-              {user?.role?.toLowerCase() === "viewer" ? "Reports Viewer" : (user?.role || "Franchise Owner")}
+              {user?.name?.toLowerCase().includes("islam badshah")
+                ? "Franchise Owner (Audit View)"
+                : user?.role?.toLowerCase() === "viewer"
+                ? "Reports Viewer"
+                : (user?.role === "Admin" ? "Admin / Incharge" : user?.role || "Finance Officer")}
             </span>
           </div>
         </div>

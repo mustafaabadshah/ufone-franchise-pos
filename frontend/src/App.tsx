@@ -101,7 +101,11 @@ function MainApp() {
     return <Login />;
   }
 
-  const allowedViewerTabs = ['reports', 'dashboard', 'pnl', 'ledger', 'rso-daily', 'rso-weekly', 'rso-monthly'];
+  const allowedViewerTabs = [
+    'reports', 'dashboard', 'pnl', 'ledger', 'audit-logs',
+    'rso-daily', 'rso-weekly', 'rso-monthly',
+    'expenses', 'salaries', 'retailers', 'sales', 'purchases', 'stock', 'company-credit'
+  ];
 
   const handleNavigate = (tabId: string) => {
     if (isViewer && !allowedViewerTabs.includes(tabId)) {
@@ -118,7 +122,7 @@ function MainApp() {
       return (
         <div className="space-y-6">
           <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm font-medium flex items-center justify-between">
-            <span>You are logged in as <strong>Islam Badshah (Viewer Only)</strong>. Operational and administrative modules are restricted. You can view all reports, financial statements, and print/download documents below.</span>
+            <span>Logged in as <strong>Islam Badshah (Franchise Owner - Executive Audit & Reports View)</strong>. Operational counter transactions are restricted. You can view all financial reports, statements, security audit logs, and download/print documents.</span>
           </div>
           <ReportCenter />
         </div>
@@ -207,7 +211,7 @@ function MainApp() {
                 <div className="flex items-center gap-2.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-xs font-semibold text-emerald-900">
-                    Logged in as <strong>Islam Badshah</strong> (Role: Reports Viewer). You have access to view all reports, financial summaries, and print or download documents.
+                    Logged in as <strong>Islam Badshah</strong> (Role: Franchise Owner - Audit & Reports View). You have full access to view all reports, financial summaries, security logs, and print or download documents.
                   </span>
                 </div>
                 <button

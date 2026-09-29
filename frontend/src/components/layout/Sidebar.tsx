@@ -99,14 +99,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onNavigate, lowSto
 
   const viewerSections: NavSection[] = [
     {
-      title: "Reports & Audits (View Only)",
+      title: "Executive Reports & Audit",
       items: [
         { id: "reports", label: "Executive Report Hub", icon: FileSpreadsheet },
         { id: "pnl", label: "Profit & Loss Statement", icon: TrendingUp },
         { id: "ledger", label: "General Ledger", icon: BookOpen },
+        { id: "audit-logs", label: "Security Audit Logs", icon: ShieldAlert },
         { id: "rso-daily", label: "RSO Daily Report", icon: CalendarDays },
         { id: "rso-weekly", label: "RSO Weekly Report", icon: CalendarDays },
         { id: "rso-monthly", label: "RSO Monthly Report", icon: CalendarDays },
+      ]
+    },
+    {
+      title: "Operations & Ledgers (View Only)",
+      items: [
+        { id: "expenses", label: "Expenses Breakdown", icon: Receipt },
+        { id: "salaries", label: "Staff Payroll & RSO Salaries", icon: DollarSign },
+        { id: "retailers", label: "Retailers Network & Balances", icon: Smartphone },
+        { id: "sales", label: "Sales Register", icon: ShoppingBag },
+        { id: "purchases", label: "Purchases & Inward Stock", icon: ShoppingCart },
+        { id: "stock", label: "Stock & Inventory", icon: Boxes },
+        { id: "company-credit", label: "Company Credit / Payables", icon: Building2 },
       ]
     }
   ];
@@ -131,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onNavigate, lowSto
       {isViewer && (
         <div className="mx-3 mt-3 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11px] font-semibold flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-          <span className="leading-snug">Islam Badshah (Reports & Print Only)</span>
+          <span className="leading-snug">Islam Badshah (Franchise Owner - Audit & Reports View)</span>
         </div>
       )}
 

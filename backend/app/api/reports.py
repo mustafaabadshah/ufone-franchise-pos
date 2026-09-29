@@ -11,7 +11,7 @@ from app.core.database import get_db
 from app.core.accounting_engine import calculate_profit_and_loss
 from app.models.models import (
     Sale, Purchase, Expense, Salary, Return, RetailerCollection,
-    CompanyCreditTransaction, Investment, Commission, Product, RSO, Retailer, Staff
+    CompanyCreditTransaction, Investment, Commission, Product, RSO, Retailer, Staff, RSOSalary
 )
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -213,26 +213,146 @@ def get_weekly_report(
         "daily_breakdown": day_by_day
     }
 
-# --- MONTHLY REPORT ---
+# --- MONTHLY REPORT (Full Multi-Section Executive Audit matching August.xlsx) ---
 @router.get("/monthly")
 def get_monthly_report(
     year: int = Query(2026),
-    month: int = Query(9),
+    month: int = Query(8),
     db: Session = Depends(get_db)
 ):
     first_day = date(year, month, 1)
     next_month = first_day.replace(day=28) + timedelta(days=4)
     last_day = next_month - timedelta(days=next_month.day)
+    month_name_str = first_day.strftime("%B %Y")
 
     pnl = calculate_profit_and_loss(db, start_date=first_day, end_date=last_day)
 
-    # Payables & Receivables
-    from app.models.models import CompanyCreditAccount
-    company_payables = db.query(func.coalesce(func.sum(CompanyCreditAccount.outstanding), 0)).scalar()
-    retailer_receivables = db.query(func.coalesce(func.sum(Retailer.balance), 0)).scalar()
-    rso_receivables = db.query(func.coalesce(func.sum(RSO.current_balance), 0)).scalar()
+    # 1. Capital Investments & Working Capital Loans (Debit Details - Rs. 6.64M)
+    investments_q = db.query(Investment).all()
+    investments_list = [
+        {
+            "id": inv.id,
+            "name": inv.name,
+            "phone": inv.phone,
+            "amount_given": float(inv.amount_given),
+            "purchased_amount": float(inv.purchased_amount),
+            "returns": float(inv.returns),
+            "remaining": float(inv.remaining),
+            "status": inv.status,
+            "remarks": inv.remarks
+        }
+        for inv in investments_q
+    ]
+    total_capital_loans = sum(i["amount_given"] for i in investments_list)
 
-    # Daily trend graph for the month
+    # 2. Market Outstanding Credit / Receivables (Credit Details - Rs. 719,385)
+    retailers_credit_q = db.query(Retailer).filter(Retailer.balance > 0).order_by(Retailer.balance.desc()).all()
+    market_credit_list = [
+        {
+            "id": r.id,
+            "name": r.name,
+            "shop_name": r.shop_name,
+            "phone": r.phone,
+            "route": r.route,
+            "balance": float(r.balance)
+        }
+        for r in retailers_credit_q
+    ]
+    total_market_credit = sum(m["balance"] for m in market_credit_list)
+
+    # 3. Monthly Expenditures Breakdown (All Expenditure Details)
+    expenses_q = db.query(Expense).filter(Expense.paid_date >= first_day, Expense.paid_date <= last_day).all()
+    expenditures_list = [
+        {
+            "id": e.id,
+            "title": e.title,
+            "category": e.category,
+            "amount": float(e.amount),
+            "paid_date": str(e.paid_date),
+            "payment_method": e.payment_method,
+            "remarks": e.remarks
+        }
+        for e in expenses_q
+    ]
+    total_expenditures_outflow = sum(e["amount"] for e in expenditures_list)
+
+    # 4. RSO Field Distribution & Sales Volume
+    rsos = db.query(RSO).all()
+    rso_distribution_list = []
+    for r in rsos:
+        r_sales = db.query(func.coalesce(func.sum(Sale.total_amount), 0)).filter(
+            Sale.rso_id == r.id,
+            Sale.sale_date >= first_day,
+            Sale.sale_date <= last_day
+        ).scalar()
+        rso_distribution_list.append({
+            "id": r.id,
+            "name": r.name,
+            "route": r.route,
+            "opening_balance": float(r.opening_balance),
+            "sales_volume": float(r_sales),
+            "current_balance": float(r.current_balance),
+            "status": r.status
+        })
+    total_rso_sales_vol = sum(r["sales_volume"] for r in rso_distribution_list)
+
+    # 5. RSO Salaries Breakdown (August dedicated table)
+    rso_salaries_q = db.query(RSOSalary).all()
+    rso_salaries_list = [
+        {
+            "id": rs.id,
+            "rso_name": rs.rso_name,
+            "basic_salary": float(rs.basic_salary),
+            "fuel_amount": float(rs.fuel_amount),
+            "kpi_comm": float(rs.kpi_comm),
+            "evc_comm": float(rs.evc_comm),
+            "fca_comm": float(rs.fca_comm),
+            "bonus": float(rs.bonus),
+            "gross_total": float(rs.gross_total)
+        }
+        for rs in rso_salaries_q
+    ]
+    total_rso_payroll = sum(rs["gross_total"] for rs in rso_salaries_list)
+
+    # 6. Office Staff Payroll
+    staff_salaries_q = db.query(Salary).filter(
+        Salary.paid_on >= first_day,
+        Salary.paid_on <= last_day
+    ).all()
+    staff_salaries_list = []
+    for s in staff_salaries_q:
+        st_name = s.staff_member.name if s.staff_member else "Employee"
+        st_role = s.staff_member.role if s.staff_member else "Staff"
+        staff_salaries_list.append({
+            "id": s.id,
+            "name": st_name,
+            "role": st_role,
+            "basic_salary": float(s.basic_salary),
+            "allowances": float(s.allowances),
+            "deductions": float(s.deductions),
+            "bonus": float(s.bonus),
+            "commission": float(s.commission),
+            "net_salary": float(s.net_salary),
+            "remarks": s.remarks
+        })
+    total_staff_payroll = sum(st["net_salary"] for st in staff_salaries_list)
+    combined_payroll = total_rso_payroll + total_staff_payroll
+
+    # 7. Headquarter Commission Inflows (Rs. 849,297)
+    commissions_q = db.query(Commission).filter(Commission.date >= first_day, Commission.date <= last_day).all()
+    commissions_list = [
+        {
+            "id": c.id,
+            "type": c.commission_type,
+            "reference": c.reference,
+            "amount": float(c.amount),
+            "remarks": c.remarks
+        }
+        for c in commissions_q
+    ]
+    total_commissions_inflow = sum(c["amount"] for c in commissions_list)
+
+    # 8. Daily Trend Graph for the month
     daily_graph = []
     curr = first_day
     while curr <= min(last_day, date.today()):
@@ -248,19 +368,44 @@ def get_monthly_report(
     return {
         "year": year,
         "month": month,
-        "month_name": first_day.strftime("%B %Y"),
+        "month_name": month_name_str,
+        "franchise_name": "Ufone Franchise - Dargai Office",
+        "franchise_address": "Main Bazar, Dargai, Malakand, KP",
+        "finance_officer": "Shahid Khan",
+        "franchise_owner": "Islam Badshah",
+        # Certified P&L metrics
         "revenue": pnl["net_revenue"],
         "cogs": pnl["cogs"],
-        "gross_profit": pnl["gross_profit"],
-        "expenses": pnl["expenses"],
-        "salaries": pnl["salaries"],
+        "margin": pnl["net_revenue"] - pnl["cogs"],
         "commission": pnl["commission_income"],
-        "returns": pnl["sales_returns"],
+        "gross_profit": pnl["gross_profit"],
+        "operating_expenses": pnl["expenses"],
+        "salaries": pnl["salaries"],
+        "total_operating_deductions": pnl["expenses"] + pnl["salaries"],
         "net_profit": pnl["net_profit"],
         "is_loss": pnl["is_loss"],
-        "company_payables": float(company_payables),
-        "retailer_receivables": float(retailer_receivables),
-        "rso_receivables": float(rso_receivables),
+        "loss_amount": pnl["loss_amount"],
+        # Below-the-line Cash Outflows
+        "loan_repayments": pnl.get("loan_repayments", 0.0),
+        "drawings": pnl.get("drawings", 0.0),
+        "capital_inventory": pnl.get("capital_inventory", 0.0),
+        "total_cash_outflows": pnl.get("total_cash_outflows", 0.0),
+        # Detailed Tables matching August.xlsx
+        "capital_loans": investments_list,
+        "total_capital_loans": total_capital_loans,
+        "market_credit": market_credit_list,
+        "total_market_credit": total_market_credit,
+        "expenditures": expenditures_list,
+        "total_expenditures_outflow": total_expenditures_outflow,
+        "rso_distribution": rso_distribution_list,
+        "total_rso_sales_vol": total_rso_sales_vol,
+        "rso_salaries": rso_salaries_list,
+        "total_rso_payroll": total_rso_payroll,
+        "staff_salaries": staff_salaries_list,
+        "total_staff_payroll": total_staff_payroll,
+        "combined_payroll": combined_payroll,
+        "commissions_breakdown": commissions_list,
+        "total_commissions_inflow": total_commissions_inflow,
         "daily_graph": daily_graph
     }
 

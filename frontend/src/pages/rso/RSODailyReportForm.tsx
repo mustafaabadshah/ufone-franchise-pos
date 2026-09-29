@@ -589,11 +589,11 @@ export const RSODailyReportForm: React.FC = () => {
                 <p className="text-[10px] text-slate-500 uppercase">RSO Signature</p>
               </div>
               <div className="border-t border-slate-800 pt-1">
-                <p className="font-bold">{currentReport.sd_signature || "Tariq Naveed"}</p>
-                <p className="text-[10px] text-slate-500 uppercase">S&D Supervisor Signature</p>
+                <p className="font-bold">{currentReport.sd_signature || "Islam Badshah"}</p>
+                <p className="text-[10px] text-slate-500 uppercase">Franchise Owner / S&D Signature</p>
               </div>
               <div className="border-t border-slate-800 pt-1">
-                <p className="font-bold">{currentReport.finance_signature || "Rashid Qureshi"}</p>
+                <p className="font-bold">{currentReport.finance_signature || "Shahid Khan"}</p>
                 <p className="text-[10px] text-slate-500 uppercase">Finance Officer Signature</p>
               </div>
             </div>

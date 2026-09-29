@@ -9,13 +9,17 @@ import { MetricCard } from "../../components/common/MetricCard";
 import { Modal } from "../../components/common/Modal";
 import { StatusBadge } from "../../components/common/StatusBadge";
 import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
+import { useAuth } from "../../context/AuthContext";
 
 export const PurchasesList: React.FC = () => {
+  const { user } = useAuth();
+  const isViewer = user?.role?.toLowerCase() === "viewer";
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [search, setSearch] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("All");
@@ -62,9 +66,30 @@ export const PurchasesList: React.FC = () => {
     }
   };
 
+  const handleMonthChange = (monthKey: string) => {
+    setSelectedMonth(monthKey);
+    let from = "";
+    let to = "";
+    if (monthKey === "2026-08") {
+      from = "2026-08-01";
+      to = "2026-08-31";
+    } else if (monthKey === "2026-09") {
+      from = "2026-09-01";
+      to = "2026-09-30";
+    } else if (monthKey === "2026-10") {
+      from = "2026-10-01";
+      to = "2026-10-31";
+    } else if (monthKey === "2026-07") {
+      from = "2026-07-01";
+      to = "2026-07-31";
+    }
+    setDateFrom(from);
+    setDateTo(to);
+  };
+
   useEffect(() => {
     loadData();
-  }, [search, paymentStatus]);
+  }, [search, paymentStatus, dateFrom, dateTo]);
 
   // Real-time calculated total and due amount
   const qtyNum = Number(formData.quantity) || 0;
@@ -144,13 +169,15 @@ export const PurchasesList: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <ExportPrintButtons reportType="purchases" />
-          <button
-            onClick={() => setIsCreateOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Purchase</span>
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => setIsCreateOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Purchase</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -198,12 +225,30 @@ export const PurchasesList: React.FC = () => {
           />
         </div>
 
+        <div className="w-44">
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Select Month</label>
+          <select
+            value={selectedMonth}
+            onChange={(e) => handleMonthChange(e.target.value)}
+            className="w-full px-3 py-2 rounded-xl border border-indigo-200 text-xs font-semibold text-indigo-900 bg-indigo-50/50"
+          >
+            <option value="all">All Records</option>
+            <option value="2026-08">August 2026</option>
+            <option value="2026-09">September 2026</option>
+            <option value="2026-10">October 2026</option>
+            <option value="2026-07">July 2026</option>
+          </select>
+        </div>
+
         <div>
           <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">From Date</label>
           <input
             type="date"
             value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
+            onChange={(e) => {
+              setSelectedMonth("custom");
+              setDateFrom(e.target.value);
+            }}
             className="px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white"
           />
         </div>
@@ -213,7 +258,10 @@ export const PurchasesList: React.FC = () => {
           <input
             type="date"
             value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
+            onChange={(e) => {
+              setSelectedMonth("custom");
+              setDateTo(e.target.value);
+            }}
             className="px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white"
           />
         </div>
@@ -296,6 +344,31 @@ export const PurchasesList: React.FC = () => {
                 ))
               )}
             </tbody>
+            <tfoot className="bg-slate-100/90 border-t-2 border-slate-300 font-bold text-slate-900 text-xs">
+              <tr>
+                <td colSpan={3} className="py-3.5 px-6 text-right uppercase tracking-wider font-extrabold text-slate-800">
+                  Total Purchases ({purchases.length} Invoices):
+                </td>
+                <td className="py-3.5 px-6 font-mono font-black text-slate-800">
+                  {purchases.reduce((acc, p) => acc + (p.items?.reduce((q, i) => q + Number(i.quantity), 0) || 0), 0).toLocaleString()}
+                </td>
+                <td className="py-3.5 px-6 text-slate-500 font-normal">
+                  -
+                </td>
+                <td className="py-3.5 px-6 font-mono font-black text-slate-950 text-sm whitespace-nowrap">
+                  Rs. {purchases.reduce((acc, p) => acc + Number(p.total_amount || 0), 0).toLocaleString()}
+                </td>
+                <td className="py-3.5 px-6 font-mono font-black text-emerald-700 text-sm whitespace-nowrap">
+                  Rs. {purchases.reduce((acc, p) => acc + Number(p.paid_amount || 0), 0).toLocaleString()}
+                </td>
+                <td className="py-3.5 px-6 font-mono font-black text-rose-700 text-sm whitespace-nowrap">
+                  Rs. {purchases.reduce((acc, p) => acc + Number(p.due_amount || 0), 0).toLocaleString()}
+                </td>
+                <td colSpan={2} className="py-3.5 px-6 text-slate-500 font-normal">
+                  Vendor Payables & Stock
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>

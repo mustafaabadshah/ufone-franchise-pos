@@ -29,6 +29,24 @@ export const ProfitLoss: React.FC = () => {
     loadData();
   }, [dateFrom, dateTo]);
 
+  const [selectedMonth, setSelectedMonth] = useState("2026-08");
+
+  const handleMonthSelect = (mStr: string) => {
+    setSelectedMonth(mStr);
+    if (!mStr || mStr === "all") {
+      setPeriod("all");
+      setDateFrom("");
+      setDateTo("");
+      return;
+    }
+    const [year, month] = mStr.split("-").map(Number);
+    const firstDay = new Date(Date.UTC(year, month - 1, 1)).toISOString().split("T")[0];
+    const lastDay = new Date(Date.UTC(year, month, 0)).toISOString().split("T")[0];
+    setPeriod("custom");
+    setDateFrom(firstDay);
+    setDateTo(lastDay);
+  };
+
   const handlePeriodQuickSelect = (p: string) => {
     setPeriod(p);
     const today = new Date();
@@ -37,10 +55,7 @@ export const ProfitLoss: React.FC = () => {
       setDateFrom(dStr);
       setDateTo(dStr);
     } else if (p === "this_month") {
-      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split("T")[0];
-      const todayStr = today.toISOString().split("T")[0];
-      setDateFrom(firstDay);
-      setDateTo(todayStr);
+      handleMonthSelect("2026-08");
     } else if (p === "this_year") {
       const firstDay = new Date(today.getFullYear(), 0, 1).toISOString().split("T")[0];
       const todayStr = today.toISOString().split("T")[0];
@@ -49,6 +64,7 @@ export const ProfitLoss: React.FC = () => {
     } else if (p === "all") {
       setDateFrom("");
       setDateTo("");
+      setSelectedMonth("all");
     }
   };
 
@@ -68,10 +84,26 @@ export const ProfitLoss: React.FC = () => {
         </div>
       </div>
 
-      {/* Period Selector (no-print) */}
+      {/* Period & Month Selector (no-print) */}
       <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3 no-print">
+        {/* Month Selector Dropdown */}
         <div className="flex items-center gap-2">
-          {["today", "this_month", "this_year", "all"].map(p => (
+          <span className="text-xs font-bold text-indigo-900 uppercase tracking-wide">Select Month:</span>
+          <select
+            value={selectedMonth}
+            onChange={(e) => handleMonthSelect(e.target.value)}
+            className="px-3 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50/50 text-xs font-bold text-indigo-950 focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="2026-08">August 2026 (Live Closed Month)</option>
+            <option value="2026-09">September 2026</option>
+            <option value="2026-07">July 2026</option>
+            <option value="2026-06">June 2026</option>
+            <option value="all">All Records (Cumulative)</option>
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {["this_month", "this_year", "all"].map(p => (
             <button
               key={p}
               onClick={() => handlePeriodQuickSelect(p)}
@@ -90,14 +122,14 @@ export const ProfitLoss: React.FC = () => {
           <input
             type="date"
             value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
+            onChange={(e) => { setDateFrom(e.target.value); setSelectedMonth(""); }}
             className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white"
           />
           <span className="text-slate-400">to</span>
           <input
             type="date"
             value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
+            onChange={(e) => { setDateTo(e.target.value); setSelectedMonth(""); }}
             className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white"
           />
           <button
@@ -245,11 +277,11 @@ export const ProfitLoss: React.FC = () => {
             {/* Audit & Signatures */}
             <div className="pt-10 grid grid-cols-2 gap-10 text-center font-sans">
               <div className="border-t border-slate-800 pt-1">
-                <p className="font-bold">Rashid Qureshi</p>
+                <p className="font-bold">Shahid Khan</p>
                 <p className="text-[10px] text-slate-500 uppercase">Prepared by Finance Officer</p>
               </div>
               <div className="border-t border-slate-800 pt-1">
-                <p className="font-bold">Shahid Khan</p>
+                <p className="font-bold">Islam Badshah</p>
                 <p className="text-[10px] text-slate-500 uppercase">Approved by Franchise Owner</p>
               </div>
             </div>

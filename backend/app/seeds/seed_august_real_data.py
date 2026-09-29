@@ -86,12 +86,12 @@ def seed_august_real_data():
                 db.flush()
             roles_dict[r_name] = role
             
-        # Ensure the 4 Core Users
+        # Ensure the 4 Core Users: Shahid Khan (Admin - Full Access), Islam Badshah (Viewer - Franchise Owner view/print)
         users_info = [
             ("Shahid Khan", "shahidkhan@pos.com", "Admin", "+92 333 9123456"),
+            ("Islam Badshah", "islambadshah@pos.com", "Viewer", "+92 333 1122334"),
             ("Tariq Naveed", "manager@pos.com", "Manager", "+92 334 8877665"),
             ("Rashid Qureshi", "finance@pos.com", "Finance", "+92 332 5544332"),
-            ("Islam Badshah", "islambadshah@pos.com", "Viewer", "+92 333 1122334"),
         ]
         users_dict = {}
         for name, email, role_name, phone in users_info:
@@ -334,7 +334,7 @@ def seed_august_real_data():
         # 7. Real Personnel (Row 74-82 Office Staff + Row 63-71 RSO Field Agents of August.xlsx)
         print("Seeding Dargai Office personnel and RSO Officers...")
         staff_data = [
-            ("Shahid Khan", "shahidkhan@pos.com", "+92 333 9123456", "Franchise Incharge", Decimal("35000.00")),
+            ("Shahid Khan", "shahidkhan@pos.com", "+92 333 9123456", "Finance Officer", Decimal("35000.00")),
             ("Shahab Badshah", "shahab@pos.com", "+92 333 9002001", "Office Staff", Decimal("27000.00")),
             ("Shakil Ahmad", "shakil@pos.com", "+92 333 9002002", "Operations Staff", Decimal("34000.00")),
             ("Israr Badshah", "israr@pos.com", "+92 333 9002003", "Accounts Staff", Decimal("20000.00")),
@@ -629,8 +629,8 @@ def seed_august_real_data():
             easyload_retailer_transfer=Decimal("3578960.00"),
             easyload_closing=Decimal("296941.00"),
             rso_signature="Muhammad Riaz",
-            sd_signature="Shahid Khan",
-            finance_signature="Rashid Qureshi"
+            sd_signature="Islam Badshah",
+            finance_signature="Shahid Khan"
         )
         db.add(report)
         db.flush()
@@ -658,14 +658,6 @@ def seed_august_real_data():
 
         # 16. Certified Double-Entry General Ledger Balance Sync
         print("Synchronizing general ledger accounts with August.xlsx balance...")
-        # Update ledger account balances to reflect exact sheet reality
-        # Cash on Hand (1010): 0
-        # Bank Account (1020): 204,620
-        # Inventory (1030): 1,232,069 (1,226,069 EVC + 6,000 BVS)
-        # Accounts Receivable (1040): 719,385 (Market Credit)
-        # Total Liquid/Working Assets = 204,620 + 1,232,069 + 719,385 = 2,156,074
-        # Islam Badshah Equity (3010): 5,220,410
-        # Loans Payable (2020): 1,428,930 (Israr 800k + Haris 191.5k + Shahab 156k + Loose SIMs 221.25k + Cash 60.18k)
         ledger_updates = [
             ("1010", Decimal("0.00")),
             ("1020", Decimal("204620.00")),
@@ -685,6 +677,31 @@ def seed_august_real_data():
             acc = db.query(LedgerAccount).filter(LedgerAccount.code == acc_code).first()
             if acc:
                 acc.balance = acc_bal
+        db.commit()
+
+        # 17. Seed Forensic Security Audit Logs
+        print("Seeding initial security & operational audit logs...")
+        audit_samples = [
+            ("Islam Badshah", "Franchise Owner", "Create", "Capital & Investment", "INV-001", None, "Islam Badshah Sb Total Investment: Rs. 5,220,410.00 registered as equity capital", datetime(2026, 8, 1, 9, 30)),
+            ("Shahid Khan", "Finance Officer", "Create", "Purchase", "UF-PUR-AUG-001", None, "Paired SIMs Order Ufone HQ (1,500 pieces @ 115) - Total: Rs. 172,500.00", datetime(2026, 8, 10, 11, 15)),
+            ("Shahid Khan", "Finance Officer", "Create", "Purchase", "UF-PUR-AUG-002", None, "Loose SIMs Order Ufone HQ (750 pieces @ 65) - Total: Rs. 48,750.00", datetime(2026, 8, 14, 14, 20)),
+            ("Shahid Khan", "Finance Officer", "Settlement", "Financing / Loan", "LOAN-HARIS", "Outstanding: Rs. 500,000", "Settled working capital loan return to Haris Badshah: Rs. 500,000.00", datetime(2026, 8, 26, 16, 45)),
+            ("Tariq Naveed", "Operations Manager", "Update", "RSO Daily Report", "RSO-DARG-AUG31-1", "Status: Draft", "Status: Approved by Operations Manager Tariq Naveed (EVC Sales: 3.4M)", datetime(2026, 8, 31, 18, 10)),
+            ("Shahid Khan", "Finance Officer", "Payment", "Salaries & Payroll", "PAYROLL-AUG-26", "Status: Pending", "Disbursed August 2026 Office Staff & RSO payroll (Rs. 252,324.00 total)", datetime(2026, 8, 31, 19, 0)),
+            ("Islam Badshah", "Franchise Owner", "Update", "Franchise Settings", "COMPANY_INFO", "Branch: Peshawar", "Branch set to: Dargai Office (Main Bazar, Dargai, Malakand, KP)", datetime(2026, 8, 31, 20, 30)),
+        ]
+        for u_name, u_role, act, ent, ent_id, old_v, new_v, t_stamp in audit_samples:
+            alog = AuditLog(
+                user_name=f"{u_name} ({u_role})",
+                action=act,
+                entity=ent,
+                entity_id=ent_id,
+                old_value=old_v,
+                new_value=new_v,
+                ip_address="192.168.1.10",
+                timestamp=t_stamp
+            )
+            db.add(alog)
         db.commit()
 
         print("==================================================================")

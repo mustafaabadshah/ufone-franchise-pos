@@ -4,8 +4,11 @@ import { Plus, Search, Store, Phone, MapPin, DollarSign, ArrowUpRight, ArrowDown
 import MetricCard from '../../components/common/MetricCard';
 import Modal from '../../components/common/Modal';
 import ExportPrintButtons from '../../components/common/ExportPrintButtons';
+import { useAuth } from '../../context/AuthContext';
 
 export default function RetailersList() {
+  const { user } = useAuth();
+  const isViewer = user?.role?.toLowerCase() === 'viewer';
   const [retailers, setRetailers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -93,13 +96,15 @@ export default function RetailersList() {
         </div>
         <div className="flex items-center gap-3">
           <ExportPrintButtons title="Retailers Directory" targetId="retailers-table" />
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Add Retailer
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Add Retailer
+            </button>
+          )}
         </div>
       </div>
 
@@ -207,22 +212,42 @@ export default function RetailersList() {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <button
-                        onClick={() => {
-                          setSelectedRetailer(r);
-                          setCollectionForm(prev => ({ ...prev, retailer_id: r.id }));
-                          setShowCollectionModal(true);
-                        }}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1.5 rounded-md transition-colors"
-                      >
-                        <DollarSign className="w-3 h-3" />
-                        Collect Cash
-                      </button>
+                      {!isViewer ? (
+                        <button
+                          onClick={() => {
+                            setSelectedRetailer(r);
+                            setCollectionForm(prev => ({ ...prev, retailer_id: r.id }));
+                            setShowCollectionModal(true);
+                          }}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1.5 rounded-md transition-colors"
+                        >
+                          <DollarSign className="w-3 h-3" />
+                          Collect Cash
+                        </button>
+                      ) : (
+                        <span className="text-slate-400 text-xs font-medium">Read-Only</span>
+                      )}
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
+            <tfoot className="bg-slate-100/90 border-t-2 border-slate-300 font-bold text-slate-900 text-xs">
+              <tr>
+                <td colSpan={4} className="py-3.5 px-4 text-right uppercase tracking-wider font-extrabold text-slate-800">
+                  Total Market Debtors ({retailers.length} Retailers):
+                </td>
+                <td className="py-3.5 px-4 text-right font-mono font-black text-slate-900 text-sm whitespace-nowrap">
+                  Rs. {retailers.reduce((acc, r) => acc + Number(r.credit_limit || 0), 0).toLocaleString('en-PK')}
+                </td>
+                <td className="py-3.5 px-4 text-right font-mono font-black text-amber-800 text-sm whitespace-nowrap">
+                  Rs. {retailers.reduce((acc, r) => acc + Number(r.current_balance || 0), 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                </td>
+                <td className="py-3.5 px-4 text-center text-slate-500 font-normal">
+                  -
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>

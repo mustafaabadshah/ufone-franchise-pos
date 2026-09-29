@@ -7,14 +7,18 @@ import { Expense, Staff } from "../../types";
 import { MetricCard } from "../../components/common/MetricCard";
 import { Modal } from "../../components/common/Modal";
 import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
+import { useAuth } from "../../context/AuthContext";
 
 export const ExpensesList: React.FC = () => {
+  const { user } = useAuth();
+  const isViewer = user?.role?.toLowerCase() === "viewer";
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedMonth, setSelectedMonth] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -27,7 +31,7 @@ export const ExpensesList: React.FC = () => {
     amount: "",
     paid_date: new Date().toISOString().split("T")[0],
     payment_method: "Cash",
-    paid_by_name: "",
+    paid_by_name: "Shahid Khan",
     reference: "",
     remarks: ""
   });
@@ -57,9 +61,30 @@ export const ExpensesList: React.FC = () => {
     }
   };
 
+  const handleMonthChange = (monthKey: string) => {
+    setSelectedMonth(monthKey);
+    let from = "";
+    let to = "";
+    if (monthKey === "2026-08") {
+      from = "2026-08-01";
+      to = "2026-08-31";
+    } else if (monthKey === "2026-09") {
+      from = "2026-09-01";
+      to = "2026-09-30";
+    } else if (monthKey === "2026-10") {
+      from = "2026-10-01";
+      to = "2026-10-31";
+    } else if (monthKey === "2026-07") {
+      from = "2026-07-01";
+      to = "2026-07-31";
+    }
+    setDateFrom(from);
+    setDateTo(to);
+  };
+
   useEffect(() => {
     loadData();
-  }, [search, selectedCategory]);
+  }, [search, selectedCategory, dateFrom, dateTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +100,7 @@ export const ExpensesList: React.FC = () => {
         amount: "",
         paid_date: new Date().toISOString().split("T")[0],
         payment_method: "Cash",
-        paid_by_name: "",
+        paid_by_name: "Shahid Khan",
         reference: "",
         remarks: ""
       });
@@ -98,13 +123,15 @@ export const ExpensesList: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <ExportPrintButtons reportType="expenses" />
-          <button
-            onClick={() => setIsCreateOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Expense</span>
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => setIsCreateOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Expense</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -164,12 +191,30 @@ export const ExpensesList: React.FC = () => {
           </select>
         </div>
 
+        <div className="w-44">
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Select Month</label>
+          <select
+            value={selectedMonth}
+            onChange={(e) => handleMonthChange(e.target.value)}
+            className="w-full px-3 py-2 rounded-xl border border-indigo-200 text-xs font-semibold text-indigo-900 bg-indigo-50/50"
+          >
+            <option value="all">All Records</option>
+            <option value="2026-08">August 2026</option>
+            <option value="2026-09">September 2026</option>
+            <option value="2026-10">October 2026</option>
+            <option value="2026-07">July 2026</option>
+          </select>
+        </div>
+
         <div>
           <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">From Date</label>
           <input
             type="date"
             value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
+            onChange={(e) => {
+              setSelectedMonth("custom");
+              setDateFrom(e.target.value);
+            }}
             className="px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white"
           />
         </div>
@@ -179,7 +224,10 @@ export const ExpensesList: React.FC = () => {
           <input
             type="date"
             value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
+            onChange={(e) => {
+              setSelectedMonth("custom");
+              setDateTo(e.target.value);
+            }}
             className="px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white"
           />
         </div>
@@ -236,6 +284,19 @@ export const ExpensesList: React.FC = () => {
                 ))
               )}
             </tbody>
+            <tfoot className="bg-slate-100/90 border-t-2 border-slate-300 font-bold text-slate-900 text-xs">
+              <tr>
+                <td colSpan={3} className="py-3.5 px-6 text-right uppercase tracking-wider font-extrabold text-slate-800">
+                  Total Expenses ({expenses.length} Records):
+                </td>
+                <td className="py-3.5 px-6 font-mono font-black text-rose-700 text-sm whitespace-nowrap">
+                  Rs. {expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                </td>
+                <td colSpan={3} className="py-3.5 px-6 text-slate-500 font-normal">
+                  All active expenses in current period
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
