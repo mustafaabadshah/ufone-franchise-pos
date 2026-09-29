@@ -465,7 +465,8 @@ def calculate_profit_and_loss(
     hq_commissions = sum((c.amount for c in commissions_q.all()), Decimal("0.00"))
     total_commission = sales_commission + hq_commissions
 
-    gross_profit = net_revenue - net_cogs + total_commission
+    gross_sales_margin = net_revenue - net_cogs
+    gross_profit = gross_sales_margin + total_commission
 
     # Operating expenses exclude non-operating categories (Drawings, Loan Repayment, Salaries, Inventory)
     non_operating_cats = ["Drawings", "Loan Repayment", "Salaries", "Inventory"]
@@ -477,10 +478,19 @@ def calculate_profit_and_loss(
     capital_inventory = sum((e.amount for e in expenses if e.category == "Inventory"), Decimal("0.00"))
 
     total_salaries = sum((s.salary_given for s in salaries), Decimal("0.00"))
+    total_operating_deductions = operating_expenses + total_salaries
 
-    # Net Operating Profit
-    net_profit = gross_profit - operating_expenses - total_salaries
+    # Net Operating Profit (Full Commercial Model with EVC margin)
+    net_profit = gross_profit - total_operating_deductions
     is_loss = net_profit < Decimal("0.00")
+
+    # Agency / Direct Commission Model (Commissions minus Operating Deductions)
+    agency_net_profit = total_commission - total_operating_deductions
+
+    # Commissions breakdown
+    comm_records = commissions_q.all()
+    topup_comm = sum((c.amount for c in comm_records if c.commission_type == "U Top Up Commission"), Decimal("0.00"))
+    promo_comm = sum((c.amount for c in comm_records if c.commission_type != "U Top Up Commission"), Decimal("0.00"))
 
     return {
         "gross_revenue": float(gross_revenue),
@@ -488,16 +498,21 @@ def calculate_profit_and_loss(
         "sales_returns": float(sales_returns_amount),
         "net_revenue": float(net_revenue),
         "cogs": float(net_cogs),
+        "gross_sales_margin": float(gross_sales_margin),
         "commission_income": float(total_commission),
+        "promo_commissions": float(promo_comm),
+        "topup_commissions": float(topup_comm),
         "gross_profit": float(gross_profit),
         "expenses": float(operating_expenses),
         "salaries": float(total_salaries),
         "operating_expenses": float(operating_expenses),
+        "total_operating_deductions": float(total_operating_deductions),
         "net_profit": float(net_profit),
         "is_loss": is_loss,
         "loss_amount": float(abs(net_profit)) if is_loss else 0.0,
+        "agency_net_profit": float(agency_net_profit),
         "drawings": float(drawings),
         "loan_repayments": float(loan_repayments),
         "capital_inventory": float(capital_inventory),
-        "total_cash_outflows": float(operating_expenses + total_salaries + drawings + loan_repayments + capital_inventory)
+        "total_cash_outflows": float(total_operating_deductions + drawings + loan_repayments + capital_inventory)
     }
