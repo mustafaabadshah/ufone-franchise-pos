@@ -14,7 +14,7 @@ router = APIRouter(prefix="/expenses", tags=["Expenses"])
 EXPENSE_CATEGORIES = [
     "Rent", "Electricity", "Internet", "Communication", "Transport", "Fuel",
     "Maintenance", "Office", "Tea & Refreshment", "Commissions", "Tax",
-    "Drawings", "Loan Repayment", "Inventory", "Salary-related", "Other"
+    "Drawings", "Loan Repayment", "Inventory", "Salaries", "Salary-related", "Other"
 ]
 
 @router.get("/categories")

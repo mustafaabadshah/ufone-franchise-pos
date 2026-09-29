@@ -502,11 +502,14 @@ def seed_august_real_data():
             db.add(inv)
         db.commit()
 
-        # 11. Real Expenditures & Cash Outflows (Rows 38-59 of August.xlsx totaling Rs. 1,653,620)
-        # Note: Staff payroll (144,300) and RSO salaries (108,024) are recorded in the dedicated Salaries & RSOSalaries tables!
-        # Haris Badshah Loan (500k) is Loan Repayment, Islam Badshah (103.9k) is Drawings, and SIM orders (221.25k) are Inventory purchases.
-        print("Seeding August operating expenditures & below-the-line outflows (Rs. 1,653,620 total)...")
+        # 11. Real Expenditures & Cash Outflows (Rows 38-59 of August.xlsx totaling Rs. 1,653,620 across 17 items)
+        # Note: Staff payroll (144,300) and RSO salaries (108,024) are recorded here with category 'Salaries' (as Item 1 Row 41 of August.xlsx)
+        # as well as in the dedicated individual staff payroll tables.
+        # In the accounting engine, 'Salaries' is non-operating for expenses to avoid double-counting.
+        print("Seeding August operating expenditures & below-the-line outflows (Rs. 1,653,620 total across 17 records)...")
         expenses_data = [
+            ("Office Staff Salaries (Shahid, Shahab, Shakil, Israr, Arshad, Watchman)", "Salaries", Decimal("144300.00"), date(2026, 8, 31), "Cash", "Monthly salary for 6 office employees per August.xlsx (Item 1 Row 41)"),
+            ("RSO Field Salaries & Allowances (Riaz, Khizer, Maaz, Sabir)", "Salaries", Decimal("108024.00"), date(2026, 8, 31), "Cash", "Monthly basic, fuel and commission for 4 field RSOs per August.xlsx (Item 1 Row 41)"),
             ("Pay of FCA (Field Customer Agents & Kiosks)", "Commissions", Decimal("339700.00"), date(2026, 8, 31), "Bank Transfer", "FCA commissions (301,300) and daily promo incentives (38,400)"),
             ("Office Communication & Connectivity", "Communication", Decimal("15460.00"), date(2026, 8, 25), "Cash", "PTCL bill (6,110), staff official SIM loads and packages (9,350)"),
             ("Office Rent (Dargai Office August Rent)", "Rent", Decimal("25300.00"), date(2026, 8, 5), "Cash", "August 2026 franchise building rent"),
