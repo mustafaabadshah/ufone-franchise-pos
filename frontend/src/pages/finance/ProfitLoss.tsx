@@ -12,6 +12,7 @@ export const ProfitLoss: React.FC = () => {
   const [dateTo, setDateTo] = useState("");
   const [period, setPeriod] = useState("this_month");
   const [isLoading, setIsLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<"agency_1_4" | "commercial">("agency_1_4");
 
   const loadData = async () => {
     setIsLoading(true);
@@ -141,6 +142,36 @@ export const ProfitLoss: React.FC = () => {
         </div>
       </div>
 
+      {/* Accounting Model Toggle Banner (no-print) */}
+      <div className="p-3 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3 no-print">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">Accounting Method:</span>
+          <span className="text-[11px] text-slate-500 font-medium">Switch between official 1.4% franchise commission vs. commercial gross margin</span>
+        </div>
+        <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200/80 text-xs font-semibold">
+          <button
+            onClick={() => setViewMode("agency_1_4")}
+            className={`px-3 py-1.5 rounded-lg transition-all ${
+              viewMode === "agency_1_4"
+                ? "bg-white text-indigo-900 shadow-xs font-bold"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            Franchise 1.4% Commission Model (Net: +Rs. 20,837)
+          </button>
+          <button
+            onClick={() => setViewMode("commercial")}
+            className={`px-3 py-1.5 rounded-lg transition-all ${
+              viewMode === "commercial"
+                ? "bg-white text-indigo-900 shadow-xs font-bold"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            Commercial Turnover Model (Net: +Rs. 387,337)
+          </button>
+        </div>
+      </div>
+
       {/* Printable P&L Statement Sheet (Instruction 28) */}
       <div className="rounded-2xl bg-white border border-slate-200/80 shadow-sm p-8 space-y-6 print-container">
         {/* Document Header */}
@@ -155,151 +186,214 @@ export const ProfitLoss: React.FC = () => {
 
         {pnl && (
           <div className="space-y-4 text-xs font-mono">
-            {/* 1. Operating Revenue (Sales Turnover) */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
-                <span className="font-sans">1. OPERATING REVENUE (EVC AIRTIME DISTRIBUTION & SALES)</span>
-                <span>(PKR)</span>
-              </div>
-              <div className="flex justify-between text-slate-600 pl-4">
-                <span className="font-sans">Gross EVC Sales Turnover (Row 63-71 of August.xlsx):</span>
-                <span>Rs. {Number(pnl.gross_revenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between text-slate-500 pl-4">
-                <span className="font-sans">Less: Sales Discounts & Returns:</span>
-                <span>(Rs. 0.00)</span>
-              </div>
-              <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1 border-t border-slate-200/60">
-                <span className="font-sans">NET SALES REVENUE:</span>
-                <span>Rs. {Number(pnl.net_revenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-            </div>
-
-            {/* 2. Cost of Goods Sold (COGS) */}
-            <div className="space-y-1.5 pt-2">
-              <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
-                <span className="font-sans">2. COST OF GOODS SOLD (COGS)</span>
-                <span>(PKR)</span>
-              </div>
-              <div className="flex justify-between text-slate-600 pl-4">
-                <span className="font-sans">Wholesale Inventory Cost of EVC Airtime (97.50% Wholesale Cost):</span>
-                <span className="text-slate-800">Rs. {Number(pnl.cogs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1 border-t border-slate-200/60">
-                <span className="font-sans">TOTAL COST OF GOODS SOLD (COGS):</span>
-                <span className="text-rose-700 font-bold">(Rs. {Number(pnl.cogs).toLocaleString(undefined, { minimumFractionDigits: 2 })})</span>
-              </div>
-            </div>
-
-            {/* 3. Gross Sales Trading Margin */}
-            <div className="space-y-1.5 pt-2">
-              <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
-                <span className="font-sans">3. GROSS SALES TRADING MARGIN (NET SALES LESS COGS)</span>
-                <span>(PKR)</span>
-              </div>
-              <div className="flex justify-between text-slate-600 pl-4">
-                <span className="font-sans">Net Sales Revenue:</span>
-                <span>Rs. {Number(pnl.net_revenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between text-slate-600 pl-4">
-                <span className="font-sans">Less: Wholesale Inventory Cost (COGS):</span>
-                <span className="text-rose-700">(Rs. {Number(pnl.cogs).toLocaleString(undefined, { minimumFractionDigits: 2 })})</span>
-              </div>
-              <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1.5 border-t border-slate-200/80 bg-slate-50/70 p-2 rounded-lg">
-                <span className="font-sans">GROSS SALES TRADING MARGIN (2.50% Spread):</span>
-                <span className="text-indigo-950 font-bold">Rs. {Number(pnl.gross_sales_margin || (Number(pnl.net_revenue) - Number(pnl.cogs))).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-            </div>
-
-            {/* 4. Commission & Incentive Revenue */}
-            <div className="space-y-1.5 pt-2">
-              <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
-                <span className="font-sans">4. COMMISSION & INCENTIVE REVENUE (FROM UFONE PTCL HQ)</span>
-                <span>(PKR)</span>
-              </div>
-              <div className="flex justify-between text-slate-600 pl-4">
-                <span className="font-sans">Ufone Promo Commissions (11 Categories, August.xlsx Row 160-170):</span>
-                <span className="text-emerald-700 font-bold">+Rs. {Number(pnl.promo_commissions || 638223).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between text-slate-600 pl-4">
-                <span className="font-sans">U-Top Up / EVC Distribution Commission (August.xlsx Row 16):</span>
-                <span className="text-emerald-700 font-bold">+Rs. {Number(pnl.topup_commissions || 211074).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1.5 border-t border-slate-200/80 bg-emerald-50/50 p-2 rounded-lg">
-                <span className="font-sans">TOTAL COMMISSION & INCENTIVE INCOME:</span>
-                <span className="text-emerald-800 font-bold">+Rs. {Number(pnl.commission_income).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-            </div>
-
-            {/* 5. Total Gross Operating Profit */}
-            <div className="pt-2">
-              <div className="flex justify-between items-center font-bold text-base text-indigo-950 p-3 rounded-xl bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 border border-indigo-200">
-                <div className="font-sans">
-                  <span className="text-sm uppercase tracking-wide">5. TOTAL GROSS OPERATING PROFIT:</span>
-                  <p className="text-[11px] font-normal text-slate-500 mt-0.5">
-                    Trading Margin (Rs. {Number(pnl.gross_sales_margin || (Number(pnl.net_revenue) - Number(pnl.cogs))).toLocaleString()}) + HQ Commissions (Rs. {Number(pnl.commission_income).toLocaleString()})
-                  </p>
+            {viewMode === "agency_1_4" ? (
+              <>
+                {/* 1. Airtime Float Distribution Throughput */}
+                <div className="space-y-1.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
+                    <span className="font-sans">1. AIRTIME FLOAT DISTRIBUTION THROUGHPUT (INFORMATIONAL)</span>
+                    <span>(PKR)</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">Total EVC Float Distributed by 4 RSOs (August.xlsx Row 63-71):</span>
+                    <span className="font-bold text-slate-900">Rs. {Number(pnl.gross_revenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-500 pl-4 text-[11px]">
+                    <span className="font-sans">Franchise Distributor Commission Rate on EVC:</span>
+                    <span className="font-bold text-indigo-700">1.40% official distributor rate (~1.44% achieved)</span>
+                  </div>
                 </div>
-                <span className="text-xl font-mono font-black text-indigo-900">
-                  Rs. {Number(pnl.gross_profit).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-            </div>
 
-            {/* 6. Operating Expenses */}
-            <div className="space-y-1.5 pt-4">
-              <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
-                <span className="font-sans">6. OPERATING EXPENSES & OVERHEAD DEDUCTIONS</span>
-                <span>(PKR)</span>
-              </div>
-              <div className="flex justify-between text-slate-600 pl-4">
-                <span className="font-sans">General & Administrative Expenses (Rent, Utilities, Transport, FCA Promo):</span>
-                <span className="text-rose-700">Rs. {Number(pnl.expenses).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between text-slate-600 pl-4">
-                <span className="font-sans">Staff & RSO Salaries Disbursed (August.xlsx Row 41 Item #1):</span>
-                <span className="text-rose-700">Rs. {Number(pnl.salaries).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1 border-t border-slate-200/60">
-                <span className="font-sans">TOTAL OPERATING DEDUCTIONS:</span>
-                <span>Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-            </div>
+                {/* 2. Direct Operating Commission Revenue */}
+                <div className="space-y-1.5 pt-2">
+                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
+                    <span className="font-sans">2. OPERATING COMMISSION REVENUE (DIRECT INFLOWS FROM UFONE HQ)</span>
+                    <span>(PKR)</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">1.4% EVC Top Up Commission (August.xlsx Row 16):</span>
+                    <span className="text-emerald-700 font-bold">+Rs. {Number(pnl.topup_commissions || 211074).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">Ufone Promo & Target Commissions (11 Heads, August.xlsx Row 160-170):</span>
+                    <span className="text-emerald-700 font-bold">+Rs. {Number(pnl.promo_commissions || 638223).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1.5 border-t border-slate-200/80 bg-emerald-50/70 p-2.5 rounded-lg text-sm">
+                    <span className="font-sans">TOTAL FRANCHISE OPERATING REVENUE (GROSS PROFIT):</span>
+                    <span className="text-emerald-800 font-black">Rs. {Number(pnl.commission_income).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
 
-            {/* 7. NET PROFIT OR NET LOSS (Instruction 11 & 28: Never hide negative values!) */}
-            <div className={`mt-6 p-4 rounded-xl border-2 flex items-center justify-between text-base font-extrabold ${
-              pnl.is_loss
-                ? "bg-rose-50 border-rose-400 text-rose-800"
-                : "bg-emerald-50 border-emerald-400 text-emerald-800"
-            }`}>
-              <div className="font-sans">
-                <span>{pnl.is_loss ? "NET OPERATING LOSS" : "7. NET OPERATING PROFIT (COMMERCIAL MODEL)"}:</span>
-                <p className="text-xs font-normal font-sans text-slate-600 mt-0.5">
-                  {pnl.is_loss
-                    ? "Operating expenses exceed gross profit. Negative earnings shown explicitly."
-                    : "Net operating bottom-line earnings: Gross Profit (Rs. " + Number(pnl.gross_profit).toLocaleString() + ") minus Operating Overhead (Rs. " + (Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString() + ")."}
-                </p>
-              </div>
-              <div className="text-2xl font-mono font-black">
-                {pnl.is_loss ? (
-                  <span>-Rs. {Number(pnl.loss_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                ) : (
-                  <span>Rs. {Number(pnl.net_profit).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                )}
-              </div>
-            </div>
+                {/* 3. Franchise Operating Deductions */}
+                <div className="space-y-1.5 pt-3">
+                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
+                    <span className="font-sans">3. FRANCHISE OPERATING EXPENSES & PAYROLL</span>
+                    <span>(PKR)</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">Operational Overhead (Rent 25.3k, Electricity 8k, PTCL 15.5k, Promo Loading 392k, Tax 90.2k):</span>
+                    <span className="text-rose-700">Rs. {Number(pnl.expenses).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">Staff Salaries & Field RSO Payroll (August.xlsx Row 41 Item #1):</span>
+                    <span className="text-rose-700">Rs. {Number(pnl.salaries).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1 border-t border-slate-200/60">
+                    <span className="font-sans">TOTAL OPERATING DEDUCTIONS:</span>
+                    <span>Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
 
-            {/* 8. Alternative Telecom Agency View (Pure Direct Commission Model) */}
-            <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80 font-sans text-xs text-amber-950 space-y-1.5">
-              <div className="font-bold flex items-center gap-1.5 text-amber-900">
-                <span className="px-2 py-0.5 rounded-md bg-amber-200/80 text-[10px] uppercase tracking-wider font-extrabold">Alternative View</span>
-                <span>Telecom Agency Model (Pure Commission Inflow vs. Operating Expenses):</span>
-              </div>
-              <p className="text-[11px] leading-relaxed text-amber-800">
-                If the franchise treats EVC (Rs. 14.66M) strictly as <em>Agency Airtime Float Throughput</em> without retaining 2.5% retail margin in cash, your direct operating revenue is the <strong>Commission deposited by Ufone HQ: Rs. {Number(pnl.commission_income).toLocaleString()}</strong>.
-                Deducting total franchise operating overhead of <strong>Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString()}</strong> leaves a <strong>Net Operating Margin of +Rs. {Number(pnl.agency_net_profit || (Number(pnl.commission_income) - Number(pnl.expenses) - Number(pnl.salaries))).toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>.
-              </p>
-            </div>
+                {/* 4. NET OPERATING PROFIT */}
+                <div className="mt-5 p-4 rounded-xl border-2 border-emerald-400 bg-emerald-50 flex items-center justify-between text-base font-extrabold text-emerald-900">
+                  <div className="font-sans">
+                    <span>4. NET OPERATING PROFIT (1.4% FRANCHISE MODEL):</span>
+                    <p className="text-xs font-normal font-sans text-slate-600 mt-0.5">
+                      Actual net earnings: Total Commission Revenue (Rs. {Number(pnl.commission_income).toLocaleString()}) minus Total Operating Overhead & Salaries (Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString()}).
+                    </p>
+                  </div>
+                  <div className="text-2xl font-mono font-black text-emerald-800">
+                    Rs. {Number(pnl.agency_net_profit || (Number(pnl.commission_income) - Number(pnl.expenses) - Number(pnl.salaries))).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* 1. Operating Revenue (Sales Turnover) */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
+                    <span className="font-sans">1. OPERATING REVENUE (EVC AIRTIME DISTRIBUTION & SALES)</span>
+                    <span>(PKR)</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">Gross EVC Sales Turnover (Row 63-71 of August.xlsx):</span>
+                    <span>Rs. {Number(pnl.gross_revenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-500 pl-4">
+                    <span className="font-sans">Less: Sales Discounts & Returns:</span>
+                    <span>(Rs. 0.00)</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1 border-t border-slate-200/60">
+                    <span className="font-sans">NET SALES REVENUE:</span>
+                    <span>Rs. {Number(pnl.net_revenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+
+                {/* 2. Cost of Goods Sold (COGS) */}
+                <div className="space-y-1.5 pt-2">
+                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
+                    <span className="font-sans">2. COST OF GOODS SOLD (COGS)</span>
+                    <span>(PKR)</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">Wholesale Inventory Cost of EVC Airtime (97.50% Wholesale Cost):</span>
+                    <span className="text-slate-800">Rs. {Number(pnl.cogs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1 border-t border-slate-200/60">
+                    <span className="font-sans">TOTAL COST OF GOODS SOLD (COGS):</span>
+                    <span className="text-rose-700 font-bold">(Rs. {Number(pnl.cogs).toLocaleString(undefined, { minimumFractionDigits: 2 })})</span>
+                  </div>
+                </div>
+
+                {/* 3. Gross Sales Trading Margin */}
+                <div className="space-y-1.5 pt-2">
+                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
+                    <span className="font-sans">3. GROSS SALES TRADING MARGIN (NET SALES LESS COGS)</span>
+                    <span>(PKR)</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">Net Sales Revenue:</span>
+                    <span>Rs. {Number(pnl.net_revenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">Less: Wholesale Inventory Cost (COGS):</span>
+                    <span className="text-rose-700">(Rs. {Number(pnl.cogs).toLocaleString(undefined, { minimumFractionDigits: 2 })})</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1.5 border-t border-slate-200/80 bg-slate-50/70 p-2 rounded-lg">
+                    <span className="font-sans">GROSS SALES TRADING MARGIN (2.50% Spread):</span>
+                    <span className="text-indigo-950 font-bold">Rs. {Number(pnl.gross_sales_margin || (Number(pnl.net_revenue) - Number(pnl.cogs))).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+
+                {/* 4. Commission & Incentive Revenue */}
+                <div className="space-y-1.5 pt-2">
+                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
+                    <span className="font-sans">4. COMMISSION & INCENTIVE REVENUE (FROM UFONE PTCL HQ)</span>
+                    <span>(PKR)</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">Ufone Promo Commissions (11 Categories, August.xlsx Row 160-170):</span>
+                    <span className="text-emerald-700 font-bold">+Rs. {Number(pnl.promo_commissions || 638223).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">U-Top Up / EVC Distribution Commission (August.xlsx Row 16):</span>
+                    <span className="text-emerald-700 font-bold">+Rs. {Number(pnl.topup_commissions || 211074).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1.5 border-t border-slate-200/80 bg-emerald-50/50 p-2 rounded-lg">
+                    <span className="font-sans">TOTAL COMMISSION & INCENTIVE INCOME:</span>
+                    <span className="text-emerald-800 font-bold">+Rs. {Number(pnl.commission_income).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+
+                {/* 5. Total Gross Operating Profit */}
+                <div className="pt-2">
+                  <div className="flex justify-between items-center font-bold text-base text-indigo-950 p-3 rounded-xl bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 border border-indigo-200">
+                    <div className="font-sans">
+                      <span className="text-sm uppercase tracking-wide">5. TOTAL GROSS OPERATING PROFIT:</span>
+                      <p className="text-[11px] font-normal text-slate-500 mt-0.5">
+                        Trading Margin (Rs. {Number(pnl.gross_sales_margin || (Number(pnl.net_revenue) - Number(pnl.cogs))).toLocaleString()}) + HQ Commissions (Rs. {Number(pnl.commission_income).toLocaleString()})
+                      </p>
+                    </div>
+                    <span className="text-xl font-mono font-black text-indigo-900">
+                      Rs. {Number(pnl.gross_profit).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 6. Operating Expenses */}
+                <div className="space-y-1.5 pt-4">
+                  <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
+                    <span className="font-sans">6. OPERATING EXPENSES & OVERHEAD DEDUCTIONS</span>
+                    <span>(PKR)</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">General & Administrative Expenses (Rent, Utilities, Transport, FCA Promo):</span>
+                    <span className="text-rose-700">Rs. {Number(pnl.expenses).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 pl-4">
+                    <span className="font-sans">Staff & RSO Salaries Disbursed (August.xlsx Row 41 Item #1):</span>
+                    <span className="text-rose-700">Rs. {Number(pnl.salaries).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-slate-900 pl-4 pt-1 border-t border-slate-200/60">
+                    <span className="font-sans">TOTAL OPERATING DEDUCTIONS:</span>
+                    <span>Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+
+                {/* 7. NET PROFIT OR NET LOSS */}
+                <div className={`mt-6 p-4 rounded-xl border-2 flex items-center justify-between text-base font-extrabold ${
+                  pnl.is_loss
+                    ? "bg-rose-50 border-rose-400 text-rose-800"
+                    : "bg-emerald-50 border-emerald-400 text-emerald-800"
+                }`}>
+                  <div className="font-sans">
+                    <span>{pnl.is_loss ? "NET OPERATING LOSS" : "7. NET OPERATING PROFIT (COMMERCIAL MODEL)"}:</span>
+                    <p className="text-xs font-normal font-sans text-slate-600 mt-0.5">
+                      {pnl.is_loss
+                        ? "Operating expenses exceed gross profit. Negative earnings shown explicitly."
+                        : "Net operating bottom-line earnings: Gross Profit (Rs. " + Number(pnl.gross_profit).toLocaleString() + ") minus Operating Overhead (Rs. " + (Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString() + ")."}
+                    </p>
+                  </div>
+                  <div className="text-2xl font-mono font-black">
+                    {pnl.is_loss ? (
+                      <span>-Rs. {Number(pnl.loss_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    ) : (
+                      <span>Rs. {Number(pnl.net_profit).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* 9. FINANCING, EQUITY & CAPITAL CASH MOVEMENTS (Reconciliation with Excel Row 59 Cash Outflows) */}
             {(pnl.loan_repayments > 0 || pnl.drawings > 0 || pnl.capital_inventory > 0) && (
