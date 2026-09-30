@@ -3,7 +3,8 @@ import {
   TrendingUp, TrendingDown, DollarSign, Calendar, Printer,
   FileSpreadsheet, FileText, Download, CheckCircle2, AlertTriangle,
   ChevronDown, ChevronUp, Layers, Users, Building, ShieldCheck,
-  Receipt, Wallet
+  Receipt, Wallet, ArrowDownRight, ArrowUpRight, Landmark, Scale,
+  HelpCircle, Info
 } from "lucide-react";
 import { api } from "../../api/client";
 import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
@@ -15,7 +16,7 @@ export const ProfitLoss: React.FC = () => {
   const [dateTo, setDateTo] = useState("2026-08-31");
   const [period, setPeriod] = useState("this_month");
   const [isLoading, setIsLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<"agency_1_4" | "commercial">("agency_1_4");
+  const [viewMode, setViewMode] = useState<"actual_cash_loss" | "agency_1_4" | "commercial">("actual_cash_loss");
   const [showItemizedTables, setShowItemizedTables] = useState(true);
 
   const loadData = async () => {
@@ -82,6 +83,34 @@ export const ProfitLoss: React.FC = () => {
     { id: 4, name: "Sabir-U-Allah", route: "Dargai Sector 4", sales_volume: 1880000.0 },
   ];
 
+  const realizedInflowsList = pnl?.itemized_realized_inflows || [
+    { title: "Received From Ufone Promo Commission", category: "Operating Commission", amount: 638223.0, source: "August.xlsx Row 15", type: "Telecom Commission Inflow" },
+    { title: "Received From U Top Up Commission", category: "Operating Commission", amount: 211074.0, source: "August.xlsx Row 16", type: "Telecom Commission Inflow" },
+    { title: "Received From Haris Badshah Loan", category: "Financing Loan", amount: 191500.0, source: "August.xlsx Row 17", type: "Working Capital Inflow" },
+    { title: "Received From Loos Sim Loan", category: "Financing Loan", amount: 73750.0, source: "August.xlsx Row 20", type: "Working Capital Inflow" },
+    { title: "Received From FMS Used Amount", category: "Operations", amount: 34392.0, source: "August.xlsx Row 18", type: "Operations Recovery" },
+    { title: "Received From Shahab Cares", category: "Customer Care", amount: 16500.0, source: "August.xlsx Row 19", type: "Customer Care Recovery" },
+  ];
+
+  const allDisbursementsList = pnl?.itemized_all_disbursements || [
+    { id: 1, title: "Haris Badshah Loan Return / Settlement", category: "Debt Settlement", amount: 500000.0, sheet_item: "Item 13, Row 53", payment_method: "Bank Transfer" },
+    { id: 2, title: "Pay Of FCA (Field Customer Agents & Promos)", category: "Commissions", amount: 339700.0, sheet_item: "Item 2, Row 42", payment_method: "Bank Transfer" },
+    { id: 3, title: "Pay Of Office Staff & RSO Payroll", category: "Salaries", amount: 252324.0, sheet_item: "Item 1, Row 41", payment_method: "Cash / Bank" },
+    { id: 4, title: "Paired SIMs Order Ufone HQ (Stock Inward)", category: "Inventory Asset", amount: 172500.0, sheet_item: "Item 10, Row 50", payment_method: "Bank Transfer" },
+    { id: 5, title: "Pay Of Islam Badshah Sb (Owner Drawings)", category: "Owner Drawings", amount: 103910.0, sheet_item: "Item 16, Row 56", payment_method: "Bank Transfer" },
+    { id: 6, title: "Tax Adjustment (Federal & Provincial WHT)", category: "Tax", amount: 90176.0, sheet_item: "Item 12, Row 52", payment_method: "Bank Transfer" },
+    { id: 7, title: "Loading FCA August 2026", category: "Commissions", amount: 52300.0, sheet_item: "Item 17, Row 57", payment_method: "Cash" },
+    { id: 8, title: "Loos Sims Order Ufone HQ (Stock Inward)", category: "Inventory Asset", amount: 48750.0, sheet_item: "Item 11, Row 51", payment_method: "Bank Transfer" },
+    { id: 9, title: "Office Maintenance & Miscellaneous Supplies", category: "Maintenance", amount: 28650.0, sheet_item: "Item 18, Row 58", payment_method: "Cash" },
+    { id: 10, title: "Office Rent (Dargai Office August Rent)", category: "Rent", amount: 25300.0, sheet_item: "Item 4, Row 44", payment_method: "Cash" },
+    { id: 11, title: "Entertainment Office (Staff Tea & Refreshment)", category: "Office", amount: 16160.0, sheet_item: "Item 5, Row 45", payment_method: "Cash" },
+    { id: 12, title: "Communication (PTCL & Staff SIMs)", category: "Communication", amount: 15460.0, sheet_item: "Item 3, Row 43", payment_method: "Cash" },
+    { id: 13, title: "Utility Bills (Office Electricity / Bijjli)", category: "Electricity", amount: 8000.0, sheet_item: "Item 9, Row 49", payment_method: "Bank Transfer" },
+    { id: 14, title: "Local Transport & Field Conveyance", category: "Transport", amount: 300.0, sheet_item: "Item 7, Row 47", payment_method: "Cash" },
+    { id: 15, title: "Courier & Logistics (LCS, TCS)", category: "Transport", amount: 60.0, sheet_item: "Item 6, Row 46", payment_method: "Cash" },
+    { id: 16, title: "Stationery & Photostat", category: "Office", amount: 30.0, sheet_item: "Item 8, Row 48", payment_method: "Cash" },
+  ];
+
   const commissionsList = pnl?.itemized_commissions || [
     { id: 1, type: "Ufone Promo Commission", reference: "FCA Promo JULY 2026", amount: 390041.0, remarks: "August.xlsx Row 164" },
     { id: 2, type: "U Top Up Commission", reference: "U-Top Up & EVC Distribution Commission", amount: 211074.0, remarks: "August.xlsx Row 16" },
@@ -131,6 +160,13 @@ export const ProfitLoss: React.FC = () => {
     { id: 17, title: "Loose SIMs Order Ufone HQ", category: "Inventory", amount: 48750.0, payment_method: "Bank Transfer", remarks: "Stock asset inward order (August.xlsx Row 58)" },
   ];
 
+  const openBank = pnl?.opening_bank_balance || 3152601.0;
+  const closeBank = pnl?.closing_bank_balance || 2664420.0;
+  const totInflows = pnl?.total_realized_inflows || 1165439.0;
+  const totDisbursed = pnl?.total_cash_outflows || 1653620.0;
+  const netBankDrain = pnl?.net_cash_depletion || (totInflows - totDisbursed);
+  const commDeficit = pnl?.franchise_actual_cash_deficit || (Number(pnl?.commission_income || 849297.0) - totDisbursed);
+
   return (
     <div className="p-6 space-y-6 max-w-5xl mx-auto">
       {/* Header */}
@@ -138,7 +174,7 @@ export const ProfitLoss: React.FC = () => {
         <div>
           <h2 className="text-2xl font-bold font-heading text-slate-900 tracking-tight">Profit & Loss Statement</h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Transaction-based accounting engine with Weighted Average Cost (COGS) and full operational deductions.
+            Forensic reconciliation between franchise cash flow sheets (August.xlsx) and standard accrual accounting.
           </p>
         </div>
 
@@ -206,28 +242,41 @@ export const ProfitLoss: React.FC = () => {
 
       {/* Accounting Model & View Options Banner (no-print) */}
       <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3 no-print">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">Accounting Method:</span>
-          <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200/80 text-xs font-semibold">
+          <div className="flex flex-wrap items-center p-1 rounded-xl bg-slate-100 border border-slate-200/80 text-xs font-semibold gap-1">
             <button
-              onClick={() => setViewMode("agency_1_4")}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                viewMode === "agency_1_4"
-                  ? "bg-white text-indigo-900 shadow-xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
+              onClick={() => setViewMode("actual_cash_loss")}
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+                viewMode === "actual_cash_loss"
+                  ? "bg-rose-600 text-white shadow-xs font-bold"
+                  : "text-slate-700 hover:text-slate-900"
               }`}
             >
-              Franchise 1.4% Commission Model (Net: +Rs. 20,837)
+              <TrendingDown className="w-3.5 h-3.5" />
+              <span>Franchise Cash Sheet Model (August.xlsx Loss: -Rs. 804k / Bank Drain: -Rs. 488k)</span>
+            </button>
+            <button
+              onClick={() => setViewMode("agency_1_4")}
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+                viewMode === "agency_1_4"
+                  ? "bg-white text-indigo-900 shadow-xs font-bold"
+                  : "text-slate-700 hover:text-slate-900"
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Operating Overhead Margin (+Rs. 20,837)</span>
             </button>
             <button
               onClick={() => setViewMode("commercial")}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
                 viewMode === "commercial"
                   ? "bg-white text-indigo-900 shadow-xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
+                  : "text-slate-700 hover:text-slate-900"
               }`}
             >
-              Commercial Turnover Model (Net: +Rs. 387,337)
+              <Scale className="w-3.5 h-3.5 text-slate-500" />
+              <span>Commercial Spread Model (+Rs. 387,337)</span>
             </button>
           </div>
         </div>
@@ -253,7 +302,7 @@ export const ProfitLoss: React.FC = () => {
           <h1 className="text-2xl font-black uppercase tracking-wide text-slate-900 mt-2">Ufone Franchise - Dargai Office</h1>
           <p className="text-xs text-slate-600 font-medium">Main Bazar, Dargai, Malakand, KP | Ufone PTCL Telecommunications</p>
           <h2 className="text-base font-extrabold uppercase tracking-widest text-indigo-900 mt-2">
-            Statement of Profit & Loss
+            Statement of Profit & Loss and Cash Flow
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-1">
             Period: {selectedMonth === "2026-08"
@@ -261,13 +310,303 @@ export const ProfitLoss: React.FC = () => {
               : (dateFrom ? `${dateFrom} to ${dateTo || 'Present'}` : "All Time Records (Cumulative)")}
           </p>
           <div className="inline-block mt-2 px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-700 uppercase">
-            Model: {viewMode === "agency_1_4" ? "Franchise 1.4% Telecom Commission Model" : "Commercial Turnover & Trading Margin Model"}
+            Model: {viewMode === "actual_cash_loss"
+              ? "Franchise Cash Ledger & Bank Balance Sheet Model (August.xlsx Physical Business Truth)"
+              : (viewMode === "agency_1_4" ? "Franchise 1.4% Telecom Commission & Operating Margin Model" : "Commercial Turnover & Trading Margin Model")}
           </div>
         </div>
 
         {pnl && (
           <div className="space-y-6 text-xs font-mono">
-            {viewMode === "agency_1_4" ? (
+            {viewMode === "actual_cash_loss" ? (
+              <>
+                {/* 0. BANK & CASH EXECUTIVE SUMMARY CARDS (Rows 4-12, Column S of August.xlsx) */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <p className="text-[10px] font-sans font-bold text-slate-500 uppercase tracking-wider">Opening Bank/Cash (Row 6)</p>
+                    <p className="text-base font-bold text-slate-900 mt-1">Rs. {Number(openBank).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                    <span className="text-[10px] text-slate-400 font-sans">As of 01-August-2026</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-emerald-50/50 border border-emerald-200">
+                    <p className="text-[10px] font-sans font-bold text-emerald-800 uppercase tracking-wider">Total Inflow Receipts (Row 8 & 21)</p>
+                    <p className="text-base font-bold text-emerald-700 mt-1">+Rs. {Number(totInflows).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                    <span className="text-[10px] text-emerald-600 font-sans">Commissions + Injections</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-rose-50/50 border border-rose-200">
+                    <p className="text-[10px] font-sans font-bold text-rose-800 uppercase tracking-wider">Total Disbursed (Row 10 & 59)</p>
+                    <p className="text-base font-bold text-rose-700 mt-1">-Rs. {Number(totDisbursed).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                    <span className="text-[10px] text-rose-600 font-sans">All payments from bank/cash</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-amber-50/50 border border-amber-200">
+                    <p className="text-[10px] font-sans font-bold text-amber-800 uppercase tracking-wider">Closing Bank/Cash (Row 12)</p>
+                    <p className="text-base font-bold text-amber-900 mt-1">Rs. {Number(closeBank).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                    <span className="text-[10px] text-rose-600 font-sans font-bold">Drain: -Rs. {Math.abs(netBankDrain).toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {/* FORENSIC CLARITY BANNER: WHY FRANCHISE IDENTIFIED A LOSS */}
+                <div className="p-4 rounded-xl bg-rose-50 border-2 border-rose-300 font-sans space-y-2 text-rose-950">
+                  <div className="flex items-center gap-2 font-bold text-sm text-rose-900">
+                    <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+                    <span>Business Truth: Why the Franchise Experienced a Financial Loss / Deficit in August</span>
+                  </div>
+                  <p className="text-xs leading-relaxed text-rose-900">
+                    Franchise leadership rightly noticed that <strong>the business lost money in August 2026</strong>. Total disbursements from the franchise bank account and cash register were <strong>Rs. 1,653,620.00</strong>. Against Ufone commission revenue of <strong>Rs. 849,297.00</strong>, there was a direct <strong>Operating Commission Deficit of -Rs. 804,323.00</strong>.
+                  </p>
+                  <p className="text-xs leading-relaxed text-rose-800">
+                    Even after receiving <strong>Rs. 316,142.00</strong> in loan inflows (Haris Badshah Rs. 191.5k, Loose SIMs Rs. 73.75k, FMS & Cares Rs. 50.9k), the franchise's liquid bank account depleted by <strong>-Rs. 488,181.00</strong> (closing at Rs. 2,664,420.00 down from Rs. 3,152,601.00). This sheet explains every single rupee of where that cash went.
+                  </p>
+                </div>
+
+                {/* 1. AIRTIME FLOAT DISTRIBUTION THROUGHPUT (Row 63-71) */}
+                <div className="space-y-2 p-4 rounded-xl bg-slate-50/80 border border-slate-200">
+                  <div className="flex justify-between font-bold text-slate-900 text-sm pb-1.5 border-b border-slate-200">
+                    <span className="font-sans">1. AIRTIME FLOAT DISTRIBUTION THROUGHPUT (August.xlsx Row 63-71)</span>
+                    <span className="font-bold text-slate-900">Rs. {Number(pnl.gross_revenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <p className="font-sans text-[11px] text-slate-600">
+                    EVC airtime allocated to the 4 field Retail Sales Officers (RSOs). This represents throughput agency float; the franchise does NOT retain trading margin—Ufone credits commission into the bank account.
+                  </p>
+
+                  {/* 4 RSOs Itemized Table */}
+                  {showItemizedTables && (
+                    <div className="overflow-x-auto mt-2 border border-slate-200 rounded-lg bg-white">
+                      <table className="w-full text-left text-[11px]">
+                        <thead className="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200 font-sans">
+                          <tr>
+                            <th className="px-3 py-1.5">#</th>
+                            <th className="px-3 py-1.5">Field Officer (RSO)</th>
+                            <th className="px-3 py-1.5">Assigned Sector / Route</th>
+                            <th className="px-3 py-1.5 text-right">EVC Sales Volume (PKR)</th>
+                            <th className="px-3 py-1.5 text-right">Distribution Share</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {rsoSales.map((r: any, idx: number) => {
+                            const pct = pnl.gross_revenue > 0 ? (r.sales_volume / pnl.gross_revenue) * 100 : 0;
+                            return (
+                              <tr key={idx} className="hover:bg-slate-50">
+                                <td className="px-3 py-1.5 text-slate-500">{idx + 1}</td>
+                                <td className="px-3 py-1.5 font-bold text-slate-800 font-sans">{r.name}</td>
+                                <td className="px-3 py-1.5 text-slate-600 font-sans">{r.route}</td>
+                                <td className="px-3 py-1.5 text-right font-bold text-slate-900">
+                                  Rs. {Number(r.sales_volume).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </td>
+                                <td className="px-3 py-1.5 text-right text-slate-500">{pct.toFixed(2)}%</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                        <tfoot className="bg-slate-50 font-bold border-t border-slate-200">
+                          <tr>
+                            <td colSpan={3} className="px-3 py-2 text-slate-900 uppercase font-sans">
+                              TOTAL EVC AIRTIME DISTRIBUTED:
+                            </td>
+                            <td className="px-3 py-2 text-right text-slate-950 font-black">
+                              Rs. {Number(pnl.gross_revenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </td>
+                            <td className="px-3 py-2 text-right text-slate-700">100.00%</td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. TOTAL CASH INFLOWS REALIZED (August.xlsx Rows 14-21) */}
+                <div className="space-y-2 p-4 rounded-xl bg-emerald-50/30 border border-emerald-200/80">
+                  <div className="flex justify-between font-bold text-emerald-950 text-sm pb-1.5 border-b border-emerald-200">
+                    <span className="font-sans">2. TOTAL CASH INFLOWS & COMMISSIONS RECEIVED (August.xlsx Rows 14-21)</span>
+                    <span className="font-black text-emerald-800">+Rs. {Number(totInflows).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <p className="font-sans text-[11px] text-slate-600">
+                    All funds deposited into the franchise bank account or cash drawer in August 2026 (Row 8 & Row 21 Column S).
+                  </p>
+
+                  {/* 6 Inflow Items Table */}
+                  {showItemizedTables && (
+                    <div className="overflow-x-auto mt-2 border border-emerald-200 rounded-lg bg-white">
+                      <table className="w-full text-left text-[11px]">
+                        <thead className="bg-emerald-100/60 text-emerald-950 uppercase font-bold border-b border-emerald-200 font-sans">
+                          <tr>
+                            <th className="px-3 py-1.5">#</th>
+                            <th className="px-3 py-1.5">Inflow Description</th>
+                            <th className="px-3 py-1.5">Accounting Classification</th>
+                            <th className="px-3 py-1.5">Source / Citation</th>
+                            <th className="px-3 py-1.5 text-right">Received Amount (PKR)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-emerald-50">
+                          {realizedInflowsList.map((item: any, idx: number) => {
+                            const isComm = item.category === "Operating Commission";
+                            return (
+                              <tr key={idx} className="hover:bg-emerald-50/40">
+                                <td className="px-3 py-1.5 text-slate-500">{idx + 1}</td>
+                                <td className="px-3 py-1.5 font-bold text-slate-800 font-sans">{item.title}</td>
+                                <td className="px-3 py-1.5 font-sans">
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                    isComm ? "bg-emerald-100 text-emerald-900" : "bg-blue-100 text-blue-900"
+                                  }`}>
+                                    {item.category}
+                                  </span>
+                                </td>
+                                <td className="px-3 py-1.5 text-slate-500 font-sans">{item.source}</td>
+                                <td className="px-3 py-1.5 text-right font-bold text-emerald-700">
+                                  +Rs. {Number(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                        <tfoot className="bg-emerald-50 font-bold border-t border-emerald-200">
+                          <tr>
+                            <td colSpan={4} className="px-3 py-2 text-emerald-950 uppercase font-sans">
+                              TOTAL REALIZED RECEIPTS (COMMISSIONS RS. 849,297 + FINANCING INFLOWS RS. 316,142):
+                            </td>
+                            <td className="px-3 py-2 text-right text-emerald-800 font-black text-sm">
+                              +Rs. {Number(totInflows).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. TOTAL CASH DISBURSEMENTS (August.xlsx Rows 40-59) */}
+                <div className="space-y-3 p-4 rounded-xl bg-rose-50/30 border border-rose-200/80">
+                  <div className="flex justify-between font-bold text-rose-950 text-sm pb-1.5 border-b border-rose-200">
+                    <span className="font-sans">3. TOTAL MONTHLY CASH DISBURSEMENTS & PAYMENTS (August.xlsx Rows 40-59)</span>
+                    <span className="font-black text-rose-700">-Rs. {Number(totDisbursed).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <p className="font-sans text-[11px] text-slate-600">
+                    Every cash and bank transfer payout executed during August 2026. Exactly matches Row 59 Column C & S of August.xlsx.
+                  </p>
+
+                  {/* 16 Disbursement Items Table */}
+                  {showItemizedTables && (
+                    <div className="overflow-x-auto mt-2 border border-rose-200 rounded-lg bg-white">
+                      <table className="w-full text-left text-[11px]">
+                        <thead className="bg-rose-100/60 text-rose-950 uppercase font-bold border-b border-rose-200 font-sans">
+                          <tr>
+                            <th className="px-3 py-1.5">#</th>
+                            <th className="px-3 py-1.5">Payment Classification & Details</th>
+                            <th className="px-3 py-1.5">Category</th>
+                            <th className="px-3 py-1.5">Payment Method</th>
+                            <th className="px-3 py-1.5">Sheet Row</th>
+                            <th className="px-3 py-1.5 text-right">Disbursed Amount (PKR)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-rose-50">
+                          {allDisbursementsList.map((item: any, idx: number) => {
+                            const isNonOp = ["Debt Settlement", "Inventory Asset", "Owner Drawings"].includes(item.category);
+                            return (
+                              <tr key={idx} className="hover:bg-rose-50/40">
+                                <td className="px-3 py-1.5 text-slate-500">{idx + 1}</td>
+                                <td className="px-3 py-1.5 font-bold text-slate-800 font-sans">{item.title}</td>
+                                <td className="px-3 py-1.5 font-sans">
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                    isNonOp ? "bg-amber-100 text-amber-900 border border-amber-200" : "bg-rose-100 text-rose-900"
+                                  }`}>
+                                    {item.category}
+                                  </span>
+                                </td>
+                                <td className="px-3 py-1.5 text-slate-500 font-sans">{item.payment_method}</td>
+                                <td className="px-3 py-1.5 text-slate-400 font-sans">{item.sheet_item}</td>
+                                <td className="px-3 py-1.5 text-right font-bold text-rose-700">
+                                  Rs. {Number(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                        <tfoot className="bg-rose-50 font-bold border-t border-rose-200">
+                          <tr>
+                            <td colSpan={5} className="px-3 py-2 text-rose-950 uppercase font-sans">
+                              TOTAL MONTHLY CASH DISBURSEMENTS (August.xlsx Row 59):
+                            </td>
+                            <td className="px-3 py-2 text-right text-rose-800 font-black text-sm">
+                              -Rs. {Number(totDisbursed).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. NET FINANCIAL RESULT (THE TWO TRUTHS OF AUGUST.XLSX) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Card A: Commission Operating Deficit */}
+                  <div className="p-5 rounded-2xl border-2 border-rose-500 bg-rose-50 flex flex-col justify-between space-y-2">
+                    <div>
+                      <div className="flex items-center gap-2 text-rose-900 font-sans font-black text-sm uppercase">
+                        <TrendingDown className="w-5 h-5 text-rose-700" />
+                        <span>A. Operating Commission Cash Deficit</span>
+                      </div>
+                      <p className="text-xs text-rose-900 font-sans mt-1">
+                        Commission Earned (+Rs. {Number(pnl.commission_income).toLocaleString()}) minus Total Cash Paid Out (Rs. {Number(totDisbursed).toLocaleString()}).
+                      </p>
+                      <p className="text-[11px] text-rose-800 font-sans mt-1">
+                        This is why management felt the business lost money: Ufone commission revenue was not sufficient to cover August's cash payments.
+                      </p>
+                    </div>
+                    <div className="text-3xl font-mono font-black text-rose-700 pt-2 border-t border-rose-200">
+                      -Rs. {Math.abs(commDeficit).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </div>
+                  </div>
+
+                  {/* Card B: Net Monthly Bank Balance Depletion */}
+                  <div className="p-5 rounded-2xl border-2 border-amber-500 bg-amber-50/80 flex flex-col justify-between space-y-2">
+                    <div>
+                      <div className="flex items-center gap-2 text-amber-950 font-sans font-black text-sm uppercase">
+                        <Wallet className="w-5 h-5 text-amber-700" />
+                        <span>B. Net Monthly Cash / Bank Depletion</span>
+                      </div>
+                      <p className="text-xs text-amber-900 font-sans mt-1">
+                        Total Realized Inflows (+Rs. {Number(totInflows).toLocaleString()}) minus Total Cash Paid Out (Rs. {Number(totDisbursed).toLocaleString()}).
+                      </p>
+                      <p className="text-[11px] text-amber-900 font-sans mt-1">
+                        Opening Bank: Rs. {Number(openBank).toLocaleString()} → Closing Bank: Rs. {Number(closeBank).toLocaleString()} (Bank account dropped by nearly 5 Lakh PKR).
+                      </p>
+                    </div>
+                    <div className="text-3xl font-mono font-black text-amber-900 pt-2 border-t border-amber-200">
+                      -Rs. {Math.abs(netBankDrain).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 5. FORENSIC RECONCILIATION: WHERE DID THE CASH GO? */}
+                <div className="p-5 rounded-2xl bg-indigo-50/60 border border-indigo-200 font-sans space-y-3">
+                  <div className="flex items-center gap-2 font-bold text-sm text-indigo-950">
+                    <CheckCircle2 className="w-5 h-5 text-indigo-700 flex-shrink-0" />
+                    <span>Forensic Accounting Reconciliation: Why Did Bank Cash Drop if Operations Were Healthy?</span>
+                  </div>
+                  <div className="text-xs text-indigo-950 space-y-2 leading-relaxed">
+                    <p>
+                      Although the cash register shows a net loss / cash deficit of <strong>-Rs. 804,323.00</strong>, the franchise business did NOT incur operational losses from bad trades. Exactly <strong>Rs. 825,160.00 (50.0%)</strong> of August's cash payouts went toward three balance sheet transactions:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1 font-medium text-slate-800">
+                      <li>
+                        <strong>Haris Badshah Loan Settlement (Rs. 500,000.00):</strong> This paid off a prior debt liability. This reduced franchise liabilities on the balance sheet, not an ongoing operational waste.
+                      </li>
+                      <li>
+                        <strong>Paired & Loose SIMs Stock Purchases (Rs. 221,250.00):</strong> This converted bank cash into valuable inventory assets currently in stock.
+                      </li>
+                      <li>
+                        <strong>Islam Badshah Sb Personal Drawings (Rs. 103,910.00):</strong> Owner equity withdrawal for household bills and driver salaries.
+                      </li>
+                    </ul>
+                    <p className="pt-1 text-slate-700">
+                      If these non-operational capital items (Rs. 825,160.00) are separated, true operational running overhead was <strong>Rs. 828,460.00</strong>. Against commission inflows of <strong>Rs. 849,297.00</strong>, the franchise's ongoing operations generated a slim positive operating margin of <strong>+Rs. 20,837.00</strong> (viewable in the Operational Margin model above).
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : viewMode === "agency_1_4" ? (
               <>
                 {/* 1. AIRTIME FLOAT DISTRIBUTION THROUGHPUT (INFORMATIONAL) */}
                 <div className="space-y-2 p-4 rounded-xl bg-slate-50/80 border border-slate-200">
@@ -368,7 +707,7 @@ export const ProfitLoss: React.FC = () => {
                         <tfoot className="bg-emerald-50 font-bold border-t border-emerald-200">
                           <tr>
                             <td colSpan={4} className="px-3 py-2 text-emerald-950 uppercase font-sans">
-                              TOTAL OPERATING REVENUE (GROSS PROFIT):
+                              TOTAL OPERATING REVENUE (COMMISSION REVENUE):
                             </td>
                             <td className="px-3 py-2 text-right text-emerald-800 font-black text-sm">
                               +Rs. {Number(pnl.commission_income).toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -507,14 +846,14 @@ export const ProfitLoss: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <ShieldCheck className="w-5 h-5 text-emerald-600" />
                       <span className="text-base font-extrabold uppercase tracking-wide">
-                        4. NET OPERATING PROFIT (1.4% FRANCHISE MODEL):
+                        4. NET OPERATIONAL MARGIN (BEFORE DEBT & CAPITAL):
                       </span>
                     </div>
                     <p className="text-xs text-emerald-900 font-medium">
                       Total Commission Revenue (+Rs. {Number(pnl.commission_income).toLocaleString()}) minus Total Operating Overhead & Salaries (Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString()}).
                     </p>
                     <p className="text-[11px] text-emerald-800 font-normal">
-                      The franchise operates at a clean positive net bottom-line (+2.45% net operational margin on commission turnover) with all expenses and 10 staff members fully paid.
+                      The franchise operating engine broke even with a small operational buffer (+2.45% margin) before non-operating debt repayment and inventory purchases.
                     </p>
                   </div>
                   <div className="text-3xl font-mono font-black text-emerald-800 text-right">
@@ -525,6 +864,16 @@ export const ProfitLoss: React.FC = () => {
             ) : (
               <>
                 {/* COMMERCIAL TURNOVER MODEL */}
+                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-sans text-xs space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-amber-950">
+                    <Info className="w-4 h-4 text-amber-600" />
+                    <span>Commercial Spread Model Disclosure</span>
+                  </div>
+                  <p>
+                    This model illustrates hypothetical retail gross profit assuming the franchise retained the entire 2.50% retail spread (Rs. 366,500) on EVC airtime sales. In real telecom operations, this spread is retained by field retailers and shopkeepers, not deposited into the franchise bank account.
+                  </p>
+                </div>
+
                 {/* 1. Operating Revenue (Sales Turnover) */}
                 <div className="space-y-2 p-4 rounded-xl bg-slate-50/80 border border-slate-200">
                   <div className="flex justify-between font-bold text-slate-800 text-sm pb-1 border-b border-slate-200">
@@ -639,7 +988,7 @@ export const ProfitLoss: React.FC = () => {
                   <div className="font-sans">
                     <span>7. NET OPERATING PROFIT (COMMERCIAL MODEL):</span>
                     <p className="text-xs font-normal font-sans text-slate-600 mt-0.5">
-                      Net operating bottom-line earnings: Gross Profit (Rs. {Number(pnl.gross_profit).toLocaleString()}) minus Operating Overhead (Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString()}).
+                      Net theoretical earnings: Gross Profit (Rs. {Number(pnl.gross_profit).toLocaleString()}) minus Operating Overhead (Rs. {(Number(pnl.expenses) + Number(pnl.salaries)).toLocaleString()}).
                     </p>
                   </div>
                   <div className="text-3xl font-mono font-black text-emerald-800">
@@ -652,7 +1001,7 @@ export const ProfitLoss: React.FC = () => {
             {/* 9. FINANCING, EQUITY & CAPITAL CASH MOVEMENTS (Reconciliation with Excel Row 59 Cash Outflows) */}
             <div className="space-y-4 pt-4 mt-6 border-t-2 border-dashed border-slate-300">
               <div className="flex justify-between font-bold text-slate-900 text-sm pb-1 border-b border-slate-200">
-                <span className="font-sans">9. CASH FLOW RECONCILIATION (OPERATING VS. TOTAL CASH OUTFLOWS)</span>
+                <span className="font-sans">CASH FLOW AUDIT RECONCILIATION (OPERATING VS. TOTAL BANK OUTFLOWS)</span>
                 <span className="font-bold text-slate-900">Rs. {Number(pnl.total_cash_outflows || 1653620).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
 
@@ -661,18 +1010,13 @@ export const ProfitLoss: React.FC = () => {
                 <div className="font-bold flex items-center gap-1.5 text-blue-950 text-sm">
                   <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0" />
                   <span>
-                    Why Net Profit is {viewMode === "agency_1_4" ? "+Rs. 20,837 (Agency Model)" : "+Rs. 387,337 (Commercial Model)"} while Total Cash Outflows are Rs. 1,653,620:
+                    Reconciling Bank Deficit (-Rs. 804,323) with Accrual Margin (+Rs. 20,837):
                   </span>
                 </div>
                 <p className="text-[11px] leading-relaxed text-blue-900">
                   Total cash disbursements through bank transfer and cash register in August were <strong>Rs. 1,653,620.00</strong> (matching Row 59 of August.xlsx).
-                  However, exactly <strong>Rs. 825,160.00</strong> of these disbursements were for <em>non-operating balance sheet transactions</em> (debt repayment to Haris Badshah, personal drawings taken by Islam Badshah, and purchasing SIM card inventory assets).
-                  Because these are balance sheet capital and liability settlements rather than business operational expenses, your true operational overhead is only <strong>Rs. 828,460.00</strong> (Expenses Rs. 576,136 + Salaries Rs. 252,324).
-                  {viewMode === "agency_1_4" ? (
-                    <span> Against Commission Inflows of <strong>Rs. 849,297.00</strong>, the franchise generated a certified <strong>Net Operating Profit of +Rs. 20,837.00</strong>.</span>
-                  ) : (
-                    <span> Against Gross Profit of <strong>Rs. 1,215,797.00</strong> (EVC trading margin Rs. 366,500 + Commissions Rs. 849,297), the franchise generated a healthy <strong>Net Operating Profit of +Rs. 387,337.00</strong>.</span>
-                  )}
+                  Exactly <strong>Rs. 825,160.00</strong> of these disbursements were for <em>non-operating balance sheet transactions</em> (debt repayment to Haris Badshah Rs. 500k, personal drawings by Islam Badshah Rs. 103.9k, and purchasing SIM card inventory assets Rs. 221.2k).
+                  Because these are balance sheet capital and liability settlements rather than recurring operational costs, your pure operational overhead is only <strong>Rs. 828,460.00</strong> (Expenses Rs. 576,136 + Salaries Rs. 252,324).
                 </p>
               </div>
 
@@ -741,7 +1085,7 @@ export const ProfitLoss: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex justify-between font-bold text-slate-950 pl-4 pt-2 border-t-2 border-slate-900 bg-slate-100 p-2.5 rounded-xl text-sm">
-                  <span className="font-sans">TOTAL MONTHLY CASH OUTFLOWS (August.xlsx Row 59: A + B):</span>
+                  <span className="font-sans">TOTAL MONTHLY CASH DISBURSEMENTS (August.xlsx Row 59: A + B):</span>
                   <span className="font-black text-slate-950">
                     Rs. {Number(pnl.total_cash_outflows || 1653620).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </span>

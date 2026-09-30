@@ -562,6 +562,43 @@ def calculate_profit_and_loss(
         })
     rso_sales_list.sort(key=lambda x: x["sales_volume"], reverse=True)
 
+    # August.xlsx Bank & Cash Ledger Reconciliation (Rows 4-12, 14-21, 40-59)
+    opening_bank_balance = Decimal("3152601.00")
+    closing_bank_balance = Decimal("2664420.00")
+    total_cash_disbursements = total_operating_deductions + drawings + loan_repayments + capital_inventory
+    external_cash_inflows = Decimal("316142.00")
+    total_realized_inflows = total_commission + external_cash_inflows
+    net_cash_depletion = total_realized_inflows - total_cash_disbursements
+    franchise_actual_cash_deficit = total_commission - total_cash_disbursements
+
+    itemized_realized_inflows = [
+        {"title": "Received From Ufone Promo Commission", "category": "Operating Commission", "amount": 638223.0, "source": "August.xlsx Row 15", "type": "Telecom Revenue"},
+        {"title": "Received From U Top Up Commission", "category": "Operating Commission", "amount": 211074.0, "source": "August.xlsx Row 16", "type": "Telecom Revenue"},
+        {"title": "Received From Haris Badshah Loan", "category": "Financing Loan", "amount": 191500.0, "source": "August.xlsx Row 17", "type": "Working Capital Inflow"},
+        {"title": "Received From Loos Sim Loan", "category": "Financing Loan", "amount": 73750.0, "source": "August.xlsx Row 20", "type": "Working Capital Inflow"},
+        {"title": "Received From FMS Used Amount", "category": "Operations", "amount": 34392.0, "source": "August.xlsx Row 18", "type": "Operations Recovery"},
+        {"title": "Received From Shahab Cares", "category": "Customer Care", "amount": 16500.0, "source": "August.xlsx Row 19", "type": "Customer Care Recovery"},
+    ]
+
+    all_disbursements_list = [
+        {"id": 1, "title": "Haris Badshah Loan Return / Settlement", "category": "Debt Settlement", "amount": 500000.0, "sheet_item": "Item 13, Row 53", "payment_method": "Bank Transfer"},
+        {"id": 2, "title": "Pay Of FCA (Field Customer Agents)", "category": "Commissions", "amount": 339700.0, "sheet_item": "Item 2, Row 42", "payment_method": "Bank Transfer"},
+        {"id": 3, "title": "Pay Of Office Staff", "category": "Salaries", "amount": 252324.0, "sheet_item": "Item 1, Row 41", "payment_method": "Cash / Bank"},
+        {"id": 4, "title": "Paired SIMs Order Ufone HQ", "category": "Inventory Asset", "amount": 172500.0, "sheet_item": "Item 10, Row 50", "payment_method": "Bank Transfer"},
+        {"id": 5, "title": "Pay Of Islam Badshah Sb (Drawings)", "category": "Owner Drawings", "amount": 103910.0, "sheet_item": "Item 16, Row 56", "payment_method": "Bank Transfer"},
+        {"id": 6, "title": "Tax Adjustment (Sales Tax / WHT)", "category": "Tax", "amount": 90176.0, "sheet_item": "Item 12, Row 52", "payment_method": "Bank Transfer"},
+        {"id": 7, "title": "Loading FCA August 2026", "category": "Commissions", "amount": 52300.0, "sheet_item": "Item 17, Row 57", "payment_method": "Cash"},
+        {"id": 8, "title": "Loos Sims Order Ufone HQ", "category": "Inventory Asset", "amount": 48750.0, "sheet_item": "Item 11, Row 51", "payment_method": "Bank Transfer"},
+        {"id": 9, "title": "Office Maintenance & Others Supplies", "category": "Maintenance", "amount": 28650.0, "sheet_item": "Item 18, Row 58", "payment_method": "Cash"},
+        {"id": 10, "title": "Office Rent (Dargai Office August Rent)", "category": "Rent", "amount": 25300.0, "sheet_item": "Item 4, Row 44", "payment_method": "Cash"},
+        {"id": 11, "title": "Entertainment Office (Refreshment)", "category": "Office", "amount": 16160.0, "sheet_item": "Item 5, Row 45", "payment_method": "Cash"},
+        {"id": 12, "title": "Communication (PTCL & Staff SIMs)", "category": "Communication", "amount": 15460.0, "sheet_item": "Item 3, Row 43", "payment_method": "Cash"},
+        {"id": 13, "title": "Utility Bills (Electricity Bijjli)", "category": "Electricity", "amount": 8000.0, "sheet_item": "Item 9, Row 49", "payment_method": "Bank Transfer"},
+        {"id": 14, "title": "Local Transport & Conveyance", "category": "Transport", "amount": 300.0, "sheet_item": "Item 7, Row 47", "payment_method": "Cash"},
+        {"id": 15, "title": "Courier & Logistics (LCS, TCS)", "category": "Transport", "amount": 60.0, "sheet_item": "Item 6, Row 46", "payment_method": "Cash"},
+        {"id": 16, "title": "Stationery & Photostat", "category": "Office", "amount": 30.0, "sheet_item": "Item 8, Row 48", "payment_method": "Cash"},
+    ]
+
     return {
         "gross_revenue": float(gross_revenue),
         "sales_discounts": float(sales_discounts),
@@ -584,7 +621,15 @@ def calculate_profit_and_loss(
         "drawings": float(drawings),
         "loan_repayments": float(loan_repayments),
         "capital_inventory": float(capital_inventory),
-        "total_cash_outflows": float(total_operating_deductions + drawings + loan_repayments + capital_inventory),
+        "total_cash_outflows": float(total_cash_disbursements),
+        "opening_bank_balance": float(opening_bank_balance),
+        "closing_bank_balance": float(closing_bank_balance),
+        "total_realized_inflows": float(total_realized_inflows),
+        "external_cash_inflows": float(external_cash_inflows),
+        "net_cash_depletion": float(net_cash_depletion),
+        "franchise_actual_cash_deficit": float(franchise_actual_cash_deficit),
+        "itemized_realized_inflows": itemized_realized_inflows,
+        "itemized_all_disbursements": all_disbursements_list,
         "itemized_operating_expenses": op_expenses_list,
         "itemized_non_operating": non_op_list,
         "itemized_commissions": comm_list,
