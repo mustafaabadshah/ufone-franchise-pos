@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import {
   TrendingUp, TrendingDown, ShoppingBag, ShoppingCart, Receipt,
   DollarSign, Boxes, Users, AlertTriangle, ArrowRight, Building2,
-  Wallet, Coins, PiggyBank, RotateCcw, Landmark, Filter, RefreshCw
+  Wallet, Coins, PiggyBank, RotateCcw, Landmark, Filter, RefreshCw,
+  Calendar
 } from "lucide-react";
 import { api } from "../../api/client";
 import { MetricCard } from "../../components/common/MetricCard";
@@ -22,20 +23,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [metrics, setMetrics] = useState<any>(null);
   const [chartsData, setChartsData] = useState<any>(null);
   const [lowStockAlerts, setLowStockAlerts] = useState<any[]>([]);
-  const [period, setPeriod] = useState<string>("30_days");
+  const [selectedMonth, setSelectedMonth] = useState<string>("2026-08");
+  const [dateFrom, setDateFrom] = useState<string>("2026-08-01");
+  const [dateTo, setDateTo] = useState<string>("2026-08-31");
+  const [periodPreset, setPeriodPreset] = useState<string>("august_2026");
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = async (selectedPeriod = period) => {
+  const loadData = async (m = selectedMonth, from = dateFrom, to = dateTo) => {
     setIsLoading(true);
     try {
-      const [m, c, l] = await Promise.all([
-        api.getDashboardMetrics(),
-        api.getDashboardCharts(selectedPeriod),
+      const [mRes, cRes, lRes] = await Promise.all([
+        api.getDashboardMetrics({
+          month: m && m !== "all" ? m : undefined,
+          date_from: from || undefined,
+          date_to: to || undefined,
+        }),
+        api.getDashboardCharts("custom", from || undefined, to || undefined, m && m !== "all" ? m : undefined),
         api.getLowStockAlerts()
       ]);
-      setMetrics(m);
-      setChartsData(c);
-      setLowStockAlerts(l);
+      setMetrics(mRes);
+      setChartsData(cRes);
+      setLowStockAlerts(lRes);
     } catch (err) {
       console.error("Dashboard data load error:", err);
     } finally {
@@ -44,8 +52,60 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   };
 
   useEffect(() => {
-    loadData(period);
-  }, [period]);
+    loadData(selectedMonth, dateFrom, dateTo);
+  }, []);
+
+  const handleMonthSelect = (mStr: string) => {
+    setSelectedMonth(mStr);
+    if (!mStr || mStr === "all") {
+      setPeriodPreset("all");
+      setDateFrom("");
+      setDateTo("");
+      loadData("all", "", "");
+      return;
+    }
+    const [year, month] = mStr.split("-").map(Number);
+    const firstDay = new Date(Date.UTC(year, month - 1, 1)).toISOString().split("T")[0];
+    const lastDay = new Date(Date.UTC(year, month, 0)).toISOString().split("T")[0];
+    setDateFrom(firstDay);
+    setDateTo(lastDay);
+    setPeriodPreset(mStr === "2026-08" ? "august_2026" : "custom");
+    loadData(mStr, firstDay, lastDay);
+  };
+
+  const handlePresetSelect = (preset: string) => {
+    setPeriodPreset(preset);
+    const today = new Date();
+    if (preset === "august_2026") {
+      handleMonthSelect("2026-08");
+    } else if (preset === "this_month") {
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split("T")[0];
+      const todayStr = today.toISOString().split("T")[0];
+      const mStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+      setSelectedMonth(mStr);
+      setDateFrom(firstDay);
+      setDateTo(todayStr);
+      loadData(mStr, firstDay, todayStr);
+    } else if (preset === "this_year") {
+      const firstDay = new Date(today.getFullYear(), 0, 1).toISOString().split("T")[0];
+      const todayStr = today.toISOString().split("T")[0];
+      setSelectedMonth("");
+      setDateFrom(firstDay);
+      setDateTo(todayStr);
+      loadData("", firstDay, todayStr);
+    } else if (preset === "all") {
+      setSelectedMonth("all");
+      setDateFrom("");
+      setDateTo("");
+      loadData("all", "", "");
+    }
+  };
+
+  const handleApplyCustomDates = () => {
+    setPeriodPreset("custom");
+    setSelectedMonth("");
+    loadData("", dateFrom, dateTo);
+  };
 
   if (isLoading && !metrics) {
     return (
@@ -60,30 +120,57 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Overview Banner */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Overview & Specific Month Filter Banner */}
+      <div className="rounded-2xl bg-white border border-slate-200/80 p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold font-heading text-slate-900 tracking-tight">Shop Dashboard</h2>
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-2xl font-bold font-heading text-slate-900 tracking-tight">Shop Dashboard</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+              {selectedMonth === "2026-08"
+                ? "August 2026 (Live Closed Month)"
+                : selectedMonth === "all" || (!dateFrom && !dateTo)
+                ? "All Time Records (Cumulative)"
+                : `${dateFrom} to ${dateTo}`}
+            </span>
+          </div>
           <p className="text-xs text-slate-500 mt-1 font-medium">
-            Overview of sales, inventory, telecom distribution, staff, purchases, expenses and double-entry profit.
+            Live sales turnover, telecom airtime float, inventory solvency, expenditures, and audited net profit.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Quick period filters */}
+        {/* Specific Month & Date Filters */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Specific Month Dropdown */}
+          <div className="flex items-center gap-2 bg-indigo-50/60 border border-indigo-200/80 p-1 rounded-xl">
+            <Calendar className="w-3.5 h-3.5 text-indigo-700 ml-1.5" />
+            <span className="text-xs font-bold text-indigo-950 uppercase tracking-wide">Month:</span>
+            <select
+              value={selectedMonth}
+              onChange={(e) => handleMonthSelect(e.target.value)}
+              className="px-2.5 py-1 rounded-lg border border-indigo-200 bg-white text-xs font-bold text-indigo-950 focus:ring-2 focus:ring-indigo-500 shadow-2xs"
+            >
+              <option value="2026-08">August 2026 (Live Closed Month)</option>
+              <option value="2026-09">September 2026</option>
+              <option value="2026-07">July 2026</option>
+              <option value="2026-06">June 2026</option>
+              <option value="2026-05">May 2026</option>
+              <option value="all">All Time Records (Cumulative)</option>
+            </select>
+          </div>
+
+          {/* Quick preset tabs */}
           <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-medium">
             {[
-              { id: "today", label: "Today" },
-              { id: "7_days", label: "7 Days" },
-              { id: "30_days", label: "30 Days" },
+              { id: "august_2026", label: "August 2026" },
               { id: "this_month", label: "This Month" },
-              { id: "this_year", label: "This Year" }
+              { id: "this_year", label: "This Year" },
+              { id: "all", label: "All Time" }
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setPeriod(tab.id)}
-                className={`px-3 py-1 rounded-lg transition-all ${
-                  period === tab.id
+                onClick={() => handlePresetSelect(tab.id)}
+                className={`px-2.5 py-1 rounded-lg transition-all ${
+                  periodPreset === tab.id
                     ? "bg-white text-indigo-700 shadow-xs font-bold"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
@@ -93,9 +180,32 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             ))}
           </div>
 
+          {/* Custom Date Range */}
+          <div className="flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-200 p-1 rounded-xl">
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => { setDateFrom(e.target.value); setSelectedMonth(""); setPeriodPreset("custom"); }}
+              className="px-2 py-1 rounded-lg border border-slate-200 bg-white text-xs"
+            />
+            <span className="text-slate-400 text-xs">to</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => { setDateTo(e.target.value); setSelectedMonth(""); setPeriodPreset("custom"); }}
+              className="px-2 py-1 rounded-lg border border-slate-200 bg-white text-xs"
+            />
+            <button
+              onClick={handleApplyCustomDates}
+              className="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-semibold text-xs shadow-2xs hover:bg-indigo-700 transition-colors"
+            >
+              Apply
+            </button>
+          </div>
+
           <button
-            onClick={() => loadData(period)}
-            className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors"
+            onClick={() => loadData(selectedMonth, dateFrom, dateTo)}
+            className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors shadow-2xs"
             title="Refresh Metrics"
           >
             <RefreshCw className="w-4 h-4" />
@@ -277,7 +387,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               <p className="text-xs text-slate-500 font-medium">Daily Sales, Purchases & Operating Expenses</p>
             </div>
             <span className="text-xs px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-semibold uppercase tracking-wider">
-              {period.replace("_", " ")}
+              {selectedMonth === "2026-08"
+                ? "August 2026"
+                : selectedMonth === "all" || (!dateFrom && !dateTo)
+                ? "All Records"
+                : (dateFrom ? `${dateFrom} - ${dateTo}` : "Custom Scope")}
             </span>
           </div>
 
@@ -293,6 +407,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     <stop offset="5%" stopColor="#ec4899" stopOpacity={0.3}/>
                     <stop offset="95%" stopColor="#ec4899" stopOpacity={0.0}/>
                   </linearGradient>
+                  <linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.0}/>
+                  </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#94a3b8" />
@@ -304,6 +422,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 <Legend />
                 <Area type="monotone" dataKey="sales" name="Sales" stroke="#4f46e5" strokeWidth={2.5} fillOpacity={1} fill="url(#salesGrad)" />
                 <Area type="monotone" dataKey="purchases" name="Purchases" stroke="#ec4899" strokeWidth={2} fillOpacity={1} fill="url(#purGrad)" />
+                <Area type="monotone" dataKey="expenses" name="Expenses" stroke="#f59e0b" strokeWidth={2} fillOpacity={1} fill="url(#expGrad)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>

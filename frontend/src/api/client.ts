@@ -40,11 +40,19 @@ export const api = {
   me: () => apiFetch<any>("/auth/me"),
 
   // Dashboard
-  getDashboardMetrics: () => apiFetch<any>("/dashboard/metrics"),
-  getDashboardCharts: (period: string = "30_days", startDate?: string, endDate?: string) => {
+  getDashboardMetrics: (params?: { date_from?: string; date_to?: string; month?: string }) => {
+    const query = new URLSearchParams();
+    if (params?.date_from) query.append("date_from", params.date_from);
+    if (params?.date_to) query.append("date_to", params.date_to);
+    if (params?.month) query.append("month", params.month);
+    const qs = query.toString();
+    return apiFetch<any>(`/dashboard/metrics${qs ? `?${qs}` : ""}`);
+  },
+  getDashboardCharts: (period: string = "30_days", startDate?: string, endDate?: string, month?: string) => {
     let url = `/dashboard/charts?period=${period}`;
     if (startDate) url += `&start_date=${startDate}`;
     if (endDate) url += `&end_date=${endDate}`;
+    if (month) url += `&month=${month}`;
     return apiFetch<any>(url);
   },
   getLowStockAlerts: () => apiFetch<any[]>("/dashboard/low-stock-alerts"),

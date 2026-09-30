@@ -5,8 +5,8 @@ import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react";
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
-  const [email, setEmail] = useState("shahidkhan@pos.com");
-  const [password, setPassword] = useState("posUfone@123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 

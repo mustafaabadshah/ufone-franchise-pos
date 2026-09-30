@@ -85,14 +85,20 @@ If you want an immediate live link on the internet right now from your running m
    ```
 3. It will give you a public URL (e.g. `https://xxxx.ngrok-free.app` or `https://xxxx.trycloudflare.com`) that anyone can open on mobile or PC anywhere in the world!
 
----
+### Secure User Roles & Account Architecture
 
-### Default Login Credentials for Live System
+To safeguard your production franchise operations, **passwords and encryption keys are strictly omitted from public repository documentation**. Configure your administrator secrets privately through your cloud hosting environment variables.
 
-| Role | Email | Password |
-|---|---|---|
-| **Franchise Owner / Admin** | `shahidkhan@pos.com` | `posUfone@123` |
-| **Manager** | `manager@pos.com` | `posUfone@123` |
-| **Reports Viewer (Islam Badshah)** | `islambadshah@pos.com` | `posUfone@123` |
-| **Cashier / POS** | `cashier@pos.com` | `posUfone@123` |
-| **RSO Officer** | `rso1@pos.com` | `posUfone@123` |
+| Role | Authorized User | System Access Level | Initial Setup Guideline |
+|---|---|---|---|
+| **Franchise Incharge / Admin** | `shahidkhan@pos.com` | Full Operations & POS Master | Set via private environment secret or admin panel |
+| **Franchise Owner (Audit View)** | `islambadshah@pos.com` | Executive Audits, Reports, P&L (Viewer) | Restricted read-only executive access |
+| **Operations Manager** | `manager@pos.com` | Inventory, Stock & Staff Dispatch | Standard operational profile |
+| **Cashier / POS Terminal** | `cashier@pos.com` | POS Counter & Sales Billing | Counter billing terminal |
+| **RSO Field Officer** | `rso1@pos.com` | Daily Route Sales & Float Management | Field distribution profile |
+
+> [!IMPORTANT]
+> **Production Security Best Practice:**
+> 1. Set `SECRET_KEY` and initial admin credentials in your **Render Environment Variables** dashboard (or local `.env` file). Never push private passwords to public git repositories.
+> 2. Change all default passwords immediately after your first sign-in via the **Administration > Users & Access** panel.
+> 3. Security audit events are recorded in real time under the **Security Audit Logs** tab.

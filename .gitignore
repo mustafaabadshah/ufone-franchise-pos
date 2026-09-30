@@ -3,7 +3,17 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+# Environment & Secrets (Centralized Security)
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+credentials.json
+secrets.json
+private_config.json
+
 .venv
 env/
 venv/

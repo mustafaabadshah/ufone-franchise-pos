@@ -15,29 +15,68 @@ from app.models.models import (
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 @router.get("/metrics")
-def get_dashboard_metrics(db: Session = Depends(get_db)):
+def get_dashboard_metrics(
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    month: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    if month and month != "all":
+        try:
+            parts = month.split("-")
+            y, m = int(parts[0]), int(parts[1])
+            date_from = date(y, m, 1)
+            next_m = date_from.replace(day=28) + timedelta(days=4)
+            date_to = next_m - timedelta(days=next_m.day)
+        except Exception:
+            pass
+
     today = date.today()
     
+    # Query filters
+    sales_q = db.query(Sale)
+    purchases_q = db.query(Purchase)
+    expenses_q = db.query(Expense)
+    salaries_q = db.query(Salary)
+    returns_q = db.query(Return)
+    commissions_q = db.query(Commission)
+
+    if date_from:
+        sales_q = sales_q.filter(Sale.sale_date >= date_from)
+        purchases_q = purchases_q.filter(Purchase.purchase_date >= date_from)
+        expenses_q = expenses_q.filter(Expense.paid_date >= date_from)
+        salaries_q = salaries_q.filter(Salary.paid_on >= date_from)
+        returns_q = returns_q.filter(Return.return_date >= date_from)
+        commissions_q = commissions_q.filter(Commission.date >= date_from)
+
+    if date_to:
+        sales_q = sales_q.filter(Sale.sale_date <= date_to)
+        purchases_q = purchases_q.filter(Purchase.purchase_date <= date_to)
+        expenses_q = expenses_q.filter(Expense.paid_date <= date_to)
+        salaries_q = salaries_q.filter(Salary.paid_on <= date_to)
+        returns_q = returns_q.filter(Return.return_date <= date_to)
+        commissions_q = commissions_q.filter(Commission.date <= date_to)
+
     # Sales
     today_sales_sum = db.query(func.coalesce(func.sum(Sale.total_amount), 0)).filter(Sale.sale_date == today).scalar()
-    total_sales_sum = db.query(func.coalesce(func.sum(Sale.total_amount), 0)).scalar()
+    total_sales_sum = sales_q.with_entities(func.coalesce(func.sum(Sale.total_amount), 0)).scalar()
 
     # Purchases
     today_purchases_sum = db.query(func.coalesce(func.sum(Purchase.total_amount), 0)).filter(Purchase.purchase_date == today).scalar()
-    total_purchases_sum = db.query(func.coalesce(func.sum(Purchase.total_amount), 0)).scalar()
-    purchase_due = db.query(func.coalesce(func.sum(Purchase.due_amount), 0)).scalar()
-    pending_purchases = db.query(Purchase).filter(Purchase.payment_status.in_(["Due", "Partial", "Loan"])).count()
+    total_purchases_sum = purchases_q.with_entities(func.coalesce(func.sum(Purchase.total_amount), 0)).scalar()
+    purchase_due = purchases_q.with_entities(func.coalesce(func.sum(Purchase.due_amount), 0)).scalar()
+    pending_purchases = purchases_q.filter(Purchase.payment_status.in_(["Due", "Partial", "Loan"])).count()
 
     # Expenses
     today_expenses_sum = db.query(func.coalesce(func.sum(Expense.amount), 0)).filter(Expense.paid_date == today).scalar()
-    total_expenses_sum = db.query(func.coalesce(func.sum(Expense.amount), 0)).scalar()
+    total_expenses_sum = expenses_q.with_entities(func.coalesce(func.sum(Expense.amount), 0)).scalar()
 
     # Salaries
-    total_salaries_sum = db.query(func.coalesce(func.sum(Salary.salary_given), 0)).scalar()
+    total_salaries_sum = salaries_q.with_entities(func.coalesce(func.sum(Salary.salary_given), 0)).scalar()
 
-    # Profit & Loss (Today & Overall)
+    # Profit & Loss (Selected range and Today)
     today_pnl = calculate_profit_and_loss(db, start_date=today, end_date=today)
-    overall_pnl = calculate_profit_and_loss(db)
+    overall_pnl = calculate_profit_and_loss(db, start_date=date_from, end_date=date_to)
 
     # Company Credit Outstanding
     company_credit_outstanding = db.query(func.coalesce(func.sum(CompanyCreditAccount.outstanding), 0)).scalar()
@@ -186,13 +225,27 @@ def get_dashboard_metrics(db: Session = Depends(get_db)):
 
 @router.get("/charts")
 def get_dashboard_charts(
-    period: str = Query("30_days", description="today, 7_days, 30_days, this_month, this_year, custom"),
+    period: str = Query("30_days", description="today, 7_days, 30_days, this_month, this_year, custom, all"),
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
+    month: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     today = date.today()
-    if period == "today":
+    if month and month != "all":
+        try:
+            parts = month.split("-")
+            y, m = int(parts[0]), int(parts[1])
+            start = date(y, m, 1)
+            next_m = start.replace(day=28) + timedelta(days=4)
+            end = next_m - timedelta(days=next_m.day)
+        except Exception:
+            start = today - timedelta(days=29)
+            end = today
+    elif start_date and end_date:
+        start = start_date
+        end = end_date
+    elif period == "today":
         start = today
         end = today
     elif period == "7_days":
@@ -207,9 +260,13 @@ def get_dashboard_charts(
     elif period == "this_year":
         start = today.replace(month=1, day=1)
         end = today
-    elif period == "custom" and start_date and end_date:
-        start = start_date
-        end = end_date
+    elif period == "all":
+        # Search for earliest transaction date or default to 2026-08-01
+        earliest_sale = db.query(func.min(Sale.sale_date)).scalar()
+        earliest_exp = db.query(func.min(Expense.paid_date)).scalar()
+        dates = [d for d in [earliest_sale, earliest_exp] if d is not None]
+        start = min(dates) if dates else date(2026, 8, 1)
+        end = max(today, date(2026, 8, 31))
     else:
         start = today - timedelta(days=29)
         end = today
