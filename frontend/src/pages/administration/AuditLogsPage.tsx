@@ -67,7 +67,7 @@ export default function AuditLogsPage() {
             Immutable forensic audit log tracking who made changes, timestamp, entity affected, and before/after values
           </p>
         </div>
-        <ExportPrintButtons title="Security Audit Log" targetId="audit-logs-table" />
+        <ExportPrintButtons reportType="audit" title="Security Audit Log" targetId="audit-logs-table" />
       </div>
 
       {/* KPI Summary */}

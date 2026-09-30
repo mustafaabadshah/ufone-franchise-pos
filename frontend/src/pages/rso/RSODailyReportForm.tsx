@@ -7,7 +7,7 @@ import { api } from "../../api/client";
 import { RSO, RSODailyReport, RSOItem } from "../../types";
 import { Modal } from "../../components/common/Modal";
 import { StatusBadge } from "../../components/common/StatusBadge";
-import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
+import { ExportPrintButtons, printTargetContent } from "../../components/common/ExportPrintButtons";
 
 export const RSODailyReportForm: React.FC = () => {
   const [reports, setReports] = useState<RSODailyReport[]>([]);
@@ -162,7 +162,7 @@ export const RSODailyReportForm: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <ExportPrintButtons reportType="sales" />
+          <ExportPrintButtons reportType="rso" title="RSO Daily Sales Reports" targetId="rso-reports-table" />
           <button
             onClick={() => setIsCreateOpen(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
@@ -210,7 +210,7 @@ export const RSODailyReportForm: React.FC = () => {
       </div>
 
       {/* Reports Table */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
+      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden" id="rso-reports-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200/60 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
@@ -513,7 +513,7 @@ export const RSODailyReportForm: React.FC = () => {
         maxWidth="3xl"
       >
         {currentReport && (
-          <div className="space-y-4 print-container text-xs">
+          <div className="space-y-4 print-container text-xs" id="rso-voucher-printable">
             {/* Physical Report Header */}
             <div className="text-center pb-3 border-b-2 border-slate-900">
               <h2 className="text-lg font-extrabold uppercase tracking-wide">Ufone 4G Authorized Franchise</h2>
@@ -600,8 +600,8 @@ export const RSODailyReportForm: React.FC = () => {
 
             <div className="flex justify-end pt-3 no-print">
               <button
-                onClick={() => window.print()}
-                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/30"
+                onClick={() => printTargetContent('rso-voucher-printable', `RSO Daily Report - ${currentReport?.report_code || ''}`)}
+                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/30 cursor-pointer"
               >
                 <Printer className="w-4 h-4" />
                 <span>Print Physical Sheet</span>

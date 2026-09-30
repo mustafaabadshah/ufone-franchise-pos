@@ -115,7 +115,7 @@ export default function StaffList() {
           <p className="text-sm text-slate-500 mt-1">Manage franchise personnel, RSO sales agents, base salaries, and roles</p>
         </div>
         <div className="flex items-center gap-3">
-          <ExportPrintButtons title="Staff Directory" targetId="staff-table" />
+          <ExportPrintButtons reportType="staff" title="Staff Directory" targetId="staff-table" />
           <button
             onClick={handleOpenAdd}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"

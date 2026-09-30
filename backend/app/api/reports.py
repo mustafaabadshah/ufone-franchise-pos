@@ -11,7 +11,8 @@ from app.core.database import get_db
 from app.core.accounting_engine import calculate_profit_and_loss
 from app.models.models import (
     Sale, Purchase, Expense, Salary, Return, RetailerCollection,
-    CompanyCreditTransaction, Investment, Commission, Product, RSO, Retailer, Staff, RSOSalary
+    CompanyCreditTransaction, Investment, Commission, Product, RSO, Retailer, Staff, RSOSalary,
+    EasyLoadTransaction, AuditLog, LedgerTransaction, LedgerEntry, LedgerAccount
 )
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -514,6 +515,70 @@ def export_report_excel(
         for e in exps:
             ws.append([e.title, e.category, str(e.paid_date), float(e.amount), e.paid_by_name or "", e.payment_method, e.remarks or ""])
 
+    elif report_type == "salaries":
+        ws.append(["Staff / Officer Name", "Designation", "Month", "Basic (PKR)", "Bonus / Allowances (PKR)", "Deductions (PKR)", "Net Salary Paid (PKR)", "Payment Date", "Method", "Status"])
+        sals = db.query(Salary).order_by(Salary.paid_on.desc()).all()
+        for s in sals:
+            s_name = s.staff_member.name if s.staff_member else "Employee"
+            s_role = s.staff_member.role if s.staff_member else "Staff"
+            ws.append([s_name, s_role, s.month, float(s.basic_salary), float(s.bonus + s.allowances + s.commission), float(s.deductions), float(s.salary_given), str(s.paid_on), s.payment_method, s.status])
+
+    elif report_type == "retailers":
+        ws.append(["Retailer Name", "Shop Name", "Phone", "Route / Sector", "Address", "Outstanding Credit Balance (PKR)", "Status"])
+        rets = db.query(Retailer).order_by(Retailer.balance.desc()).all()
+        for r in rets:
+            ws.append([r.name, r.shop_name or "", r.phone or "", r.route or "", r.address or "", float(r.balance), r.status])
+
+    elif report_type == "rso":
+        ws.append(["RSO Officer Name", "Route", "Mobile", "Opening Float Balance (PKR)", "Current Balance (PKR)", "EasyLoad Balance (PKR)", "Status"])
+        rsos = db.query(RSO).all()
+        for r in rsos:
+            ws.append([r.name, r.route or "", r.mobile or "", float(r.opening_balance), float(r.current_balance), float(r.easyload_balance), r.status])
+
+    elif report_type == "ledger":
+        ws.append(["Tx Code", "Date & Time", "Description", "Ref Type", "Account Code", "Account Name", "Entry Type", "Amount (PKR)", "Memo"])
+        txs = db.query(LedgerTransaction).order_by(LedgerTransaction.date.desc()).all()
+        for tx in txs:
+            for e in tx.entries:
+                ws.append([
+                    tx.tx_code, str(tx.date), tx.description, tx.reference_type,
+                    e.account.code if e.account else "",
+                    e.account.name if e.account else "",
+                    e.entry_type.value if hasattr(e.entry_type, "value") else str(e.entry_type),
+                    float(e.amount), e.memo or ""
+                ])
+
+    elif report_type == "staff":
+        ws.append(["Staff Name", "Role / Designation", "Phone", "Email", "Monthly Basic (PKR)", "Status"])
+        staff_members = db.query(Staff).all()
+        for st in staff_members:
+            ws.append([st.name, st.role, st.phone or "", st.email or "", float(st.salary_rate), "Active" if st.is_active else "Inactive"])
+
+    elif report_type == "returns":
+        ws.append(["Return Invoice", "Date", "Original Sale Invoice", "Return Type", "Reason", "Refund Amount (PKR)", "Status"])
+        rets = db.query(Return).order_by(Return.return_date.desc()).all()
+        for ret in rets:
+            sale_inv = ret.sale.invoice_number if ret.sale else ""
+            ws.append([ret.return_number, str(ret.return_date), sale_inv, ret.return_type, ret.reason or "", float(ret.refunded_amount), ret.status])
+
+    elif report_type == "easyload":
+        ws.append(["Date & Time", "MSISDN / Mobile", "Agent / Retailer", "RSO", "Type", "Amount (PKR)", "Commission (PKR)", "Status"])
+        el_txs = db.query(EasyLoadTransaction).order_by(EasyLoadTransaction.date.desc()).all()
+        for el in el_txs:
+            ws.append([str(el.date), el.msisdn, el.retailer.name if el.retailer else "", el.rso.name if el.rso else "", el.transaction_type, float(el.amount), float(el.commission), el.status])
+
+    elif report_type == "commissions":
+        ws.append(["Date", "Commission Head / Type", "Amount (PKR)", "Reference Month / Period", "Remarks"])
+        comms = db.query(Commission).order_by(Commission.date.desc()).all()
+        for c in comms:
+            ws.append([str(c.date), c.commission_type, float(c.amount), c.reference_month or "", c.remarks or ""])
+
+    elif report_type == "audit":
+        ws.append(["Timestamp", "User Email", "Action", "Entity", "Entity ID", "Details"])
+        logs = db.query(AuditLog).order_by(AuditLog.timestamp.desc()).limit(1000).all()
+        for l in logs:
+            ws.append([str(l.timestamp), l.user_email or "", l.action, l.entity, str(l.entity_id or ""), l.details or ""])
+
     elif report_type == "pnl":
         ws.append(["Statement of Profit & Loss - Executive Audit Summary", "Amount (PKR)"])
         pnl = calculate_profit_and_loss(db, start_date=date_from, end_date=date_to)
@@ -580,6 +645,51 @@ def export_report_csv(
         writer.writerow(["SKU", "Product", "Current Stock", "Alert Qty", "Cost", "Price", "Valuation"])
         for p in db.query(Product).all():
             writer.writerow([p.sku, p.name, float(p.current_stock), float(p.alert_quantity), float(p.avg_cost), float(p.selling_price), float(p.current_stock * p.avg_cost)])
+    elif report_type == "salaries":
+        writer.writerow(["Staff Name", "Role", "Month", "Basic", "Allowances/Bonus", "Net Paid", "Date", "Status"])
+        for s in db.query(Salary).all():
+            s_name = s.staff_member.name if s.staff_member else "Employee"
+            s_role = s.staff_member.role if s.staff_member else "Staff"
+            writer.writerow([s_name, s_role, s.month, float(s.basic_salary), float(s.bonus + s.allowances + s.commission), float(s.salary_given), str(s.paid_on), s.status])
+    elif report_type == "retailers":
+        writer.writerow(["Name", "Shop Name", "Phone", "Route", "Balance", "Status"])
+        for r in db.query(Retailer).all():
+            writer.writerow([r.name, r.shop_name or "", r.phone or "", r.route or "", float(r.balance), r.status])
+    elif report_type == "rso":
+        writer.writerow(["RSO Name", "Route", "Mobile", "Opening Balance", "Current Balance", "EasyLoad Balance", "Status"])
+        for r in db.query(RSO).all():
+            writer.writerow([r.name, r.route or "", r.mobile or "", float(r.opening_balance), float(r.current_balance), float(r.easyload_balance), r.status])
+    elif report_type == "purchases":
+        writer.writerow(["Invoice", "Date", "Supplier", "Total Amount", "Paid", "Due", "Status"])
+        for p in db.query(Purchase).all():
+            writer.writerow([p.invoice_number, str(p.purchase_date), p.company_name or "", float(p.total_amount), float(p.paid_amount), float(p.due_amount), p.payment_status])
+    elif report_type == "ledger":
+        writer.writerow(["Tx Code", "Date", "Description", "Ref Type", "Account", "Entry Type", "Amount", "Memo"])
+        for tx in db.query(LedgerTransaction).order_by(LedgerTransaction.date.desc()).all():
+            for e in tx.entries:
+                acc_name = f"{e.account.code} - {e.account.name}" if e.account else ""
+                writer.writerow([tx.tx_code, str(tx.date), tx.description, tx.reference_type, acc_name, str(e.entry_type), float(e.amount), e.memo or ""])
+    elif report_type == "staff":
+        writer.writerow(["Staff Name", "Role", "Phone", "Email", "Monthly Basic", "Status"])
+        for st in db.query(Staff).all():
+            writer.writerow([st.name, st.role, st.phone or "", st.email or "", float(st.salary_rate), "Active" if st.is_active else "Inactive"])
+    elif report_type == "returns":
+        writer.writerow(["Return Invoice", "Date", "Original Sale", "Type", "Reason", "Refund Amount", "Status"])
+        for ret in db.query(Return).all():
+            sale_inv = ret.sale.invoice_number if ret.sale else ""
+            writer.writerow([ret.return_number, str(ret.return_date), sale_inv, ret.return_type, ret.reason or "", float(ret.refunded_amount), ret.status])
+    elif report_type == "easyload":
+        writer.writerow(["Date", "MSISDN", "Retailer", "RSO", "Type", "Amount", "Commission", "Status"])
+        for el in db.query(EasyLoadTransaction).all():
+            writer.writerow([str(el.date), el.msisdn, el.retailer.name if el.retailer else "", el.rso.name if el.rso else "", el.transaction_type, float(el.amount), float(el.commission), el.status])
+    elif report_type == "commissions":
+        writer.writerow(["Date", "Commission Head", "Amount", "Period", "Remarks"])
+        for c in db.query(Commission).all():
+            writer.writerow([str(c.date), c.commission_type, float(c.amount), c.reference_month or "", c.remarks or ""])
+    elif report_type == "audit":
+        writer.writerow(["Timestamp", "User Email", "Action", "Entity", "Entity ID", "Details"])
+        for l in db.query(AuditLog).order_by(AuditLog.timestamp.desc()).limit(1000).all():
+            writer.writerow([str(l.timestamp), l.user_email or "", l.action, l.entity, str(l.entity_id or ""), l.details or ""])
     else:
         writer.writerow(["Title", "Category", "Amount", "Date"])
         for e in db.query(Expense).all():

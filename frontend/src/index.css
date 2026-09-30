@@ -29,38 +29,129 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   background: #94a3b8;
 }
 
-/* Print Layout Optimization */
+/* Multi-Page Print Layout Engine */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm 14mm 10mm;
+  }
+
+  /* Critical: Unclip and reset heights on all root and layout wrappers so multi-page pagination works */
+  html,
+  body,
+  #root,
+  #root > div,
+  main,
+  div,
+  section,
+  article,
+  .h-screen,
+  .min-h-screen,
+  .overflow-hidden,
+  .overflow-y-auto,
+  .overflow-x-auto,
+  .flex-1 {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+    float: none !important;
+  }
+
   body {
     background: #ffffff !important;
-    color: #000000 !important;
-    font-size: 11pt !important;
+    color: #0f172a !important;
+    font-size: 10pt !important;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  .no-print, nav, aside, header, .print-hidden {
+
+  /* Hide navigation, sidebar, headers, modals' backdrop and UI controls */
+  .no-print,
+  nav,
+  aside,
+  header,
+  .print-hidden,
+  button:not(.print-include) {
     display: none !important;
   }
+
   .print-only {
     display: block !important;
   }
+
   .print-container {
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
+    overflow: visible !important;
   }
+
+  /* Multi-page Table Pagination */
   table {
     border-collapse: collapse !important;
     width: 100% !important;
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+    margin-bottom: 12px !important;
   }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  tfoot {
+    display: table-footer-group !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
   th, td {
-    border: 1px solid #000000 !important;
-    padding: 6px 8px !important;
-    font-size: 9pt !important;
+    padding: 5px 8px !important;
+    font-size: 8.5pt !important;
+    border: 1px solid #cbd5e1 !important;
   }
+
   th {
     background-color: #f1f5f9 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Page break helpers */
+  .page-break,
+  .break-after-page {
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
+  .page-break-before {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+
+  .break-inside-avoid,
+  .avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Remove shadows and excessive padding on cards when printing */
+  .rounded-2xl,
+  .rounded-xl,
+  .shadow-xs,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg {
+    box-shadow: none !important;
+    border-radius: 6px !important;
   }
 }

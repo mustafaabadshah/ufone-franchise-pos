@@ -14,6 +14,7 @@ import {
 } from "recharts";
 
 import { FranchiseFinancialEquationCard } from "../../components/dashboard/FranchiseFinancialEquationCard";
+import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
 
 interface DashboardProps {
   onNavigate: (tabId: string) => void;
@@ -119,7 +120,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="p-6 space-y-6 max-w-7xl mx-auto" id="dashboard-printable-area">
       {/* Overview & Specific Month Filter Banner */}
       <div className="rounded-2xl bg-white border border-slate-200/80 p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
@@ -136,6 +137,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           <p className="text-xs text-slate-500 mt-1 font-medium">
             Live sales turnover, telecom airtime float, inventory solvency, expenditures, and audited net profit.
           </p>
+          <div className="mt-3 no-print">
+            <ExportPrintButtons
+              title={`Ufone Franchise Dashboard - ${selectedMonth === "2026-08" ? "August 2026" : (selectedMonth || "Audit")}`}
+              targetId="dashboard-printable-area"
+              reportType="pnl"
+            />
+          </div>
         </div>
 
         {/* Specific Month & Date Filters */}

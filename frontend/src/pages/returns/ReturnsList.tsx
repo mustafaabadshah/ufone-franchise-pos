@@ -93,7 +93,7 @@ export default function ReturnsList() {
           <p className="text-sm text-slate-500 mt-1">Manage product defect returns, stock restock reversals, and investor capital payouts</p>
         </div>
         <div className="flex items-center gap-3">
-          <ExportPrintButtons title="Returns Log" targetId="returns-table" />
+          <ExportPrintButtons reportType="returns" title="Returns Log" targetId="returns-table" />
           <button
             onClick={() => setShowModal(true)}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"

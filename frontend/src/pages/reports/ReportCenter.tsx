@@ -282,7 +282,7 @@ export default function ReportCenter() {
 
         {/* MONTHLY VIEW (Full Multi-Section Executive Audit matching August.xlsx) */}
         {activeTab === 'monthly' && (
-          <div className="space-y-8" id="report-printable-area">
+          <div className="space-y-8">
             {/* Document Header */}
             <div className="text-center pb-6 border-b-2 border-slate-900 bg-white p-6 rounded-2xl shadow-xs">
               <span className="text-[11px] font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full uppercase tracking-wider border border-amber-200">

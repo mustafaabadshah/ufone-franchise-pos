@@ -98,7 +98,7 @@ export default function EasyLoadList() {
           <p className="text-sm text-slate-500 mt-1">Ufone franchise e-load transfers to retailers, direct subscriber top-ups & commissions</p>
         </div>
         <div className="flex items-center gap-3">
-          <ExportPrintButtons title="EasyLoad Transactions" targetId="easyload-table" />
+          <ExportPrintButtons reportType="easyload" title="EasyLoad Transactions" targetId="easyload-table" />
           <button
             onClick={() => setShowModal(true)}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"

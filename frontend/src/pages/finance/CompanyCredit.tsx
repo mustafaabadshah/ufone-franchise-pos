@@ -8,7 +8,7 @@ import { CompanyCreditAccount } from "../../types";
 import { MetricCard } from "../../components/common/MetricCard";
 import { Modal } from "../../components/common/Modal";
 import { StatusBadge } from "../../components/common/StatusBadge";
-import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
+import { ExportPrintButtons, printTargetContent } from "../../components/common/ExportPrintButtons";
 
 export const CompanyCredit: React.FC = () => {
   const [accounts, setAccounts] = useState<CompanyCreditAccount[]>([]);
@@ -93,7 +93,7 @@ export const CompanyCredit: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <ExportPrintButtons reportType="purchases" />
+          <ExportPrintButtons reportType="purchases" title="Company Credit Facility & Ledger" targetId="company-credit-table" />
         </div>
       </div>
 
@@ -123,7 +123,7 @@ export const CompanyCredit: React.FC = () => {
       </div>
 
       {/* Credit Accounts Table */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
+      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden" id="company-credit-table">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <h3 className="text-base font-bold font-heading text-slate-800">Company Credit Accounts</h3>
           <span className="text-xs text-slate-500">{accounts.length} active credit facility lines</span>
@@ -275,7 +275,7 @@ export const CompanyCredit: React.FC = () => {
         maxWidth="3xl"
       >
         {statementData && (
-          <div className="space-y-4 text-xs">
+          <div className="space-y-4 text-xs" id="credit-statement-printable">
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-3 gap-3 font-mono">
               <div>
                 <p className="text-slate-500 font-sans text-[10px] uppercase">Total Credit</p>
@@ -319,10 +319,10 @@ export const CompanyCredit: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-end pt-2 no-print">
               <button
-                onClick={() => window.print()}
-                className="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-semibold text-slate-700"
+                onClick={() => printTargetContent('credit-statement-printable', `Company Credit Statement - ${statementData?.company_name || 'Ufone'}`)}
+                className="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-semibold text-slate-700 cursor-pointer"
               >
                 Print Statement
               </button>

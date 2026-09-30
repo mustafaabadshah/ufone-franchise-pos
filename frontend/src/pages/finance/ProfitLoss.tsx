@@ -143,7 +143,7 @@ export const ProfitLoss: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <ExportPrintButtons reportType="pnl" title="Ufone Franchise Dargai - Profit & Loss Statement" />
+          <ExportPrintButtons reportType="pnl" title="Ufone Franchise Dargai - Profit & Loss Statement" targetId="pnl-printable-area" />
         </div>
       </div>
 

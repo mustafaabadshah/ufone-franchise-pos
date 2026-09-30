@@ -144,7 +144,7 @@ export const SalariesList: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <ExportPrintButtons reportType="sales" />
+          <ExportPrintButtons reportType="salaries" title="Staff Salaries & Payroll" targetId="salaries-printable-area" />
           {!isViewer && (
             <button
               onClick={() => setIsCreateOpen(true)}
@@ -278,8 +278,10 @@ export const SalariesList: React.FC = () => {
         </button>
       </div>
 
-      {/* RSO SALARY SHEET (Exact Monthly Audit View from August.xlsx) */}
-      {activeTab === 'rso_sheet' ? (
+      {/* Printable Area Wrapper */}
+      <div id="salaries-printable-area" className="space-y-6">
+        {/* RSO SALARY SHEET (Exact Monthly Audit View from August.xlsx) */}
+        {activeTab === 'rso_sheet' ? (
         <div id="rso-salary-sheet" className="rounded-2xl bg-white border border-slate-300 shadow-sm overflow-hidden">
           {/* Header Banner */}
           <div className="bg-slate-200 text-slate-900 py-3.5 px-6 border-b border-slate-300 text-center font-bold text-base sm:text-lg tracking-wide uppercase font-serif">
@@ -440,6 +442,7 @@ export const SalariesList: React.FC = () => {
         </div>
       </div>
       )}
+      </div>
 
       {/* Add Salary Modal (Matching Reference Fields: Staff Name, Salary, Salary Given, Paid On, Paid By, Payment Method, Remaining) */}
       <Modal

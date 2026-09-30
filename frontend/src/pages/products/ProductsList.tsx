@@ -131,7 +131,7 @@ export const ProductsList: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <ExportPrintButtons reportType="stock" />
+          <ExportPrintButtons reportType="stock" title="Product Catalog & Stock" targetId="products-table" />
           <button
             onClick={() => setIsCreateOpen(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
@@ -168,7 +168,7 @@ export const ProductsList: React.FC = () => {
       </div>
 
       {/* Products Table (Mirroring Reference App) */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
+      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden" id="products-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200/60 text-slate-500 font-bold uppercase tracking-wider text-[11px]">

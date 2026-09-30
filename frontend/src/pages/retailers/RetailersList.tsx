@@ -95,7 +95,7 @@ export default function RetailersList() {
           <p className="text-sm text-slate-500 mt-1">Manage partner retail shops, credit balances, and cash collections</p>
         </div>
         <div className="flex items-center gap-3">
-          <ExportPrintButtons title="Retailers Directory" targetId="retailers-table" />
+          <ExportPrintButtons reportType="retailers" title="Retailers Directory" targetId="retailers-table" />
           {!isViewer && (
             <button
               onClick={() => setShowCreateModal(true)}

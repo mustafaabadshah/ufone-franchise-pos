@@ -71,7 +71,7 @@ export default function Commissions() {
           <p className="text-sm text-slate-500 mt-1">Ufone telco commission targets, MNP bonuses, SIM activation incentives, and payout tracking</p>
         </div>
         <div className="flex items-center gap-3">
-          <ExportPrintButtons title="Commissions & Incentives" targetId="commissions-table" />
+          <ExportPrintButtons reportType="commissions" title="Commissions & Incentives" targetId="commissions-table" />
           <button
             onClick={() => setShowModal(true)}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"

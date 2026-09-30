@@ -42,7 +42,7 @@ export const Ledger: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <ExportPrintButtons reportType="sales" />
+          <ExportPrintButtons reportType="ledger" title="General Ledger & Transactions Audit" targetId="ledger-printable-area" />
         </div>
       </div>
 
@@ -61,7 +61,7 @@ export const Ledger: React.FC = () => {
       </div>
 
       {/* Transactions Journal */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
+      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden" id="ledger-printable-area">
         <div className="px-6 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
           <div>
             <h3 className="text-base font-bold font-heading text-slate-800">Double-Entry Transaction Journal</h3>

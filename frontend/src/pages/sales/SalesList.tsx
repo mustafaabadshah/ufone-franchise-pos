@@ -8,7 +8,7 @@ import { Sale, Product, Staff, Retailer, RSO } from "../../types";
 import { MetricCard } from "../../components/common/MetricCard";
 import { Modal } from "../../components/common/Modal";
 import { StatusBadge } from "../../components/common/StatusBadge";
-import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
+import { ExportPrintButtons, printTargetContent } from "../../components/common/ExportPrintButtons";
 import { useAuth } from "../../context/AuthContext";
 
 interface SalesListProps {
@@ -204,7 +204,7 @@ export const SalesList: React.FC<SalesListProps> = ({ initialOpenPos = false }) 
         </div>
 
         <div className="flex items-center gap-3">
-          <ExportPrintButtons reportType="sales" />
+          <ExportPrintButtons reportType="sales" title="Sales Transactions Register" targetId="sales-table" />
           {!isViewer && (
             <button
               onClick={() => setIsCreateOpen(true)}
@@ -316,7 +316,7 @@ export const SalesList: React.FC<SalesListProps> = ({ initialOpenPos = false }) 
       </div>
 
       {/* Sales Table (Matching Reference Columns: S.No, Title, Product, Quantity, Total Amount, Paid Amount, Remaining, Actions) */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
+      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden" id="sales-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200/60 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
@@ -624,7 +624,7 @@ export const SalesList: React.FC<SalesListProps> = ({ initialOpenPos = false }) 
         maxWidth="lg"
       >
         {selectedSale && (
-          <div className="space-y-4 text-xs font-mono">
+          <div className="space-y-4 text-xs font-mono" id="thermal-receipt-printable">
             <div className="text-center pb-3 border-b border-dashed border-slate-300 font-sans">
               <h3 className="text-base font-bold text-slate-900">Ufone Franchise - Dargai Office</h3>
               <p className="text-[11px] text-slate-500">Main Bazar, Dargai, Malakand, KP</p>
@@ -677,8 +677,8 @@ export const SalesList: React.FC<SalesListProps> = ({ initialOpenPos = false }) 
 
             <div className="flex justify-end gap-2 pt-2 no-print">
               <button
-                onClick={() => window.print()}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-sans font-semibold text-xs flex items-center gap-1.5"
+                onClick={() => printTargetContent('thermal-receipt-printable', `Thermal Receipt - ${selectedSale.invoice_number}`)}
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-sans font-semibold text-xs flex items-center gap-1.5 cursor-pointer"
               >
                 <Printer className="w-3.5 h-3.5" />
                 <span>Print Thermal Receipt</span>

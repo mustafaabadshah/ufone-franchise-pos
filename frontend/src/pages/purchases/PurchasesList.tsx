@@ -8,7 +8,7 @@ import { Purchase, Product, Investment } from "../../types";
 import { MetricCard } from "../../components/common/MetricCard";
 import { Modal } from "../../components/common/Modal";
 import { StatusBadge } from "../../components/common/StatusBadge";
-import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
+import { ExportPrintButtons, printTargetContent } from "../../components/common/ExportPrintButtons";
 import { useAuth } from "../../context/AuthContext";
 
 export const PurchasesList: React.FC = () => {
@@ -168,7 +168,7 @@ export const PurchasesList: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <ExportPrintButtons reportType="purchases" />
+          <ExportPrintButtons reportType="purchases" title="Purchases Register" targetId="purchases-table" />
           {!isViewer && (
             <button
               onClick={() => setIsCreateOpen(true)}
@@ -277,7 +277,7 @@ export const PurchasesList: React.FC = () => {
       </div>
 
       {/* Purchases Table (Matching Reference Columns: S.No, Product Name, Investor, Quantity, Purchase, Total Amount, Total Paid Amount, Total Due Amount, Actions) */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
+      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden" id="purchases-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200/60 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
@@ -531,7 +531,7 @@ export const PurchasesList: React.FC = () => {
         maxWidth="2xl"
       >
         {selectedPurchase && (
-          <div className="space-y-4 text-xs">
+          <div className="space-y-4 text-xs" id="purchase-invoice-printable">
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
               <div>
                 <p className="text-slate-500 text-[10px] uppercase font-sans">Total Amount</p>
@@ -579,10 +579,10 @@ export const PurchasesList: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-end pt-3">
+            <div className="flex justify-end pt-3 no-print">
               <button
-                onClick={() => window.print()}
-                className="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-semibold text-slate-700"
+                onClick={() => printTargetContent('purchase-invoice-printable', `Purchase Invoice - ${selectedPurchase.invoice_number}`)}
+                className="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-semibold text-slate-700 cursor-pointer"
               >
                 Print Invoice
               </button>

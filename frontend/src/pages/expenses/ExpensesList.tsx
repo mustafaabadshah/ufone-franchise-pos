@@ -122,7 +122,7 @@ export const ExpensesList: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <ExportPrintButtons reportType="expenses" />
+          <ExportPrintButtons reportType="expenses" title="Operating Expenses Register" targetId="expenses-table" />
           {!isViewer && (
             <button
               onClick={() => setIsCreateOpen(true)}
@@ -243,7 +243,7 @@ export const ExpensesList: React.FC = () => {
       </div>
 
       {/* Expenses Table (Matching Reference Columns: S.No, Title, Amount Paid, Paid By, Paid Date, Actions) */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
+      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden" id="expenses-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200/60 text-slate-500 font-bold uppercase tracking-wider text-[11px]">

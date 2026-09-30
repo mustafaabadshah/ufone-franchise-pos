@@ -70,7 +70,7 @@ export default function Investments() {
           <p className="text-sm text-slate-500 mt-1">Track external investor capital, purchase utilization, repayments, and remaining balances</p>
         </div>
         <div className="flex items-center gap-3">
-          <ExportPrintButtons title="Investor Portfolios" targetId="investments-table" />
+          <ExportPrintButtons reportType="ledger" title="Investor Portfolios" targetId="investments-table" />
           <button
             onClick={() => setShowModal(true)}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"
