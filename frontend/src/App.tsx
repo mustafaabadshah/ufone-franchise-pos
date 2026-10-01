@@ -108,7 +108,8 @@ function MainApp() {
   const allowedViewerTabs = [
     'reports', 'dashboard', 'pnl', 'ledger', 'audit-logs',
     'rso-daily', 'rso-weekly', 'rso-monthly',
-    'expenses', 'salaries', 'retailers', 'sales', 'purchases', 'stock', 'company-credit'
+    'expenses', 'salaries', 'retailers', 'sales', 'purchases', 'stock', 'company-credit',
+    'fca-performance'
   ];
 
   const handleNavigate = (tabId: string) => {

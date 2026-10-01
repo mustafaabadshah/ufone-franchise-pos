@@ -102,6 +102,80 @@ export const Login: React.FC = () => {
               )}
             </button>
           </form>
+
+          {/* Quick Login Accounts */}
+          <div className="mt-6 pt-5 border-t border-slate-200/80">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center mb-3">
+              One-Click Quick Login
+            </p>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("shahidkhan@pos.com");
+                  setPassword("posUfone@123");
+                }}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-indigo-50/80 border border-slate-200/80 hover:border-indigo-300 text-left transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+                    SK
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-700">Shahid Khan</p>
+                    <p className="text-[10px] text-slate-500 font-mono">shahidkhan@pos.com</p>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                  Admin / Incharge
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("shakeel@pos.com");
+                  setPassword("posUfone@123");
+                }}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-amber-50/80 border border-slate-200/80 hover:border-amber-300 text-left transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-xs">
+                    SA
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-800 group-hover:text-amber-800">Shakeel Ahmad</p>
+                    <p className="text-[10px] text-slate-500 font-mono">shakeel@pos.com</p>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                  Admin / FCA Master
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("islambadshah@pos.com");
+                  setPassword("posUfone@123");
+                }}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200/80 hover:border-emerald-300 text-left transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
+                    IB
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Islam Badshah</p>
+                    <p className="text-[10px] text-slate-500 font-mono">islambadshah@pos.com</p>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  Franchise Owner / Viewer
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

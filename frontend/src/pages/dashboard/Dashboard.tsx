@@ -3,7 +3,7 @@ import {
   TrendingUp, TrendingDown, ShoppingBag, ShoppingCart, Receipt,
   DollarSign, Boxes, Users, AlertTriangle, ArrowRight, Building2,
   Wallet, Coins, PiggyBank, RotateCcw, Landmark, Filter, RefreshCw,
-  Calendar
+  Calendar, Smartphone, FileSpreadsheet
 } from "lucide-react";
 import { api } from "../../api/client";
 import { MetricCard } from "../../components/common/MetricCard";
@@ -223,6 +223,38 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
       {/* Franchise Financial Equation & Net Profit/Loss Health Widget */}
       <FranchiseFinancialEquationCard metrics={metrics} onNavigate={onNavigate} />
+
+      {/* FCA Monthly Progress Quick Access Banner */}
+      <div className="bg-gradient-to-r from-[#17153b] via-[#1e1b4b] to-[#2e1065] rounded-2xl p-4 sm:p-5 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl border border-indigo-500/30">
+        <div className="flex items-center gap-3.5">
+          <div className="p-3 bg-amber-500/20 border border-amber-400/30 rounded-xl text-amber-400 shrink-0 shadow-inner">
+            <Smartphone className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="font-heading font-bold text-base text-white">
+                FCA & BVS Monthly Progress Ledger
+              </h3>
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                81 Field Agents Active
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-400/20 text-amber-200 border border-amber-400/30">
+                Jan – Sep 2026 Live
+              </span>
+            </div>
+            <p className="text-xs text-indigo-200 mt-1 max-w-2xl leading-relaxed">
+              Consolidated 3-sheet master tracking from <code className="text-amber-300 font-mono text-[11px]">FCA Table AUG 2026-1.xlsx</code> and monthly dynamic uploads like <code className="text-emerald-300 font-mono text-[11px]">BVS SEP 2026 FCA.xlsx</code>. Shakeel Ahmad & Shahid Khan full access to edit, upload, and export.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => onNavigate("fca-performance")}
+          className="w-full md:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+        >
+          <span>Open FCA Progress Sheet</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
 
       {/* Primary KPI Grid (Matching Reference App + Clickable drill-downs) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
