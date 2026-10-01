@@ -8,8 +8,10 @@ import { MetricCard } from "../../components/common/MetricCard";
 import { Modal } from "../../components/common/Modal";
 import { StatusBadge } from "../../components/common/StatusBadge";
 import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
+import { useAuth } from "../../context/AuthContext";
 
 export const StockOverview: React.FC = () => {
+  const { canEditStock } = useAuth();
   const [stockItems, setStockItems] = useState<any[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [movements, setMovements] = useState<any[]>([]);
@@ -79,13 +81,15 @@ export const StockOverview: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <ExportPrintButtons reportType="stock" title="Stock Overview & Valuation" targetId="stock-table" />
-          <button
-            onClick={() => setIsAdjustOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Stock Adjustment</span>
-          </button>
+          {canEditStock && (
+            <button
+              onClick={() => setIsAdjustOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Stock Adjustment</span>
+            </button>
+          )}
         </div>
       </div>
 

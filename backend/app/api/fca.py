@@ -2,7 +2,7 @@ import io
 from datetime import datetime, date
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 import openpyxl
@@ -486,9 +486,28 @@ async def upload_monthly_excel(
     }
 
 @router.get("/export")
-def export_fca_excel(db: Session = Depends(get_db)):
-    """Generates an executive Excel workbook with all agents and all monthly columns."""
-    agents = db.query(FCAgent).order_by(FCAgent.category.asc(), FCAgent.name.asc()).all()
+def export_fca_excel(
+    category: Optional[str] = None,
+    channel: Optional[str] = None,
+    search: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """Generates an executive Excel workbook with all agents, all monthly columns, and totals row."""
+    query = db.query(FCAgent)
+    if category and category != "All":
+        query = query.filter(FCAgent.category == category)
+    if channel and channel != "All":
+        query = query.filter(FCAgent.channel == channel)
+    if search:
+        s = f"%{search.strip()}%"
+        query = query.filter(
+            (FCAgent.bvs_id.ilike(s)) |
+            (FCAgent.name.ilike(s)) |
+            (FCAgent.market.ilike(s)) |
+            (FCAgent.category.ilike(s))
+        )
+
+    agents = query.order_by(FCAgent.category.asc(), FCAgent.name.asc()).all()
     month_records = db.query(FCAMonthlyRecord.month_key).distinct().order_by(FCAMonthlyRecord.month_key.asc()).all()
     all_month_keys = sorted(list(set([m[0] for m in month_records if m[0]])))
 
@@ -509,32 +528,43 @@ def export_fca_excel(db: Session = Depends(get_db)):
         top=Side(style="thin", color="CBD5E1"),
         bottom=Side(style="thin", color="CBD5E1")
     )
-
-    # Title
-    ws.merge_cells("A1:K1")
-    ws["A1"] = "UFONE FRANCHISE DARGAI - FCA & BVS MONTHLY SIMS SALES PROGRESS"
-    ws["A1"].font = title_font
-    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
-
-    ws.merge_cells("A2:K2")
-    ws["A2"] = f"Master Performance Ledger across all Market FCAs, DSOs, and Office BVS IDs | Generated {datetime.utcnow().strftime('%d-%b-%Y')}"
-    ws["A2"].font = sub_font
-    ws["A2"].alignment = Alignment(horizontal="center", vertical="center")
+    total_fill = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
+    total_font = Font(name="Calibri", size=11, bold=True, color="0F172A")
+    double_bottom_border = Border(
+        left=Side(style="thin", color="CBD5E1"),
+        right=Side(style="thin", color="CBD5E1"),
+        top=Side(style="thin", color="0F172A"),
+        bottom=Side(style="double", color="0F172A")
+    )
 
     # Table Headers
     base_headers = ["#", "BVS ID", "Agent Name", "Market / Route", "Category", "Channel"]
     month_headers = [get_label(mk) for mk in all_month_keys]
     final_headers = base_headers + month_headers + ["Total SIMs", "Monthly Avg"]
 
+    last_col_idx = len(final_headers)
+    last_col_letter = openpyxl.utils.get_column_letter(last_col_idx)
+
+    # Title & Subtitle merged dynamically across all columns
+    ws.merge_cells(f"A1:{last_col_letter}1")
+    ws["A1"] = "UFONE FRANCHISE DARGAI - FCA & BVS MONTHLY SIMS SALES PROGRESS"
+    ws["A1"].font = title_font
+    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
+
+    ws.merge_cells(f"A2:{last_col_letter}2")
+    ws["A2"] = f"Master Performance Ledger across all Market FCAs, DSOs, and Office BVS IDs | Generated {datetime.utcnow().strftime('%d-%b-%Y')} | Total Agents: {len(agents)}"
+    ws["A2"].font = sub_font
+    ws["A2"].alignment = Alignment(horizontal="center", vertical="center")
+
     header_row = 4
     for c_idx, h_text in enumerate(final_headers, 1):
         cell = ws.cell(row=header_row, column=c_idx, value=h_text)
         cell.fill = header_fill
         cell.font = header_font
-        cell.alignment = Alignment(horizontal="center" if c_idx > 4 else "left", vertical="center")
+        cell.alignment = Alignment(horizontal="center" if c_idx > 6 else "left", vertical="center")
         cell.border = thin_border
 
-    # Rows
+    # Data Rows
     current_row = 5
     for idx, a in enumerate(agents, 1):
         m_dict = {r.month_key: r.sims_sold for r in a.monthly_records}
@@ -562,21 +592,90 @@ def export_fca_excel(db: Session = Depends(get_db)):
             cell.border = thin_border
             if c_idx > 6:
                 cell.alignment = Alignment(horizontal="right")
+                if c_idx == len(row_vals):
+                    cell.number_format = "0.0"
+                else:
+                    cell.number_format = "#,##0"
         current_row += 1
 
-    # Auto-adjust column widths
-    for col in ws.columns:
-        max_len = max(len(str(cell.value or '')) for cell in col)
-        col_letter = openpyxl.utils.get_column_letter(col[0].column)
-        ws.column_dimensions[col_letter].width = max(max_len + 3, 10)
+    # Totals Row at Bottom
+    total_row_idx = current_row
+    ws.cell(row=total_row_idx, column=1, value="").border = double_bottom_border
+    ws.cell(row=total_row_idx, column=1).fill = total_fill
+    
+    t_cell = ws.cell(row=total_row_idx, column=2, value="TOTALS")
+    t_cell.font = total_font
+    t_cell.alignment = Alignment(horizontal="center")
+    t_cell.fill = total_fill
+    t_cell.border = double_bottom_border
+    
+    n_cell = ws.cell(row=total_row_idx, column=3, value=f"{len(agents)} Active Field Agents")
+    n_cell.font = total_font
+    n_cell.fill = total_fill
+    n_cell.border = double_bottom_border
+    
+    for c in range(4, 7):
+        blank_cell = ws.cell(row=total_row_idx, column=c, value="")
+        blank_cell.fill = total_fill
+        blank_cell.border = double_bottom_border
+
+    # Month sums
+    for m_idx, mk in enumerate(all_month_keys):
+        c_idx = 7 + m_idx
+        col_letter = openpyxl.utils.get_column_letter(c_idx)
+        cell = ws.cell(row=total_row_idx, column=c_idx, value=f"=SUM({col_letter}5:{col_letter}{current_row-1})")
+        cell.font = total_font
+        cell.fill = total_fill
+        cell.alignment = Alignment(horizontal="right")
+        cell.border = double_bottom_border
+        cell.number_format = "#,##0"
+
+    # Total SIMs column
+    tot_col_idx = len(final_headers) - 1
+    tot_col_letter = openpyxl.utils.get_column_letter(tot_col_idx)
+    tot_cell = ws.cell(row=total_row_idx, column=tot_col_idx, value=f"=SUM({tot_col_letter}5:{tot_col_letter}{current_row-1})")
+    tot_cell.font = total_font
+    tot_cell.fill = total_fill
+    tot_cell.alignment = Alignment(horizontal="right")
+    tot_cell.border = double_bottom_border
+    tot_cell.number_format = "#,##0"
+
+    # Average column
+    avg_col_idx = len(final_headers)
+    avg_col_letter = openpyxl.utils.get_column_letter(avg_col_idx)
+    avg_cell = ws.cell(row=total_row_idx, column=avg_col_idx, value=f"=AVERAGE({avg_col_letter}5:{avg_col_letter}{current_row-1})")
+    avg_cell.font = total_font
+    avg_cell.fill = total_fill
+    avg_cell.alignment = Alignment(horizontal="right")
+    avg_cell.border = double_bottom_border
+    avg_cell.number_format = "0.0"
+
+    # Freeze panes on BVS ID / Name
+    ws.freeze_panes = "D5"
+
+    # Column widths
+    ws.column_dimensions["A"].width = 5
+    ws.column_dimensions["B"].width = 16
+    ws.column_dimensions["C"].width = 24
+    ws.column_dimensions["D"].width = 18
+    ws.column_dimensions["E"].width = 22
+    ws.column_dimensions["F"].width = 14
+    for c in range(7, len(final_headers) - 1):
+        col_letter = openpyxl.utils.get_column_letter(c)
+        ws.column_dimensions[col_letter].width = 12
+    ws.column_dimensions[tot_col_letter].width = 14
+    ws.column_dimensions[avg_col_letter].width = 14
 
     stream = io.BytesIO()
     wb.save(stream)
-    stream.seek(0)
+    content = stream.getvalue()
 
     filename = f"FCA_Monthly_Progress_Dargai_{datetime.utcnow().strftime('%Y%m%d')}.xlsx"
-    return StreamingResponse(
-        stream,
+    return Response(
+        content=content,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Content-Length": str(len(content))
+        }
     )

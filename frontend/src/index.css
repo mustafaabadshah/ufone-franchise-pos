@@ -144,6 +144,29 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     break-inside: avoid !important;
   }
 
+  /* Wide FCA & BVS Progress Sheet High-Density Print Rules */
+  .fca-print-sheet table {
+    table-layout: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 6px !important;
+  }
+  .fca-print-sheet th,
+  .fca-print-sheet td {
+    padding: 2px 2.5px !important;
+    font-size: 6.8pt !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.015em !important;
+  }
+  .fca-print-sheet .month-cell,
+  .fca-print-sheet .month-header {
+    width: 28px !important;
+    min-width: 25px !important;
+    padding: 2px 1.5px !important;
+    text-align: right !important;
+    font-size: 6.8pt !important;
+  }
+
   /* Remove shadows and excessive padding on cards when printing */
   .rounded-2xl,
   .rounded-xl,

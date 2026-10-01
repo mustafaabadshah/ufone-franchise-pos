@@ -38,11 +38,11 @@ def seed_fca_data(db: Session):
     print("--- Seeding FCA and BVS Tracking Data ---")
     Base.metadata.create_all(bind=engine)
 
-    # 1. Ensure Shakeel Ahmad user exists with Admin role (same privileges as Shahid Khan)
-    admin_role = db.query(Role).filter(Role.name == "Admin").first()
-    if not admin_role:
-        admin_role = Role(name="Admin", description="Full System Administrator")
-        db.add(admin_role)
+    # 1. Ensure Shakeel Ahmad user exists with Operations/Staff role (FCA Master, read-only for products)
+    staff_role = db.query(Role).filter(Role.name == "Staff").first()
+    if not staff_role:
+        staff_role = Role(name="Staff", description="Operations & Staff Member")
+        db.add(staff_role)
         db.flush()
 
     shakeel = db.query(User).filter(User.email == "shakeel@pos.com").first()
@@ -51,15 +51,15 @@ def seed_fca_data(db: Session):
             name="Shakeel Ahmad",
             email="shakeel@pos.com",
             hashed_password=hash_password("posUfone@123"),
-            role_id=admin_role.id,
+            role_id=staff_role.id,
             phone="+92 333 9876543",
             is_active=True
         )
         db.add(shakeel)
         db.flush()
-        print("Created user Shakeel Ahmad (shakeel@pos.com) with Admin role")
+        print("Created user Shakeel Ahmad (shakeel@pos.com) with Staff role")
     else:
-        shakeel.role_id = admin_role.id
+        shakeel.role_id = staff_role.id
         shakeel.hashed_password = hash_password("posUfone@123")
         shakeel.is_active = True
 

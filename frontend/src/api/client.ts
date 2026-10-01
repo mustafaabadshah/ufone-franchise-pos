@@ -310,6 +310,13 @@ export const api = {
       return res.json();
     });
   },
-  getFCAExportUrl: () => `${API_BASE}/fca/export`,
+  getFCAExportUrl: (params?: { category?: string; channel?: string; search?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.category && params.category !== "All") q.append("category", params.category);
+    if (params?.channel && params.channel !== "All") q.append("channel", params.channel);
+    if (params?.search) q.append("search", params.search);
+    const qs = q.toString();
+    return `${API_BASE}/fca/export${qs ? `?${qs}` : ""}`;
+  },
 };
 

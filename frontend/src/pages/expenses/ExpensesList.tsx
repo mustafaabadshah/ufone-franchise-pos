@@ -10,7 +10,7 @@ import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
 import { useAuth } from "../../context/AuthContext";
 
 export const ExpensesList: React.FC = () => {
-  const { user } = useAuth();
+  const { user, canEditExpenses } = useAuth();
   const isViewer = user?.role?.toLowerCase() === "viewer";
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [summary, setSummary] = useState<any>(null);
@@ -123,7 +123,7 @@ export const ExpensesList: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <ExportPrintButtons reportType="expenses" title="Operating Expenses Register" targetId="expenses-table" />
-          {!isViewer && (
+          {canEditExpenses && (
             <button
               onClick={() => setIsCreateOpen(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer"

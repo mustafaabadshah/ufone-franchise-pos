@@ -9,7 +9,7 @@ import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
 import { useAuth } from "../../context/AuthContext";
 
 export const SalariesList: React.FC = () => {
-  const { user } = useAuth();
+  const { user, canEditSalaries } = useAuth();
   const isViewer = user?.role?.toLowerCase() === "viewer";
   const [salaries, setSalaries] = useState<Salary[]>([]);
   const [summary, setSummary] = useState<any>(null);
@@ -145,7 +145,7 @@ export const SalariesList: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <ExportPrintButtons reportType="salaries" title="Staff Salaries & Payroll" targetId="salaries-printable-area" />
-          {!isViewer && (
+          {canEditSalaries && (
             <button
               onClick={() => setIsCreateOpen(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer"

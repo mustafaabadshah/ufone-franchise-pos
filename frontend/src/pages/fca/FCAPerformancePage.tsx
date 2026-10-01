@@ -64,14 +64,11 @@ export const FCAPerformancePage: React.FC = () => {
   const [newCategory, setNewCategory] = useState("SABIR RSO MARKET");
   const [newChannel, setNewChannel] = useState("Market FCA");
 
-  // Check permissions:
-  // Shakeel Ahmad has full editing & uploading privileges.
-  // Shahid Khan (Admin) has full management privileges.
+  // Permissions:
+  // Shakeel Ahmad and Shahid Khan have full FCA editing & uploading privileges.
   // Islam Badshah (Viewer) has read-only view and print/export privileges.
-  const isShakeel = user?.email?.toLowerCase().includes("shakeel") || user?.name?.toLowerCase().includes("shakeel") || user?.name?.toLowerCase().includes("shakil");
-  const isAdmin = user?.role?.toLowerCase() === "admin";
-  const canEdit = isShakeel || isAdmin;
-  const isViewer = user?.role?.toLowerCase() === "viewer" || user?.email?.toLowerCase().includes("islambadshah");
+  const { canEditFCA, isShahid, isShakeel, isViewer } = useAuth();
+  const canEdit = canEditFCA;
 
   const loadData = async () => {
     setIsLoading(true);
@@ -270,9 +267,13 @@ export const FCAPerformancePage: React.FC = () => {
           )}
 
           <a
-            href={api.getFCAExportUrl()}
+            href={api.getFCAExportUrl({
+              category: selectedCategory !== "All" ? selectedCategory : undefined,
+              search: search || undefined
+            })}
             download
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+            title="Download Master FCA Excel Sheet (.xlsx)"
           >
             <Download className="w-4 h-4" />
             <span>Export Excel</span>
@@ -282,6 +283,11 @@ export const FCAPerformancePage: React.FC = () => {
             reportType="rso"
             title="Ufone Franchise Dargai - FCA Monthly SIMs Ledger"
             targetId="fca-printable-area"
+            orientation="landscape"
+            excelUrl={api.getFCAExportUrl({
+              category: selectedCategory !== "All" ? selectedCategory : undefined,
+              search: search || undefined
+            })}
           />
         </div>
       </div>
@@ -396,45 +402,52 @@ export const FCAPerformancePage: React.FC = () => {
       </div>
 
       {/* Main Printable Table */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-sm p-6 space-y-4 print-container" id="fca-printable-area">
+      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-sm p-4 sm:p-6 space-y-4 print-container fca-print-sheet" id="fca-printable-area">
         {/* Printable Header */}
         <div className="text-center pb-4 border-b-2 border-slate-900">
-          <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-3 py-0.5 rounded-full uppercase tracking-wider border border-indigo-200">
+          <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-3 py-0.5 rounded-full uppercase tracking-wider border border-indigo-200 print:border-none print:bg-transparent print:p-0">
             Official Telecom Channel Performance Audit
           </span>
-          <h1 className="text-2xl font-black uppercase tracking-wide text-slate-900 mt-2">
+          <h1 className="text-2xl font-black uppercase tracking-wide text-slate-900 mt-2 print:text-lg">
             Ufone Franchise — Dargai Office
           </h1>
-          <p className="text-xs text-slate-600 font-medium">
+          <p className="text-xs text-slate-600 font-medium print:text-[9px]">
             Main Bazar, Dargai, Malakand, KP | Field Customer Agent (FCA) & BVS Master SIMs Ledger
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 mt-2 text-xs font-bold text-slate-700">
+          <div className="flex flex-wrap items-center justify-center gap-4 mt-2 text-xs font-bold text-slate-700 print:text-[8px] print:gap-2">
             <span>Total Agents: {agents.length}</span>
             <span>•</span>
-            <span>Total Tracked Months: {allMonths.length} ({allMonths[0]?.label || 'Jan 2026'} – {allMonths[allMonths.length - 1]?.label || 'Sep 2026'})</span>
+            <span>Period: {allMonths[0]?.label || 'Jan 2026'} – {allMonths[allMonths.length - 1]?.label || 'Sep 2026'}</span>
             <span>•</span>
-            <span className="text-emerald-700">All-Time Activations: {columnTotals.grandTotal.toLocaleString()} SIMs</span>
+            <span className="text-emerald-700 print:text-slate-900">Total Activations: {columnTotals.grandTotal.toLocaleString()} SIMs</span>
           </div>
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto border border-slate-200 rounded-xl bg-white">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-900 text-white uppercase text-[11px] font-bold">
+        <div className="overflow-x-auto border border-slate-200 rounded-xl bg-white print:border-none">
+          <table className="w-full text-left text-xs border-collapse print:text-[6.8pt]">
+            <thead className="bg-slate-900 text-white uppercase text-[11px] font-bold print:text-[6.8pt]">
               <tr>
-                <th className="px-3 py-2.5 text-center">#</th>
-                <th className="px-3 py-2.5">BVS ID</th>
-                <th className="px-3 py-2.5">Agent / Shop Name</th>
-                <th className="px-3 py-2.5">Market / Route</th>
-                <th className="px-3 py-2.5">Category</th>
+                <th className="px-2 py-2 text-center w-8 print:w-5 print:px-1">#</th>
+                <th className="px-2.5 py-2 font-mono whitespace-nowrap w-24 print:w-16 print:px-1">BVS ID</th>
+                <th className="px-2.5 py-2 whitespace-nowrap min-w-[120px] print:min-w-0 print:w-28 print:px-1">Agent / Shop Name</th>
+                <th className="px-2.5 py-2 whitespace-nowrap w-24 print:w-20 print:px-1">Market / Route</th>
+                <th className="px-2.5 py-2 whitespace-nowrap w-24 print:w-16 print:px-1">Category</th>
                 {allMonths.map((m) => (
-                  <th key={m.key} className="px-2.5 py-2.5 text-right font-mono whitespace-nowrap bg-slate-800">
-                    {m.label}
+                  <th key={m.key} className="px-2 py-2 text-right font-mono whitespace-nowrap bg-slate-800 print:bg-slate-900 print:px-1 print:py-1 month-header">
+                    <span className="print:hidden">{m.label}</span>
+                    <span className="hidden print:inline">{m.label.replace(' 2026', '').replace(' 2027', '')}</span>
                   </th>
                 ))}
-                <th className="px-3 py-2.5 text-right font-mono bg-indigo-900 text-indigo-100">Total SIMs</th>
-                <th className="px-3 py-2.5 text-right font-mono bg-indigo-950 text-indigo-200">Avg/Mo</th>
-                {canEdit && <th className="px-3 py-2.5 text-center no-print">Action</th>}
+                <th className="px-2.5 py-2 text-right font-mono bg-indigo-900 text-indigo-100 print:bg-slate-900 print:text-white print:px-1 print:py-1 whitespace-nowrap w-16 print:w-12">
+                  <span className="print:hidden">Total SIMs</span>
+                  <span className="hidden print:inline">Total</span>
+                </th>
+                <th className="px-2.5 py-2 text-right font-mono bg-indigo-950 text-indigo-200 print:bg-slate-900 print:text-white print:px-1 print:py-1 whitespace-nowrap w-14 print:w-10">
+                  <span className="print:hidden">Avg/Mo</span>
+                  <span className="hidden print:inline">Avg</span>
+                </th>
+                {canEdit && <th className="px-2 py-2 text-center no-print w-12">Action</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-sans">
@@ -457,21 +470,21 @@ export const FCAPerformancePage: React.FC = () => {
                 agents.map((agent, idx) => {
                   return (
                     <tr key={agent.id} className="hover:bg-indigo-50/30 transition-colors">
-                      <td className="px-3 py-2 text-center text-slate-400 font-mono text-[11px]">{idx + 1}</td>
-                      <td className="px-3 py-2 font-mono font-bold text-indigo-900 text-[11px] whitespace-nowrap">
+                      <td className="px-2 py-1.5 text-center text-slate-400 font-mono text-[11px] print:text-[6.5pt] print:px-1">{idx + 1}</td>
+                      <td className="px-2.5 py-1.5 font-mono font-bold text-indigo-900 text-[11px] print:text-[6.5pt] print:px-1 whitespace-nowrap">
                         {agent.bvs_id}
                       </td>
-                      <td className="px-3 py-2 font-bold text-slate-900 text-[11px] whitespace-nowrap">
+                      <td className="px-2.5 py-1.5 font-bold text-slate-900 text-[11px] print:text-[6.8pt] print:px-1 whitespace-nowrap print:max-w-[110px] print:truncate">
                         {agent.name}
                       </td>
-                      <td className="px-3 py-2 text-slate-600 text-[11px] whitespace-nowrap">
+                      <td className="px-2.5 py-1.5 text-slate-600 text-[11px] print:text-[6.5pt] print:px-1 whitespace-nowrap print:max-w-[80px] print:truncate">
                         <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3 text-slate-400" />
+                          <MapPin className="w-3 h-3 text-slate-400 print:hidden" />
                           {agent.market}
                         </span>
                       </td>
-                      <td className="px-3 py-2 whitespace-nowrap">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      <td className="px-2.5 py-1.5 whitespace-nowrap print:text-[6pt] print:px-1">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold print:px-0.5 print:py-0 print:text-[6pt] print:bg-transparent ${
                           agent.category.includes("SABIR") ? "bg-amber-100 text-amber-900" :
                           agent.category.includes("RIAZ") ? "bg-blue-100 text-blue-900" :
                           agent.category.includes("KHIZAR") ? "bg-emerald-100 text-emerald-900" :
@@ -491,7 +504,7 @@ export const FCAPerformancePage: React.FC = () => {
                         return (
                           <td
                             key={m.key}
-                            className={`px-2.5 py-2 text-right font-mono text-[11px] font-semibold ${
+                            className={`px-2 py-1.5 text-right font-mono text-[11px] print:text-[6.8pt] print:px-1 month-cell ${
                               isLatest ? "bg-amber-50/40 text-amber-950 font-bold" : "text-slate-700"
                             }`}
                           >
@@ -508,24 +521,24 @@ export const FCAPerformancePage: React.FC = () => {
                                 className="w-12 text-right px-1 py-0.5 rounded border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:bg-white bg-transparent no-print font-mono"
                               />
                             ) : (
-                              <span>{val}</span>
+                              <span className="no-print">{val}</span>
                             )}
-                            <span className="print-only hidden">{val}</span>
+                            <span className="print-only hidden font-mono">{val}</span>
                           </td>
                         );
                       })}
 
                       {/* Total and Avg */}
-                      <td className="px-3 py-2 text-right font-mono font-black text-indigo-950 bg-indigo-50/50 text-xs">
+                      <td className="px-2.5 py-1.5 text-right font-mono font-black text-indigo-950 bg-indigo-50/50 print:bg-transparent text-xs print:text-[6.8pt] print:px-1">
                         {agent.total_sims}
                       </td>
-                      <td className="px-3 py-2 text-right font-mono font-bold text-slate-700 bg-slate-50 text-[11px]">
+                      <td className="px-2.5 py-1.5 text-right font-mono font-bold text-slate-700 bg-slate-50 print:bg-transparent text-[11px] print:text-[6.5pt] print:px-1">
                         {agent.monthly_avg}
                       </td>
 
                       {/* Edit Button */}
                       {canEdit && (
-                        <td className="px-3 py-2 text-center no-print">
+                        <td className="px-2.5 py-1.5 text-center no-print">
                           <button
                             onClick={() => setEditingAgent({ ...agent })}
                             className="p-1 rounded hover:bg-slate-100 text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer"
@@ -541,20 +554,20 @@ export const FCAPerformancePage: React.FC = () => {
               )}
             </tbody>
             {/* Table Footer with Totals */}
-            <tfoot className="bg-slate-900 text-white font-bold text-[11px] border-t-2 border-slate-950">
+            <tfoot className="bg-slate-900 text-white font-bold text-[11px] print:text-[6.8pt] border-t-2 border-slate-950">
               <tr>
-                <td colSpan={5} className="px-3 py-3 text-right uppercase tracking-wider font-sans">
+                <td colSpan={5} className="px-3 py-2 text-right uppercase tracking-wider font-sans print:px-1">
                   TOTAL SIM ACTIVATIONS ({agents.length} AGENTS):
                 </td>
                 {allMonths.map((m) => (
-                  <td key={m.key} className="px-2.5 py-3 text-right font-mono text-amber-300">
+                  <td key={m.key} className="px-2 py-2 text-right font-mono text-amber-300 print:text-white print:px-1 print:text-[6.8pt]">
                     {(columnTotals.months[m.key] || 0).toLocaleString()}
                   </td>
                 ))}
-                <td className="px-3 py-3 text-right font-mono text-emerald-300 text-xs font-black">
+                <td className="px-2.5 py-2 text-right font-mono text-emerald-300 print:text-white text-xs print:text-[7pt] font-black print:px-1">
                   {columnTotals.grandTotal.toLocaleString()}
                 </td>
-                <td className="px-3 py-3 text-right font-mono text-slate-300">
+                <td className="px-2.5 py-2 text-right font-mono text-slate-300 print:text-white print:px-1 print:text-[6.8pt]">
                   {Math.round((columnTotals.grandTotal / Math.max(1, allMonths.length)) * 10) / 10}
                 </td>
                 {canEdit && <td className="no-print"></td>}

@@ -8,8 +8,10 @@ import { Product, Category } from "../../types";
 import { Modal } from "../../components/common/Modal";
 import { StatusBadge } from "../../components/common/StatusBadge";
 import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
+import { useAuth } from "../../context/AuthContext";
 
 export const ProductsList: React.FC = () => {
+  const { canEditProducts } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState("");
@@ -132,13 +134,19 @@ export const ProductsList: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <ExportPrintButtons reportType="stock" title="Product Catalog & Stock" targetId="products-table" />
-          <button
-            onClick={() => setIsCreateOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Product</span>
-          </button>
+          {canEditProducts ? (
+            <button
+              onClick={() => setIsCreateOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Product</span>
+            </button>
+          ) : (
+            <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-500 text-xs font-semibold">
+              <span>Catalog Managed by Shahid Khan</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -215,18 +223,22 @@ export const ProductsList: React.FC = () => {
                       >
                         View
                       </button>
-                      <button
-                        onClick={() => handleOpenDetail(p)}
-                        className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[11px] transition-colors"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-[11px] transition-colors"
-                      >
-                        Delete
-                      </button>
+                      {canEditProducts && (
+                        <>
+                          <button
+                            onClick={() => handleOpenDetail(p)}
+                            className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[11px] transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(p.id)}
+                            className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-[11px] transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))

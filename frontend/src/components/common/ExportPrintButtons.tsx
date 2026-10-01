@@ -9,14 +9,20 @@ interface ExportPrintButtonsProps {
   csvUrl?: string;
   title?: string;
   targetId?: string;
+  orientation?: "portrait" | "landscape";
 }
 
 /**
  * Universal Multi-Page Print & PDF Engine
- * Solves the single-page clipping issue by rendering the target content
- * into an isolated sandbox iframe with full A4 pagination styles and CSS resets.
+ * Solves single-page and wide-table clipping by rendering the target content
+ * into an isolated sandbox iframe with A4 portrait or landscape pagination.
  */
-export const printTargetContent = (targetId?: string, title?: string, isPdf = false) => {
+export const printTargetContent = (
+  targetId?: string,
+  title?: string,
+  isPdf = false,
+  orientation?: "portrait" | "landscape"
+) => {
   let targetEl: HTMLElement | null = null;
 
   if (targetId) {
@@ -28,6 +34,7 @@ export const printTargetContent = (targetId?: string, title?: string, isPdf = fa
     targetEl =
       document.querySelector<HTMLElement>("#report-printable-area") ||
       document.querySelector<HTMLElement>("#pnl-printable-area") ||
+      document.querySelector<HTMLElement>("#fca-printable-area") ||
       document.querySelector<HTMLElement>("#dashboard-printable-area") ||
       document.querySelector<HTMLElement>(".print-container") ||
       document.querySelector<HTMLElement>('[id$="-table"]') ||
@@ -39,6 +46,16 @@ export const printTargetContent = (targetId?: string, title?: string, isPdf = fa
     window.print();
     return;
   }
+
+  // Determine orientation (explicit or auto-detected for wide ledger tables like FCA)
+  const isLandscape =
+    orientation === "landscape" ||
+    (targetId && targetId.toLowerCase().includes("fca")) ||
+    targetEl.id.toLowerCase().includes("fca") ||
+    targetEl.classList.contains("fca-print-sheet");
+
+  const pageOrientation = isLandscape ? "landscape" : "portrait";
+  const pageMargins = isLandscape ? "5mm 4mm 5mm 4mm" : "12mm 10mm 14mm 10mm";
 
   const docTitle = title
     ? isPdf && !title.toLowerCase().endsWith(".pdf")
@@ -79,8 +96,8 @@ export const printTargetContent = (targetId?: string, title?: string, isPdf = fa
   const printResetCss = `
     <style>
       @page {
-        size: A4 portrait;
-        margin: 12mm 10mm 14mm 10mm;
+        size: A4 ${pageOrientation};
+        margin: ${pageMargins};
       }
       *, *::before, *::after {
         box-sizing: border-box !important;
@@ -95,22 +112,27 @@ export const printTargetContent = (targetId?: string, title?: string, isPdf = fa
         font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
         margin: 0 !important;
         padding: 0 !important;
-        font-size: 10pt !important;
+        font-size: ${isLandscape ? "7.5pt" : "10pt"} !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-      .no-print, .print-hidden, nav, aside, header, button:not(.print-include), select, input[type="text"] {
+      .no-print, .print-hidden, nav, aside, header, button:not(.print-include), select, input[type="text"], input[type="number"] {
         display: none !important;
       }
       .print-only {
         display: block !important;
       }
+      span.print-only {
+        display: inline !important;
+      }
       table {
         border-collapse: collapse !important;
         width: 100% !important;
+        max-width: 100% !important;
         page-break-inside: auto !important;
         break-inside: auto !important;
-        margin-bottom: 12px !important;
+        margin-bottom: 8px !important;
+        table-layout: auto !important;
       }
       thead {
         display: table-header-group !important;
@@ -123,13 +145,15 @@ export const printTargetContent = (targetId?: string, title?: string, isPdf = fa
         break-inside: avoid !important;
       }
       th, td {
-        padding: 5px 8px !important;
-        font-size: 8.5pt !important;
+        padding: ${isLandscape ? "2.5px 3px" : "5px 8px"} !important;
+        font-size: ${isLandscape ? "6.8pt" : "8.5pt"} !important;
         border: 1px solid #cbd5e1 !important;
+        line-height: 1.15 !important;
+        letter-spacing: -0.01em !important;
       }
       th {
-        background-color: #f1f5f9 !important;
-        color: #0f172a !important;
+        background-color: #0f172a !important;
+        color: #ffffff !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
@@ -226,12 +250,13 @@ export const ExportPrintButtons: React.FC<ExportPrintButtonsProps> = ({
   csvUrl,
   title,
   targetId,
+  orientation,
 }) => {
   const handlePrint = (mode: "print" | "pdf" = "print") => {
     if (onPrint) {
       onPrint();
     } else {
-      printTargetContent(targetId, title, mode === "pdf");
+      printTargetContent(targetId, title, mode === "pdf", orientation);
     }
   };
 
