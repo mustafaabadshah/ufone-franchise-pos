@@ -23,6 +23,8 @@ from app.api.finance import router as finance_router
 from app.api.reports import router as reports_router
 from app.api.settings import router as settings_router
 from app.api.audit import router as audit_router
+from app.api.fca import router as fca_router
+from app.seeds.seed_fca_data import seed_fca_data
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -60,6 +62,7 @@ app.include_router(finance_router, prefix=api_prefix)
 app.include_router(reports_router, prefix=api_prefix)
 app.include_router(settings_router, prefix=api_prefix)
 app.include_router(audit_router, prefix=api_prefix)
+app.include_router(fca_router, prefix=api_prefix)
 
 @app.on_event("startup")
 def on_startup():
@@ -68,6 +71,12 @@ def on_startup():
         run_seed()
     except Exception as e:
         print(f"Startup seeding notice: {e}")
+    try:
+        db = SessionLocal()
+        seed_fca_data(db)
+        db.close()
+    except Exception as e:
+        print(f"FCA seeding notice: {e}")
 
 import os
 from fastapi.staticfiles import StaticFiles

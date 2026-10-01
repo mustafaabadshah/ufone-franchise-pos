@@ -279,4 +279,37 @@ export const api = {
   },
   getUsers: () => apiFetch<any[]>("/admin/users"),
   getRoles: () => apiFetch<any[]>("/admin/roles"),
+
+  // FCA & BVS Performance Tracking
+  getFCAAgents: (params?: { search?: string; category?: string; channel?: string; sort_by?: string; sort_dir?: string }) => {
+    const query = new URLSearchParams();
+    if (params?.search) query.append("search", params.search);
+    if (params?.category) query.append("category", params.category);
+    if (params?.channel) query.append("channel", params.channel);
+    if (params?.sort_by) query.append("sort_by", params.sort_by);
+    if (params?.sort_dir) query.append("sort_dir", params.sort_dir);
+    return apiFetch<any>(`/fca/agents?${query.toString()}`);
+  },
+  getFCASummary: () => apiFetch<any>("/fca/summary"),
+  createFCAAgent: (data: any) => apiFetch<any>("/fca/agents", { method: "POST", body: JSON.stringify(data) }),
+  updateFCAAgent: (id: number, data: any) => apiFetch<any>(`/fca/agents/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  updateFCAAgentMonth: (id: number, data: { month_key: string; sims_sold: number }) => apiFetch<any>(`/fca/agents/${id}/months`, { method: "POST", body: JSON.stringify(data) }),
+  uploadFCAMonthlyExcel: (formData: FormData) => {
+    const token = localStorage.getItem("token");
+    return fetch(`${API_BASE}/fca/upload-monthly-excel`, {
+      method: "POST",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: formData
+    }).then(async (res) => {
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Upload failed" }));
+        throw new Error(err.detail || "Upload failed");
+      }
+      return res.json();
+    });
+  },
+  getFCAExportUrl: () => `${API_BASE}/fca/export`,
 };
+

@@ -652,3 +652,40 @@ class AuditLog(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User")
+
+# --- FCA & BVS MONTHLY PERFORMANCE TRACKING ---
+class FCAgent(Base):
+    __tablename__ = "fca_agents"
+    id = Column(Integer, primary_key=True, index=True)
+    bvs_id = Column(String(60), unique=True, index=True, nullable=False)
+    name = Column(String(150), nullable=True)
+    market = Column(String(150), nullable=True)
+    category = Column(String(100), nullable=True, index=True)
+    channel = Column(String(100), default="Market FCA")
+    status = Column(String(50), default="Active")
+    phone = Column(String(50), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    monthly_records = relationship("FCAMonthlyRecord", back_populates="agent", cascade="all, delete-orphan", order_by="FCAMonthlyRecord.month_key.asc()")
+
+
+class FCAMonthlyRecord(Base):
+    __tablename__ = "fca_monthly_records"
+    id = Column(Integer, primary_key=True, index=True)
+    agent_id = Column(Integer, ForeignKey("fca_agents.id", ondelete="CASCADE"), nullable=False, index=True)
+    month_key = Column(String(20), nullable=False, index=True)  # e.g. "2026-01", "2026-08", "2026-09"
+    month_label = Column(String(50), nullable=False)  # e.g. "Jan 2026", "Aug 2026", "Sep 2026"
+    sims_sold = Column(Integer, default=0, nullable=False)
+    source = Column(String(100), default="Manual Entry")
+    notes = Column(String(255), nullable=True)
+    updated_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    agent = relationship("FCAgent", back_populates="monthly_records")
+    updater = relationship("User")
+
+    __table_args__ = (
+        Index("idx_agent_month", "agent_id", "month_key", unique=True),
+    )
+

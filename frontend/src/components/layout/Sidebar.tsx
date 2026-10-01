@@ -53,6 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onNavigate, lowSto
     {
       title: "Telecom / Distribution",
       items: [
+        { id: "fca-performance", label: "FCA Monthly Progress", icon: Smartphone },
         { id: "rso", label: "RSO Management", icon: Users },
         { id: "rso-daily", label: "RSO Daily Report", icon: CalendarDays },
         { id: "rso-weekly", label: "RSO Weekly Report", icon: CalendarDays },
@@ -102,6 +103,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onNavigate, lowSto
       title: "Executive Reports & Audit",
       items: [
         { id: "reports", label: "Executive Report Hub", icon: FileSpreadsheet },
+        { id: "fca-performance", label: "FCA Monthly Progress", icon: Smartphone },
         { id: "pnl", label: "Profit & Loss Statement", icon: TrendingUp },
         { id: "ledger", label: "General Ledger", icon: BookOpen },
         { id: "audit-logs", label: "Security Audit Logs", icon: ShieldAlert },

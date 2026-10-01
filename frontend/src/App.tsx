@@ -28,6 +28,7 @@ import ReportCenter from './pages/reports/ReportCenter';
 import UsersList from './pages/administration/UsersList';
 import SettingsPage from './pages/administration/SettingsPage';
 import AuditLogsPage from './pages/administration/AuditLogsPage';
+import { FCAPerformancePage } from './pages/fca/FCAPerformancePage';
 
 import { api } from './api/client';
 
@@ -43,6 +44,7 @@ const TAB_CONFIG: Record<string, { title: string; subtitle: string }> = {
   'rso-daily': { title: 'RSO Daily Sales & Recovery Report', subtitle: 'Official 9-item denomination verified digital sales voucher with physical signature slip' },
   'rso-weekly': { title: 'RSO Weekly Performance Audit', subtitle: 'Cumulative weekly field recoveries and retailer distribution quotas' },
   'rso-monthly': { title: 'RSO Monthly Route Analysis', subtitle: 'Monthly commission calculations and target reconciliations' },
+  'fca-performance': { title: 'FCA & BVS Monthly Progress Ledger', subtitle: 'Unified master tracking across all 3 sheets of FCA Table and dynamic monthly Excel uploads' },
   easyload: { title: 'EasyLoad Management', subtitle: 'Direct subscriber e-load, retailer balance dispatching, and 2.5% franchise margins' },
   'retailer-collections': { title: 'Retailer Collections History', subtitle: 'Audit log of all recovered credit payments and deposits from partner shops' },
   retailers: { title: 'Retailer Distribution Network', subtitle: 'Authorized shop accounts, credit balances, and collections' },
@@ -67,10 +69,12 @@ function MainApp() {
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [lowStockCount, setLowStockCount] = useState<number>(0);
 
-  // Default viewer to reports tab on initial login
+  // Default routing based on user identity and role
   useEffect(() => {
     if (user) {
-      if (user.role?.toLowerCase() === 'viewer') {
+      if (user.email?.toLowerCase().includes('shakeel') || user.name?.toLowerCase().includes('shakil') || user.name?.toLowerCase().includes('shakeel')) {
+        setCurrentTab('fca-performance');
+      } else if (user.role?.toLowerCase() === 'viewer') {
         setCurrentTab('reports');
       } else {
         setCurrentTab('dashboard');
@@ -148,6 +152,8 @@ function MainApp() {
       case 'rso-weekly':
       case 'rso-monthly':
         return <RSODailyReportForm />;
+      case 'fca-performance':
+        return <FCAPerformancePage />;
       case 'easyload':
         return <EasyLoadList />;
       case 'retailer-collections':
