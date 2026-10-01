@@ -64,31 +64,30 @@ const TAB_CONFIG: Record<string, { title: string; subtitle: string }> = {
 };
 
 function MainApp() {
-  const { user, isLoading } = useAuth();
-  const isViewer = user?.role?.toLowerCase() === 'viewer';
+  const { user, isLoading, isShakeel, isViewer } = useAuth();
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [lowStockCount, setLowStockCount] = useState<number>(0);
 
   // Default routing based on user identity and role
   useEffect(() => {
     if (user) {
-      if (user.email?.toLowerCase().includes('shakeel') || user.name?.toLowerCase().includes('shakil') || user.name?.toLowerCase().includes('shakeel')) {
+      if (isShakeel) {
         setCurrentTab('fca-performance');
-      } else if (user.role?.toLowerCase() === 'viewer') {
+      } else if (isViewer) {
         setCurrentTab('reports');
       } else {
         setCurrentTab('dashboard');
       }
     }
-  }, [user]);
+  }, [user, isShakeel, isViewer]);
 
   useEffect(() => {
-    if (user && !isViewer) {
+    if (user && !isViewer && !isShakeel) {
       api.getLowStockAlerts()
         .then((alerts) => setLowStockCount(alerts.length))
         .catch(() => {});
     }
-  }, [user, isViewer]);
+  }, [user, isViewer, isShakeel]);
 
   if (isLoading) {
     return (
@@ -113,6 +112,11 @@ function MainApp() {
   ];
 
   const handleNavigate = (tabId: string) => {
+    if (isShakeel) {
+      // Shakeel Ahmad is strictly restricted to FCA Monthly Progress only
+      setCurrentTab('fca-performance');
+      return;
+    }
     if (isViewer && !allowedViewerTabs.includes(tabId)) {
       setCurrentTab('reports');
       return;
@@ -120,9 +124,16 @@ function MainApp() {
     setCurrentTab(tabId);
   };
 
-  const tabMeta = TAB_CONFIG[currentTab] || { title: 'Franchise Management', subtitle: '' };
+  const tabMeta = isShakeel
+    ? TAB_CONFIG['fca-performance']
+    : (TAB_CONFIG[currentTab] || { title: 'Franchise Management', subtitle: '' });
 
   const renderContent = () => {
+    // Shakeel is strictly, solely, and unconditionally restricted to FCA Monthly Progress
+    if (isShakeel) {
+      return <FCAPerformancePage />;
+    }
+
     if (isViewer && !allowedViewerTabs.includes(currentTab)) {
       return (
         <div className="space-y-6">
@@ -227,6 +238,16 @@ function MainApp() {
                 >
                   Go to Report Center
                 </button>
+              </div>
+            )}
+            {isShakeel && (
+              <div className="mb-6 p-3.5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 shadow-xs flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-xs font-semibold text-amber-900">
+                    Logged in as <strong>Shakeel Ahmad</strong> (Role: FCA Operations Specialist). Access is restricted exclusively to <strong>FCA Monthly Progress</strong> tracking and monthly Excel uploads. POS, Stock, Sales, Purchases, P&L, Reports, and Ledgers are restricted.
+                  </span>
+                </div>
               </div>
             )}
             {renderContent()}

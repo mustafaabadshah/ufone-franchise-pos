@@ -26,7 +26,7 @@ interface NavSection {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onNavigate, lowStockCount = 0 }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, isShakeel, isViewer } = useAuth();
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
 
   const toggleSection = (sectionTitle: string) => {
@@ -36,7 +36,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onNavigate, lowSto
     }));
   };
 
-  const isViewer = user?.role?.toLowerCase() === "viewer";
+  const shakeelSections: NavSection[] = [
+    {
+      title: "FCA Operations",
+      items: [
+        { id: "fca-performance", label: "FCA Monthly Progress", icon: Smartphone },
+      ]
+    }
+  ];
 
   const allSections: NavSection[] = [
     {
@@ -126,7 +133,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onNavigate, lowSto
     }
   ];
 
-  const sections = isViewer ? viewerSections : allSections;
+  const sections = isShakeel ? shakeelSections : (isViewer ? viewerSections : allSections);
 
   return (
     <aside className="w-72 bg-gradient-to-b from-[#17153b] via-[#1e1b4b] to-[#12102e] text-slate-200 h-screen flex flex-col flex-shrink-0 shadow-2xl border-r border-indigo-950/60 select-none z-30">
@@ -150,20 +157,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onNavigate, lowSto
         </div>
       )}
 
+      {isShakeel && (
+        <div className="mx-3 mt-3 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[11px] font-semibold flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse flex-shrink-0" />
+          <span className="leading-snug">Shakeel Ahmad (FCA Monthly Progress Only)</span>
+        </div>
+      )}
+
       {/* Main Navigation */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5 text-xs">
-        {/* Dashboard Top Link */}
-        <button
-          onClick={() => onNavigate("dashboard")}
-          className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium transition-all ${
-            currentTab === "dashboard"
-              ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 font-semibold"
-              : "text-slate-300 hover:bg-indigo-900/40 hover:text-white"
-          }`}
-        >
-          <LayoutDashboard className="w-4 h-4 text-indigo-400" />
-          <span className="text-sm">Dashboard</span>
-        </button>
+        {/* Dashboard Top Link (Hidden for Shakeel who is restricted to FCA Progress) */}
+        {!isShakeel && (
+          <button
+            onClick={() => onNavigate("dashboard")}
+            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium transition-all ${
+              currentTab === "dashboard"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 font-semibold"
+                : "text-slate-300 hover:bg-indigo-900/40 hover:text-white"
+            }`}
+          >
+            <LayoutDashboard className="w-4 h-4 text-indigo-400" />
+            <span className="text-sm">Dashboard</span>
+          </button>
+        )}
 
         {/* Categorized Sections */}
         {sections.map(section => {
@@ -216,12 +232,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onNavigate, lowSto
       <div className="p-3 border-t border-indigo-900/50 bg-[#131130]/90">
         <div className="flex items-center justify-between p-2 rounded-xl bg-indigo-950/40 border border-indigo-800/40">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-xs shadow-inner">
-              {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-xs shadow-inner ${
+              isShakeel ? "bg-amber-500" : isViewer ? "bg-emerald-600" : "bg-gradient-to-tr from-indigo-500 to-purple-600"
+            }`}>
+              {user?.name ? user.name.charAt(0).toUpperCase() : (isShakeel ? "S" : "U")}
             </div>
             <div className="overflow-hidden">
-              <p className="text-xs font-semibold text-white truncate max-w-[120px]">{user?.name || "Shahid Khan"}</p>
-              <p className="text-[10px] text-indigo-300 font-medium truncate">{user?.role || "Admin"}</p>
+              <p className="text-xs font-semibold text-white truncate max-w-[120px]">{user?.name || (isShakeel ? "Shakeel Ahmad" : "Shahid Khan")}</p>
+              <p className="text-[10px] text-indigo-300 font-medium truncate">{isShakeel ? "FCA Specialist" : (user?.role || "Admin")}</p>
             </div>
           </div>
           <button

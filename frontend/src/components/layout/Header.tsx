@@ -17,7 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   lowStockCount = 0,
   onNavigate
 }) => {
-  const { user } = useAuth();
+  const { user, isShakeel, isViewer } = useAuth();
 
   return (
     <header className="h-16 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between shadow-xs sticky top-0 z-20">
@@ -39,8 +39,8 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Quick POS Terminal Button (Hidden for Read-Only Viewers) */}
-        {onOpenPos && user?.role?.toLowerCase() !== "viewer" && (
+        {/* Quick POS Terminal Button (Hidden for Read-Only Viewers and Shakeel) */}
+        {onOpenPos && !isViewer && !isShakeel && (
           <button
             onClick={onOpenPos}
             className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium text-xs shadow-md shadow-indigo-600/20 hover:from-indigo-700 hover:to-violet-700 active:scale-98 transition-all"
@@ -50,8 +50,8 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         )}
 
-        {/* Low Stock Notification Bell */}
-        {user?.role?.toLowerCase() !== "viewer" && (
+        {/* Low Stock Notification Bell (Hidden for Read-Only Viewers and Shakeel) */}
+        {!isViewer && !isShakeel && (
           <button
             onClick={() => onNavigate && onNavigate("stock")}
             className="relative p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
@@ -66,19 +66,29 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* User Pill */}
         <div className="flex items-center gap-2.5 pl-3 border-l border-slate-200">
-          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-sm ring-2 ${user?.role?.toLowerCase() === "viewer" ? "bg-emerald-600 ring-emerald-100" : "bg-indigo-600 ring-indigo-100"
-            }`}>
-            {user?.name ? user.name.charAt(0).toUpperCase() : "S"}
+          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-sm ring-2 ${
+            isShakeel
+              ? "bg-amber-500 ring-amber-100"
+              : isViewer
+              ? "bg-emerald-600 ring-emerald-100"
+              : "bg-indigo-600 ring-indigo-100"
+          }`}>
+            {user?.name ? user.name.charAt(0).toUpperCase() : (isShakeel ? "S" : "S")}
           </div>
           <div className="hidden sm:block text-left">
-            <p className="text-xs font-bold text-slate-800 leading-tight">{user?.name || "Shahid Khan"}</p>
-            <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${user?.role?.toLowerCase() === "viewer"
+            <p className="text-xs font-bold text-slate-800 leading-tight">{user?.name || (isShakeel ? "Shakeel Ahmad" : "Shahid Khan")}</p>
+            <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+              isViewer
                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                : isShakeel
+                ? "bg-amber-50 text-amber-800 border border-amber-300"
                 : "bg-indigo-50 text-indigo-700"
-              }`}>
+            }`}>
               {user?.name?.toLowerCase().includes("islam badshah")
                 ? "Franchise Owner (Audit View)"
-                : user?.role?.toLowerCase() === "viewer"
+                : isShakeel
+                ? "FCA Operations Specialist"
+                : isViewer
                 ? "Reports Viewer"
                 : (user?.role === "Admin" ? "Admin / Incharge" : user?.role || "Finance Officer")}
             </span>

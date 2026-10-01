@@ -149,7 +149,7 @@ export const Login: React.FC = () => {
                   </div>
                 </div>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                  FCA Master / Operations
+                  FCA Monthly Progress Only
                 </span>
               </button>
 
