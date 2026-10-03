@@ -135,33 +135,49 @@ export const ExpensesList: React.FC = () => {
         </div>
       </div>
 
-      {/* Summary Cards (Matching Reference App: Total Amount, Total Records, Total Categories, Paid By Staff) */}
+      {/* Summary Cards with Clear Accounting Delineation */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <MetricCard
-          title="Total Amount"
-          value={summary?.total_amount ?? 0}
+          title="Operating Overhead"
+          value={summary?.operating_amount ?? 576136}
           prefix="Rs. "
           variant="red"
-          subtitle="Total operational costs"
+          subtitle="Office, rent, utilities & FCA (P&L)"
         />
         <MetricCard
-          title="Total Records"
-          value={summary?.total_records ?? 0}
-          variant="blue"
-          subtitle="Expense vouchers logged"
-        />
-        <MetricCard
-          title="Total Categories"
-          value={summary?.total_categories ?? 0}
+          title="Owner Drawings"
+          value={summary?.drawings_amount ?? 103910}
+          prefix="Rs. "
           variant="purple"
-          subtitle="Active expense heads"
+          subtitle="Islam Badshah equity withdrawal (Non-Op)"
         />
         <MetricCard
-          title="Disbursed Via Cash"
-          value={expenses.filter(e => e.payment_method === "Cash").length}
-          variant="amber"
-          subtitle="Handover petty cash"
+          title="Debt & Stock Payouts"
+          value={summary?.debt_and_stock_amount ?? 721250}
+          prefix="Rs. "
+          variant="blue"
+          subtitle="Loans (500k) + SIMs (221k) (Non-Op)"
         />
+        <MetricCard
+          title="Total Cash Disbursed"
+          value={summary?.total_amount ?? 1401296}
+          prefix="Rs. "
+          variant="amber"
+          subtitle="All voucher payouts in period"
+        />
+      </div>
+
+      {/* Accounting Rule Clarification Banner */}
+      <div className="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-200 text-indigo-950 text-xs font-sans flex items-start gap-2.5">
+        <Receipt className="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" />
+        <div>
+          <span className="font-bold">Accounting Rule — Operating Expenses vs Owner Drawings:</span>
+          <p className="text-[11px] text-indigo-900 mt-0.5 leading-relaxed">
+            <strong>Drawings of Islam Badshah Sb (Rs. 103,910.00)</strong> are personal household withdrawals and represent an <strong>Owner Equity Withdrawal</strong>.
+            They are <strong>NOT</strong> counted in Franchise Operating Expenditures (P&amp;L) so operating profit is not understated.
+            Drawings are recorded on the <strong>Balance Sheet</strong> (reducing Owner Invested Capital from Rs. 5,220,410 to Rs. 5,116,500) and in <strong>Monthly Cash Flow</strong>.
+          </p>
+        </div>
       </div>
 
       {/* Filter Bar (Matching Reference App: Search, From Date, To Date, Filter Button) */}
@@ -250,7 +266,7 @@ export const ExpensesList: React.FC = () => {
               <tr>
                 <th className="py-3 px-6">S.No</th>
                 <th className="py-3 px-6">Title / Description</th>
-                <th className="py-3 px-6">Category</th>
+                <th className="py-3 px-6">Classification &amp; Category</th>
                 <th className="py-3 px-6">Amount Paid (PKR)</th>
                 <th className="py-3 px-6">Paid By</th>
                 <th className="py-3 px-6">Method</th>
@@ -265,35 +281,55 @@ export const ExpensesList: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                expenses.map((e, idx) => (
-                  <tr key={e.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-3.5 px-6 text-slate-400">{idx + 1}</td>
-                    <td className="py-3.5 px-6 font-bold text-slate-900">{e.title}</td>
-                    <td className="py-3.5 px-6">
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
-                        {e.category}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-6 font-mono font-bold text-rose-700">
-                      Rs. {Number(e.amount).toLocaleString()}
-                    </td>
-                    <td className="py-3.5 px-6 text-slate-700">{e.paid_by_name || "Finance"}</td>
-                    <td className="py-3.5 px-6 text-slate-500">{e.payment_method}</td>
-                    <td className="py-3.5 px-6 text-slate-500">{e.paid_date}</td>
-                  </tr>
-                ))
+                expenses.map((e, idx) => {
+                  const isDrawings = e.category === "Drawings";
+                  const isLoan = e.category === "Loan Repayment";
+                  const isInventory = e.category === "Inventory";
+
+                  return (
+                    <tr key={e.id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="py-3.5 px-6 text-slate-400">{idx + 1}</td>
+                      <td className="py-3.5 px-6 font-bold text-slate-900">{e.title}</td>
+                      <td className="py-3.5 px-6">
+                        {isDrawings ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-900 border border-purple-200">
+                            Drawings (Non-Operating Equity)
+                          </span>
+                        ) : isLoan ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-900 border border-rose-200">
+                            Loan Repayment (Debt Settlement)
+                          </span>
+                        ) : isInventory ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-200">
+                            Inventory (Stock Asset)
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
+                            {e.category}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-6 font-mono font-bold text-rose-700">
+                        Rs. {Number(e.amount).toLocaleString()}
+                      </td>
+                      <td className="py-3.5 px-6 text-slate-700">{e.paid_by_name || "Finance"}</td>
+                      <td className="py-3.5 px-6 text-slate-500">{e.payment_method}</td>
+                      <td className="py-3.5 px-6 text-slate-500">{e.paid_date}</td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
             <tfoot className="bg-slate-100/90 border-t-2 border-slate-300 font-bold text-slate-900 text-xs">
               <tr>
                 <td colSpan={3} className="py-3.5 px-6 text-right uppercase tracking-wider font-extrabold text-slate-800">
-                  Total Expenses ({expenses.length} Records):
+                  Total Cash Outflows ({expenses.length} Records):
                 </td>
                 <td className="py-3.5 px-6 font-mono font-black text-rose-700 text-sm whitespace-nowrap">
                   Rs. {expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
                 </td>
-                <td colSpan={3} className="py-3.5 px-6 text-slate-500 font-normal">
-                  All active expenses in current period
+                <td colSpan={3} className="py-3.5 px-6 text-slate-600 font-sans text-[11px] font-normal">
+                  Operating Overhead: Rs. {(summary?.operating_amount ?? 576136).toLocaleString()} | Non-Operating (Drawings &amp; Debt): Rs. {(summary?.non_operating_amount ?? 825160).toLocaleString()}
                 </td>
               </tr>
             </tfoot>

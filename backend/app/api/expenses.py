@@ -55,11 +55,19 @@ def get_expenses_summary(
         q = q.filter(Expense.paid_date <= date_to)
 
     expenses = q.all()
+    non_operating_cats = ["Drawings", "Loan Repayment", "Salaries", "Inventory"]
+    operating_amount = sum((e.amount for e in expenses if e.category not in non_operating_cats), Decimal("0.00"))
+    drawings_amount = sum((e.amount for e in expenses if e.category == "Drawings"), Decimal("0.00"))
+    debt_and_stock_amount = sum((e.amount for e in expenses if e.category in ["Loan Repayment", "Inventory"]), Decimal("0.00"))
     total_amount = sum((e.amount for e in expenses), Decimal("0.00"))
     categories_used = len(set(e.category for e in expenses))
 
     return {
         "total_amount": float(total_amount),
+        "operating_amount": float(operating_amount),
+        "drawings_amount": float(drawings_amount),
+        "debt_and_stock_amount": float(debt_and_stock_amount),
+        "non_operating_amount": float(drawings_amount + debt_and_stock_amount),
         "total_records": len(expenses),
         "total_categories": categories_used
     }
@@ -86,16 +94,27 @@ def create_expense(data: ExpenseCreate, db: Session = Depends(get_db)):
     db.add(exp)
     db.flush()
 
-    # Double entry ledger:
-    # Debit: Operating Expenses (5020)
-    # Credit: Cash (1010) or Bank (1020)
+    # Double entry ledger routing:
+    # Drawings -> 3020 (Owner Drawings / Capital Distribution)
+    # Loan Repayment -> 2010 (Loans Payable / Debt Settlement)
+    # Inventory -> 1030 (Inventory / SIM Stock Inward)
+    # Operating Expenses -> 5020 (Operating Expenses)
+    if data.category == "Drawings":
+        debit_account = "3020"
+    elif data.category == "Loan Repayment":
+        debit_account = "2010"
+    elif data.category == "Inventory":
+        debit_account = "1030"
+    else:
+        debit_account = "5020"
+
     cash_or_bank = "1020" if data.payment_method == "Bank Transfer" else "1010"
     entries = [
         {
-            "account_code": "5020",
+            "account_code": debit_account,
             "entry_type": EntryTypeEnum.DEBIT.value,
             "amount": data.amount,
-            "memo": f"Expense: {data.title} ({data.category})"
+            "memo": f"Disbursement: {data.title} ({data.category})"
         },
         {
             "account_code": cash_or_bank,

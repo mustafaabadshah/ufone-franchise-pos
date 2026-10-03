@@ -97,7 +97,7 @@ export const ProfitLoss: React.FC = () => {
     { id: 2, title: "Pay Of FCA (Field Customer Agents & Promos)", category: "Commissions", amount: 339700.0, sheet_item: "Item 2, Row 42", payment_method: "Bank Transfer" },
     { id: 3, title: "Pay Of Office Staff & RSO Payroll", category: "Salaries", amount: 252324.0, sheet_item: "Item 1, Row 41", payment_method: "Cash / Bank" },
     { id: 4, title: "Paired SIMs Order Ufone HQ (Stock Inward)", category: "Inventory Asset", amount: 172500.0, sheet_item: "Item 10, Row 50", payment_method: "Bank Transfer" },
-    { id: 5, title: "Pay Of Islam Badshah Sb (Owner Drawings)", category: "Owner Drawings", amount: 103910.0, sheet_item: "Item 16, Row 56", payment_method: "Bank Transfer" },
+    { id: 5, title: "Drawings of Islam Badshah Sb (Household & Personal)", category: "Drawings (Non-Operating Equity)", amount: 103910.0, sheet_item: "Item 16, Row 56", payment_method: "Bank Transfer" },
     { id: 6, title: "Tax Adjustment (Federal & Provincial WHT)", category: "Tax", amount: 90176.0, sheet_item: "Item 12, Row 52", payment_method: "Bank Transfer" },
     { id: 7, title: "Loading FCA August 2026", category: "Commissions", amount: 52300.0, sheet_item: "Item 17, Row 57", payment_method: "Cash" },
     { id: 8, title: "Loos Sims Order Ufone HQ (Stock Inward)", category: "Inventory Asset", amount: 48750.0, sheet_item: "Item 11, Row 51", payment_method: "Bank Transfer" },
@@ -559,6 +559,21 @@ export const ProfitLoss: React.FC = () => {
                 <span className="text-rose-900 font-black font-mono">
                   -Rs. {totalOperatingDeductions.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
+              </div>
+
+              {/* Audit Rule Callout: Owner Drawings are NOT Operating Expenses */}
+              <div className="mt-3 p-3 rounded-xl bg-indigo-50/80 border border-indigo-200 text-indigo-950 font-sans text-xs flex items-start gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold text-indigo-900">
+                    Audit Clarification — Are Drawings of Islam Badshah Sb (Rs. 103,910.00) Counted in Operating Expenditures?
+                  </span>
+                  <p className="text-[11px] text-indigo-900 mt-1 leading-relaxed">
+                    <strong>NO, Drawings are NOT an operating expense.</strong> Drawings of Islam Badshah Sb (IESCO/SNGPL household bills Rs. 49,060, driver salary Rs. 32,000, and home maintenance Rs. 22,850) represent an <strong>Owner Personal Equity Withdrawal</strong>, NOT a business overhead.
+                    In standard accounting and telecom franchise management, owner drawings are <strong>strictly excluded</strong> from Operating Expenditures (Rs. 828,460.00) so operating net profit (+Rs. 20,837.00) is not falsely depressed.
+                    Drawings are accounted for on the <strong>Balance Sheet</strong> (reducing Owner Invested Capital from Rs. 5,220,410 to Rs. 5,116,500) and in <strong>Statement 3: Monthly Cash Outflows</strong>.
+                  </p>
+                </div>
               </div>
             </div>
 
