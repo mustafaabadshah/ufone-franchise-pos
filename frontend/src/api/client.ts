@@ -230,6 +230,11 @@ export const api = {
     if (params?.date_to) query.append("date_to", params.date_to);
     return apiFetch<any>(`/finance/profit-and-loss?${query.toString()}`);
   },
+  getBalanceSheet: (params?: { as_of_date?: string }) => {
+    const query = new URLSearchParams();
+    if (params?.as_of_date) query.append("as_of_date", params.as_of_date);
+    return apiFetch<any>(`/finance/balance-sheet?${query.toString()}`);
+  },
   getLedgerAccounts: () => apiFetch<any[]>("/finance/ledger/accounts"),
   getLedgerTransactions: (params?: { reference_type?: string; date_from?: string; date_to?: string }) => {
     const query = new URLSearchParams();

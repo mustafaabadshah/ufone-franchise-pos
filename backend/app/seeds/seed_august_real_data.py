@@ -634,8 +634,8 @@ def seed_august_real_data():
                 total_amount=evc_vol,
                 paid_amount=evc_vol,
                 remaining_amount=Decimal("0.00"),
-                cogs=evc_vol * Decimal("0.975"),
-                gross_profit=evc_vol * Decimal("0.025"),
+                cogs=evc_vol,
+                gross_profit=Decimal("0.00"),
                 payment_method="Cash",
                 payment_status="Paid",
                 remarks=f"Total August EVC distribution sales by RSO {r_name}"

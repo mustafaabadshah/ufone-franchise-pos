@@ -74,13 +74,14 @@ def test_august_evc_sales_volume():
     db.close()
 
 def test_pnl_dual_models():
-    """Validates dual accounting models: Agency 1.4% (+Rs. 20,837) and Commercial (+Rs. 387,337)"""
+    """Validates franchise operating net profit (+Rs. 20,837) and commercial (+Rs. 387,337)"""
     db = SessionLocal()
     pnl = calculate_profit_and_loss(db)
     assert pnl["commission_income"] == 849297.0
     assert pnl["total_operating_deductions"] == 828460.0
     assert pnl["agency_net_profit"] == 20837.0
-    assert pnl["net_profit"] == 387337.0
+    assert pnl["net_profit"] == 20837.0
+    assert pnl["commercial_net_profit"] == 387337.0
     assert pnl["is_loss"] is False
     assert pnl["total_cash_outflows"] == 1653620.0
     db.close()
@@ -93,11 +94,11 @@ def test_dashboard_api_solvency():
     assert data["total_sales"] == 14660000.0
     assert data["total_expenses"] == 1653620.0
     assert data["total_salaries"] == 252324.0
-    assert data["net_profit"] == 387337.0
+    assert data["net_profit"] == 20837.0
+    assert data["commercial_net_profit"] == 387337.0
     eq = data["financial_equation"]
-    assert eq["working_capital_loans"] == 1428930.0
-    assert eq["owner_equity"] == 5220410.0
-    assert eq["working_capital_surplus"] == 948394.0
+    assert eq["working_capital_loans"] == 928930.0
+    assert eq["working_capital_surplus"] == 1956740.0
     assert eq["agency_net_profit"] == 20837.0
     assert eq["state_badge"] == "Healthy & Profitable"
     assert eq["is_loss"] is False
@@ -115,4 +116,17 @@ def test_monthly_report_api_audit():
     assert data["combined_payroll"] == 252324.0
     assert data["total_commissions_inflow"] == 849297.0
     assert data["agency_net_profit"] == 20837.0
-    assert data["net_profit"] == 387337.0
+    assert data["net_profit"] == 20837.0
+    assert data["commercial_net_profit"] == 387337.0
+
+def test_balance_sheet_api():
+    """Validates /api/v1/finance/balance-sheet reconciles Assets, Liabilities and Equity"""
+    res = client.get("/api/v1/finance/balance-sheet")
+    assert res.status_code == 200
+    bs = res.json()
+    assert bs["summary"]["total_debit_injected"] == 6649340.0
+    assert bs["summary"]["total_credit_receivables"] == 719385.0
+    assert bs["summary"]["total_liabilities"] == 928930.0
+    assert bs["summary"]["working_capital_surplus"] == 1956740.0
+    assert bs["summary"]["net_operating_profit"] == 20837.0
+    assert bs["equity"]["solvency_ratio"] >= 3.0

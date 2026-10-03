@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.core.database import get_db
-from app.core.accounting_engine import calculate_profit_and_loss, post_ledger_transaction
+from app.core.accounting_engine import calculate_profit_and_loss, get_balance_sheet, post_ledger_transaction
 from app.models.models import (
     Company, CompanyCreditAccount, CompanyCreditTransaction, LedgerAccount,
     LedgerTransaction, LedgerEntry, Investment, InvestmentReturn, Loan, LoanReturn,
@@ -28,6 +28,14 @@ def get_pnl_report(
     db: Session = Depends(get_db)
 ):
     return calculate_profit_and_loss(db, start_date=date_from, end_date=date_to)
+
+# --- BALANCE SHEET (Statement of Financial Position) ---
+@router.get("/balance-sheet")
+def get_balance_sheet_report(
+    as_of_date: Optional[date] = None,
+    db: Session = Depends(get_db)
+):
+    return get_balance_sheet(db, as_of_date=as_of_date)
 
 # --- LEDGER ---
 @router.get("/ledger/accounts")
