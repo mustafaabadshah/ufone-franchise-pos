@@ -470,8 +470,9 @@ def calculate_profit_and_loss(
     gross_sales_margin = net_revenue - net_cogs
     gross_profit = gross_sales_margin + total_commission
 
-    # Operating expenses exclude non-operating categories (Drawings, Loan Repayment, Salaries, Inventory)
-    non_operating_cats = ["Drawings", "Loan Repayment", "Salaries", "Inventory"]
+    # Operating expenses exclude non-operating categories (Loan Repayment, Salaries, Inventory).
+    # Per client requirement, Drawings of Islam Badshah Sb (Household & Personal Rs. 103,910) is counted in Operating Expenditures.
+    non_operating_cats = ["Loan Repayment", "Salaries", "Inventory"]
     operating_expenses = sum((e.amount for e in expenses if e.category not in non_operating_cats), Decimal("0.00"))
     
     # Below-the-line / Financing & Capital cash movements
@@ -526,7 +527,7 @@ def calculate_profit_and_loss(
             "payment_method": e.payment_method,
             "remarks": e.remarks or ""
         }
-        for e in expenses if e.category in ["Drawings", "Loan Repayment", "Inventory"]
+        for e in expenses if e.category in ["Loan Repayment", "Inventory"]
     ]
     non_op_list.sort(key=lambda x: x["amount"], reverse=True)
 
@@ -573,7 +574,8 @@ def calculate_profit_and_loss(
     # August.xlsx Bank & Cash Ledger Reconciliation (Rows 4-12, 14-21, 40-59)
     opening_bank_balance = Decimal("3152601.00")
     closing_bank_balance = Decimal("2664420.00")
-    total_cash_disbursements = total_operating_deductions + drawings + loan_repayments + capital_inventory
+    # Total monthly cash disbursements: operating deductions (incl. Drawings) + debt settlement + inventory
+    total_cash_disbursements = total_operating_deductions + loan_repayments + capital_inventory
     external_cash_inflows = Decimal("316142.00")
     total_realized_inflows = total_commission + external_cash_inflows
     net_cash_depletion = total_realized_inflows - total_cash_disbursements
@@ -760,8 +762,8 @@ def get_balance_sheet(
     owner_drawings = Decimal("103910.00")
     owner_net_capital = owner_gross_investment - owner_drawings  # 5,116,500.00
 
-    # Net Operating Profit for August 2026: Rs. 20,837.00
-    current_operating_profit = Decimal("20837.00")
+    # Net Operating Margin with Drawings in Operations: -Rs. 83,073.00
+    current_operating_profit = Decimal("-83073.00")
 
     # Solvency & Net Surplus:
     working_capital_surplus = total_assets - total_liabilities  # 1,956,740.00

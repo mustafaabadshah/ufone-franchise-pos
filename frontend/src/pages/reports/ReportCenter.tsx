@@ -857,7 +857,7 @@ export default function ReportCenter() {
                         { name: 'May', sales: 230000, expenses: 55000, profit: 175000 },
                         { name: 'Jun', sales: 280000, expenses: 62000, profit: 218000 },
                         { name: 'Jul', sales: 310000, expenses: 65000, profit: 245000 },
-                        { name: 'Aug', sales: 849297, expenses: 828460, profit: 20837 },
+                        { name: 'Aug', sales: 849297, expenses: 932370, profit: -83073 },
                       ]
                     }
                   >
@@ -888,17 +888,17 @@ export default function ReportCenter() {
               />
               <MetricCard
                 title="Total Franchise Overhead"
-                value={`Rs. ${Number(yearlyData?.total_expenses || 828460).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
+                value={`Rs. ${Number(yearlyData?.total_expenses || 932370).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
                 icon={TrendingUp}
                 color="rose"
-                subtitle="Salaries, rent, utilities, logistics"
+                subtitle="Salaries, rent, utilities, drawings, logistics"
               />
               <MetricCard
-                title="Net Franchise Operating Profit"
-                value={`Rs. ${Number(yearlyData?.net_profit || 387337).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
+                title="Net Commercial Franchise Profit"
+                value={`Rs. ${Number(yearlyData?.commercial_net_profit || 283427).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
                 icon={DollarSign}
                 color="emerald"
-                subtitle="Audited profit after all deductions"
+                subtitle="Commercial wholesale profit (Agency: -Rs. 83,073)"
               />
             </div>
           </div>

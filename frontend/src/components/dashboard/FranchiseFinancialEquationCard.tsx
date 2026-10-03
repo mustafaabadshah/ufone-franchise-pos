@@ -29,8 +29,8 @@ export const FranchiseFinancialEquationCard: React.FC<FinancialEquationProps> = 
   const retailerDues = Number(metrics?.financial_equation?.retailer_receivable ?? 719385);
 
   // Operating Net Profit metrics
-  const netProfit = Number(metrics?.net_profit ?? 20837);
-  const agencyNetProfit = Number(metrics?.financial_equation?.agency_net_profit ?? 20837);
+  const netProfit = Number(metrics?.net_profit ?? -83073);
+  const agencyNetProfit = Number(metrics?.financial_equation?.agency_net_profit ?? -83073);
 
   // Realizable Working Assets & Solvency Surplus
   const totalAssets = Number(metrics?.financial_equation?.total_assets ?? (stockVal + easyload + cash + retailerDues));
@@ -146,11 +146,11 @@ export const FranchiseFinancialEquationCard: React.FC<FinancialEquationProps> = 
                 Rs. {cash.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
               </td>
               {/* Highlighted Net Profit Column with correct agency model */}
-              <td className="py-4 px-5 font-mono text-right border-l border-r bg-emerald-50/60 border-emerald-200 text-emerald-800">
-                <div className="font-extrabold text-sm text-emerald-900">
-                  + Rs. {netProfit.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+              <td className={`py-4 px-5 font-mono text-right border-l border-r ${netProfit >= 0 ? "bg-emerald-50/60 border-emerald-200 text-emerald-800" : "bg-amber-50/60 border-amber-200 text-amber-900"}`}>
+                <div className={`font-extrabold text-sm ${netProfit >= 0 ? "text-emerald-900" : "text-rose-700"}`}>
+                  {netProfit >= 0 ? `+ Rs. ${netProfit.toLocaleString('en-PK', { minimumFractionDigits: 2 })}` : `- Rs. ${Math.abs(netProfit).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
                 </div>
-                <div className="text-[10px] text-emerald-700 font-sans mt-0.5">
+                <div className={`text-[10px] font-sans mt-0.5 ${netProfit >= 0 ? "text-emerald-700" : "text-slate-600"}`}>
                   Commissions − (Expenses + Salaries)
                 </div>
               </td>
@@ -169,7 +169,7 @@ export const FranchiseFinancialEquationCard: React.FC<FinancialEquationProps> = 
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-semibold text-slate-700">Audited Balance Sheet Equation:</span>
           <code className="px-2 py-0.5 bg-white border border-slate-200 rounded font-mono text-slate-800 text-[11px]">
-            Realizable Assets (Rs. {totalAssets.toLocaleString()}) − Outstanding Debt (Rs. {workingLoans.toLocaleString()}) = +Rs. {workingCapitalSurplus.toLocaleString()} Solvency Surplus | Net Operating Profit: +Rs. {netProfit.toLocaleString()}
+            Realizable Assets (Rs. {totalAssets.toLocaleString()}) − Outstanding Debt (Rs. {workingLoans.toLocaleString()}) = +Rs. {workingCapitalSurplus.toLocaleString()} Solvency Surplus | Net Operating Profit: {netProfit >= 0 ? `+Rs. ${netProfit.toLocaleString()}` : `-Rs. ${Math.abs(netProfit).toLocaleString()}`}
           </code>
         </div>
         {onNavigate && (

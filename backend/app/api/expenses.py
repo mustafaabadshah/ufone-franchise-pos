@@ -55,7 +55,8 @@ def get_expenses_summary(
         q = q.filter(Expense.paid_date <= date_to)
 
     expenses = q.all()
-    non_operating_cats = ["Drawings", "Loan Repayment", "Salaries", "Inventory"]
+    # Operating expenses include Drawings per client directive
+    non_operating_cats = ["Loan Repayment", "Salaries", "Inventory"]
     operating_amount = sum((e.amount for e in expenses if e.category not in non_operating_cats), Decimal("0.00"))
     drawings_amount = sum((e.amount for e in expenses if e.category == "Drawings"), Decimal("0.00"))
     debt_and_stock_amount = sum((e.amount for e in expenses if e.category in ["Loan Repayment", "Inventory"]), Decimal("0.00"))
@@ -67,7 +68,7 @@ def get_expenses_summary(
         "operating_amount": float(operating_amount),
         "drawings_amount": float(drawings_amount),
         "debt_and_stock_amount": float(debt_and_stock_amount),
-        "non_operating_amount": float(drawings_amount + debt_and_stock_amount),
+        "non_operating_amount": float(debt_and_stock_amount),
         "total_records": len(expenses),
         "total_categories": categories_used
     }
@@ -95,13 +96,10 @@ def create_expense(data: ExpenseCreate, db: Session = Depends(get_db)):
     db.flush()
 
     # Double entry ledger routing:
-    # Drawings -> 3020 (Owner Drawings / Capital Distribution)
     # Loan Repayment -> 2010 (Loans Payable / Debt Settlement)
     # Inventory -> 1030 (Inventory / SIM Stock Inward)
-    # Operating Expenses -> 5020 (Operating Expenses)
-    if data.category == "Drawings":
-        debit_account = "3020"
-    elif data.category == "Loan Repayment":
+    # Operating Expenses & Owner Drawings -> 5020 (Operating Expenses)
+    if data.category == "Loan Repayment":
         debit_account = "2010"
     elif data.category == "Inventory":
         debit_account = "1030"

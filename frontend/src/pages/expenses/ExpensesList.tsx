@@ -138,18 +138,11 @@ export const ExpensesList: React.FC = () => {
       {/* Summary Cards with Clear Accounting Delineation */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <MetricCard
-          title="Operating Overhead"
-          value={summary?.operating_amount ?? 576136}
+          title="Operating Expenses"
+          value={summary?.operating_amount ?? 680046}
           prefix="Rs. "
           variant="red"
-          subtitle="Office, rent, utilities & FCA (P&L)"
-        />
-        <MetricCard
-          title="Owner Drawings"
-          value={summary?.drawings_amount ?? 103910}
-          prefix="Rs. "
-          variant="purple"
-          subtitle="Islam Badshah equity withdrawal (Non-Op)"
+          subtitle="General expenses & Drawings (P&L)"
         />
         <MetricCard
           title="Debt & Stock Payouts"
@@ -157,6 +150,13 @@ export const ExpensesList: React.FC = () => {
           prefix="Rs. "
           variant="blue"
           subtitle="Loans (500k) + SIMs (221k) (Non-Op)"
+        />
+        <MetricCard
+          title="Islam Badshah Drawings"
+          value={summary?.drawings_amount ?? 103910}
+          prefix="Rs. "
+          variant="purple"
+          subtitle="Household & personal expenses"
         />
         <MetricCard
           title="Total Cash Disbursed"
@@ -167,15 +167,14 @@ export const ExpensesList: React.FC = () => {
         />
       </div>
 
-      {/* Accounting Rule Clarification Banner */}
+      {/* Accounting Notice Banner */}
       <div className="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-200 text-indigo-950 text-xs font-sans flex items-start gap-2.5">
         <Receipt className="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" />
         <div>
-          <span className="font-bold">Accounting Rule — Operating Expenses vs Owner Drawings:</span>
+          <span className="font-bold">Operating Expenditures Notice — Drawings Counted in Operations:</span>
           <p className="text-[11px] text-indigo-900 mt-0.5 leading-relaxed">
-            <strong>Drawings of Islam Badshah Sb (Rs. 103,910.00)</strong> are personal household withdrawals and represent an <strong>Owner Equity Withdrawal</strong>.
-            They are <strong>NOT</strong> counted in Franchise Operating Expenditures (P&amp;L) so operating profit is not understated.
-            Drawings are recorded on the <strong>Balance Sheet</strong> (reducing Owner Invested Capital from Rs. 5,220,410 to Rs. 5,116,500) and in <strong>Monthly Cash Flow</strong>.
+            Per franchise management directive, <strong>Drawings of Islam Badshah Sb (Rs. 103,910.00)</strong> are counted directly in <strong>Operating Expenditures</strong>.
+            Operating Expenses for the month total <strong>Rs. 680,046.00</strong> (including drawings). Total voucher payouts across all operations, debt settlement, and SIM orders total <strong>Rs. 1,401,296.00</strong>.
           </p>
         </div>
       </div>
@@ -293,7 +292,7 @@ export const ExpensesList: React.FC = () => {
                       <td className="py-3.5 px-6">
                         {isDrawings ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-900 border border-purple-200">
-                            Drawings (Non-Operating Equity)
+                            Drawings (Operating Expenditure)
                           </span>
                         ) : isLoan ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-900 border border-rose-200">
@@ -329,7 +328,7 @@ export const ExpensesList: React.FC = () => {
                   Rs. {expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
                 </td>
                 <td colSpan={3} className="py-3.5 px-6 text-slate-600 font-sans text-[11px] font-normal">
-                  Operating Overhead: Rs. {(summary?.operating_amount ?? 576136).toLocaleString()} | Non-Operating (Drawings &amp; Debt): Rs. {(summary?.non_operating_amount ?? 825160).toLocaleString()}
+                  Operating Overhead (incl. Drawings): Rs. {(summary?.operating_amount ?? 680046).toLocaleString()} | Non-Operating (Debt &amp; Stock): Rs. {(summary?.non_operating_amount ?? 721250).toLocaleString()}
                 </td>
               </tr>
             </tfoot>
