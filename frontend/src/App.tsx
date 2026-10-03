@@ -67,6 +67,7 @@ function MainApp() {
   const { user, isLoading, isShakeel, isViewer } = useAuth();
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [lowStockCount, setLowStockCount] = useState<number>(0);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Default routing based on user identity and role
   useEffect(() => {
@@ -205,11 +206,13 @@ function MainApp() {
 
   return (
     <div className="flex h-screen bg-slate-100 overflow-hidden font-sans text-slate-800">
-      {/* Dark Sidebar */}
+      {/* Dark Sidebar (Desktop column / Mobile off-canvas drawer) */}
       <Sidebar
         currentTab={currentTab}
         onNavigate={handleNavigate}
         lowStockCount={lowStockCount}
+        isMobileOpen={mobileSidebarOpen}
+        onCloseMobile={() => setMobileSidebarOpen(false)}
       />
 
       {/* Main Content Area */}
@@ -220,9 +223,10 @@ function MainApp() {
           onOpenPos={() => handleNavigate('sales')}
           lowStockCount={lowStockCount}
           onNavigate={handleNavigate}
+          onToggleMobileSidebar={() => setMobileSidebarOpen(prev => !prev)}
         />
 
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-100/70">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8 bg-slate-100/70">
           <div className="max-w-7xl mx-auto">
             {isViewer && (
               <div className="mb-6 p-3.5 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 shadow-xs flex items-center justify-between">

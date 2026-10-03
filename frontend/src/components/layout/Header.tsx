@@ -1,5 +1,5 @@
 import React from "react";
-import { Bell, Search, ShoppingBag, Shield, MapPin, Sparkles } from "lucide-react";
+import { Bell, Search, ShoppingBag, Shield, MapPin, Sparkles, Menu } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 interface HeaderProps {
@@ -8,6 +8,7 @@ interface HeaderProps {
   onOpenPos?: () => void;
   lowStockCount?: number;
   onNavigate?: (tab: string) => void;
+  onToggleMobileSidebar?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -15,24 +16,36 @@ export const Header: React.FC<HeaderProps> = ({
   subtitle,
   onOpenPos,
   lowStockCount = 0,
-  onNavigate
+  onNavigate,
+  onToggleMobileSidebar
 }) => {
   const { user, isShakeel, isViewer } = useAuth();
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between shadow-xs sticky top-0 z-20">
-      <div className="flex items-center gap-4">
-        <div>
-          <h2 className="text-xl font-bold font-heading text-slate-800 tracking-tight flex items-center gap-2">
+    <header className="h-16 bg-white border-b border-slate-200/80 px-3 sm:px-6 flex items-center justify-between shadow-xs sticky top-0 z-20">
+      <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+        {/* Mobile Hamburger Menu Toggle */}
+        {onToggleMobileSidebar && (
+          <button
+            onClick={onToggleMobileSidebar}
+            className="p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 md:hidden flex-shrink-0 cursor-pointer"
+            title="Open Menu"
+          >
+            <Menu className="w-5 h-5 text-indigo-600" />
+          </button>
+        )}
+
+        <div className="min-w-0">
+          <h2 className="text-base sm:text-xl font-bold font-heading text-slate-800 tracking-tight flex items-center gap-1.5 sm:gap-2 truncate">
             {title}
           </h2>
           {subtitle && (
-            <p className="text-xs text-slate-500 font-medium">{subtitle}</p>
+            <p className="hidden sm:block text-xs text-slate-500 font-medium truncate">{subtitle}</p>
           )}
         </div>
 
         {/* Branch tag */}
-        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-medium">
+        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-medium flex-shrink-0">
           <MapPin className="w-3.5 h-3.5 text-indigo-500" />
           <span>Dargai Malakand Branch</span>
         </div>

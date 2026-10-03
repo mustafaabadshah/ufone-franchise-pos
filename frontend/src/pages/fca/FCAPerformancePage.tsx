@@ -3,7 +3,7 @@ import {
   Smartphone, Upload, Plus, Search, Filter, Download, Printer,
   FileSpreadsheet, CheckCircle2, AlertCircle, Edit3, X, Eye,
   TrendingUp, Users, MapPin, Award, ArrowUpDown, ChevronDown,
-  RefreshCw, Layers, ShieldCheck, Lock
+  RefreshCw, Layers, ShieldCheck, Lock, PlusCircle
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../api/client";
@@ -47,6 +47,15 @@ export const FCAPerformancePage: React.FC = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<AgentMonthRecord | null>(null);
+
+  // Quick Month Entry Modal
+  const [isQuickMonthModalOpen, setIsQuickMonthModalOpen] = useState(false);
+  const [quickAgentId, setQuickAgentId] = useState<number | "">("");
+  const [quickMonthKey, setQuickMonthKey] = useState("2026-09");
+  const [quickSimsCount, setQuickSimsCount] = useState<number | "">("");
+  const [quickSuccessMsg, setQuickSuccessMsg] = useState("");
+  const [quickErrorMsg, setQuickErrorMsg] = useState("");
+  const [isSavingQuick, setIsSavingQuick] = useState(false);
 
   // Upload state
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -118,6 +127,35 @@ export const FCAPerformancePage: React.FC = () => {
       }));
     } catch (err) {
       alert("Failed to update month value: " + err);
+    }
+  };
+
+  // Handle Quick Month Manual Update Form
+  const handleQuickMonthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickAgentId || quickSimsCount === "") {
+      setQuickErrorMsg("Please select an agent and enter SIM activations count.");
+      return;
+    }
+    setIsSavingQuick(true);
+    setQuickErrorMsg("");
+    setQuickSuccessMsg("");
+    try {
+      await api.updateFCAAgentMonth(Number(quickAgentId), {
+        month_key: quickMonthKey,
+        sims_sold: Number(quickSimsCount)
+      });
+      setQuickSuccessMsg("Month activation record saved and updated successfully!");
+      await loadData();
+      setTimeout(() => {
+        setIsQuickMonthModalOpen(false);
+        setQuickSuccessMsg("");
+        setQuickSimsCount("");
+      }, 1200);
+    } catch (err: any) {
+      setQuickErrorMsg(err.message || "Failed to update monthly record");
+    } finally {
+      setIsSavingQuick(false);
     }
   };
 
@@ -254,6 +292,21 @@ export const FCAPerformancePage: React.FC = () => {
               >
                 <Upload className="w-4 h-4" />
                 <span>Upload Monthly Excel</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setQuickAgentId("");
+                  setQuickSimsCount("");
+                  setQuickErrorMsg("");
+                  setQuickSuccessMsg("");
+                  setIsQuickMonthModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                title="Manually insert or update any monthly record for an agent"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Update Month Record</span>
               </button>
 
               <button
@@ -504,24 +557,33 @@ export const FCAPerformancePage: React.FC = () => {
                         return (
                           <td
                             key={m.key}
-                            className={`px-2 py-1.5 text-right font-mono text-[11px] print:text-[6.8pt] print:px-1 month-cell ${
-                              isLatest ? "bg-amber-50/40 text-amber-950 font-bold" : "text-slate-700"
+                            className={`px-1.5 py-1 text-right font-mono text-[11px] print:text-[6.8pt] print:px-1 month-cell ${
+                              isLatest ? "bg-amber-50/50 text-amber-950 font-bold" : "text-slate-700"
                             }`}
                           >
                             {canEdit ? (
-                              <input
-                                type="number"
-                                defaultValue={val}
-                                onBlur={(e) => {
-                                  const newVal = parseInt(e.target.value) || 0;
-                                  if (newVal !== val) {
-                                    handleUpdateMonth(agent.id, m.key, newVal);
-                                  }
-                                }}
-                                className="w-12 text-right px-1 py-0.5 rounded border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:bg-white bg-transparent no-print font-mono"
-                              />
+                              <div className="inline-block relative no-print">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  defaultValue={val}
+                                  title={`Click to edit ${m.label} for ${agent.name} (${agent.bvs_id})`}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      (e.target as HTMLInputElement).blur();
+                                    }
+                                  }}
+                                  onBlur={(e) => {
+                                    const newVal = parseInt(e.target.value) || 0;
+                                    if (newVal !== val) {
+                                      handleUpdateMonth(agent.id, m.key, newVal);
+                                    }
+                                  }}
+                                  className="w-14 text-right px-1.5 py-1 rounded-md border border-slate-200 hover:border-indigo-400 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-500/30 focus:bg-white bg-slate-50/80 font-mono text-[11px] font-semibold text-slate-900 transition-all shadow-2xs cursor-text"
+                                />
+                              </div>
                             ) : (
-                              <span className="no-print">{val}</span>
+                              <span className="no-print font-mono px-1">{val}</span>
                             )}
                             <span className="print-only hidden font-mono">{val}</span>
                           </td>
@@ -538,13 +600,14 @@ export const FCAPerformancePage: React.FC = () => {
 
                       {/* Edit Button */}
                       {canEdit && (
-                        <td className="px-2.5 py-1.5 text-center no-print">
+                        <td className="px-2.5 py-1.5 text-center no-print whitespace-nowrap">
                           <button
                             onClick={() => setEditingAgent({ ...agent })}
-                            className="p-1 rounded hover:bg-slate-100 text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer"
-                            title="Edit Agent Details"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[10px] transition-colors cursor-pointer border border-indigo-200/60"
+                            title="Edit Agent Details & All Monthly Records"
                           >
-                            <Edit3 className="w-3.5 h-3.5" />
+                            <Edit3 className="w-3 h-3 text-indigo-600" />
+                            <span>Edit</span>
                           </button>
                         </td>
                       )}
@@ -908,19 +971,179 @@ export const FCAPerformancePage: React.FC = () => {
                 </select>
               </div>
 
+              {/* Monthly Activations & Sales Records */}
+              <div className="pt-3 border-t border-slate-200">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                    Monthly Activations Records (SIMs)
+                  </label>
+                  <span className="text-[10px] text-indigo-700 font-bold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
+                    Total: {Object.values(editingAgent.months || {}).reduce((a, b) => a + (b || 0), 0)} SIMs
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1.5 bg-slate-50/70 rounded-xl border border-slate-200">
+                  {allMonths.map((m) => {
+                    const val = editingAgent.months[m.key] !== undefined ? editingAgent.months[m.key] : 0;
+                    return (
+                      <div key={m.key} className="bg-white p-2 rounded-lg border border-slate-200/80 shadow-2xs">
+                        <label className="block text-[10px] font-bold text-slate-600 truncate mb-1">{m.label}</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={val}
+                          onChange={(e) => {
+                            const nVal = parseInt(e.target.value) || 0;
+                            setEditingAgent({
+                              ...editingAgent,
+                              months: {
+                                ...editingAgent.months,
+                                [m.key]: nVal
+                              }
+                            });
+                          }}
+                          className="w-full px-2 py-1 rounded border border-slate-200 text-xs font-mono font-bold text-right focus:border-indigo-600 focus:bg-white"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="flex items-center justify-end gap-2 pt-3">
                 <button
                   type="button"
                   onClick={() => setEditingAgent(null)}
-                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold"
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs cursor-pointer"
                 >
                   Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL 4: QUICK UPDATE MONTHLY ENTRY --- */}
+      {isQuickMonthModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs no-print">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-amber-50 text-amber-700">
+                  <PlusCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-slate-900">Update Monthly Record</h3>
+                  <p className="text-xs text-slate-500">Insert or update an agent's monthly activation count</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsQuickMonthModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleQuickMonthSubmit} className="space-y-3">
+              {/* Agent Selector */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Select BVS Agent *</label>
+                <select
+                  required
+                  value={quickAgentId}
+                  onChange={(e) => {
+                    const aId = Number(e.target.value);
+                    setQuickAgentId(aId);
+                    const sel = agents.find(a => a.id === aId);
+                    if (sel && sel.months[quickMonthKey] !== undefined) {
+                      setQuickSimsCount(sel.months[quickMonthKey]);
+                    }
+                  }}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white"
+                >
+                  <option value="">-- Choose Agent from Ledger ({agents.length} available) --</option>
+                  {agents.map((ag) => (
+                    <option key={ag.id} value={ag.id}>
+                      {ag.bvs_id} — {ag.name} ({ag.market} | {ag.category})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Month Selector */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Target Month *</label>
+                  <select
+                    value={quickMonthKey}
+                    onChange={(e) => {
+                      const mk = e.target.value;
+                      setQuickMonthKey(mk);
+                      if (quickAgentId) {
+                        const sel = agents.find(a => a.id === Number(quickAgentId));
+                        if (sel && sel.months[mk] !== undefined) {
+                          setQuickSimsCount(sel.months[mk]);
+                        }
+                      }
+                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white"
+                  >
+                    {allMonths.map((m) => (
+                      <option key={m.key} value={m.key}>{m.label} ({m.key})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Activations (SIMs) *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    required
+                    placeholder="e.g. 15"
+                    value={quickSimsCount}
+                    onChange={(e) => setQuickSimsCount(e.target.value === "" ? "" : parseInt(e.target.value) || 0)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono font-bold"
+                  />
+                </div>
+              </div>
+
+              {quickErrorMsg && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                  <span>{quickErrorMsg}</span>
+                </div>
+              )}
+
+              {quickSuccessMsg && (
+                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 font-bold">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <span>{quickSuccessMsg}</span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsQuickMonthModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingQuick}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50"
+                >
+                  {isSavingQuick ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  <span>Save Record</span>
                 </button>
               </div>
             </form>

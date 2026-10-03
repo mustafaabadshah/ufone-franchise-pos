@@ -50,3 +50,15 @@ yarn-error.log*
 
 # Database
 # Note: franchise_pos.db can be committed if user wants pre-seeded demo data included out of the box
+
+# GSD & Agent Framework Files
+.agent/
+.agents/
+.gemini/
+.gsd/
+GSD-STYLE.md
+PROJECT_RULES.md
+VERSION
+adapters/
+model_capabilities.yaml
+scripts/

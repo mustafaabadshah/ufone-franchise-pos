@@ -857,7 +857,7 @@ export default function ReportCenter() {
                         { name: 'May', sales: 230000, expenses: 55000, profit: 175000 },
                         { name: 'Jun', sales: 280000, expenses: 62000, profit: 218000 },
                         { name: 'Jul', sales: 310000, expenses: 65000, profit: 245000 },
-                        { name: 'Aug', sales: 14660000, expenses: 828460, profit: 387337 },
+                        { name: 'Aug', sales: 849297, expenses: 828460, profit: 20837 },
                       ]
                     }
                   >
@@ -869,7 +869,7 @@ export default function ReportCenter() {
                       contentStyle={{ backgroundColor: '#1e1b4b', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
                     />
                     <Legend />
-                    <Bar dataKey="sales" name="Sales" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="sales" name="Commissions" fill="#4f46e5" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="expenses" name="Expenses" fill="#f43f5e" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="profit" name="Net Profit" fill="#10b981" radius={[4, 4, 0, 0]} />
                   </BarChart>
@@ -880,11 +880,11 @@ export default function ReportCenter() {
             {/* Performance Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <MetricCard
-                title="Gross Aggregate Sales"
-                value={`Rs. ${Number(yearlyData?.total_sales || 14660000).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
+                title="Total Operating Commissions"
+                value={`Rs. ${Number(yearlyData?.total_sales || 849297).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
                 icon={ShoppingCart}
                 color="indigo"
-                subtitle="All products & franchise lines"
+                subtitle="Ufone promo & EVC distribution commissions"
               />
               <MetricCard
                 title="Total Franchise Overhead"
