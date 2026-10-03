@@ -89,7 +89,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: "ledger", label: "General Ledger", icon: BookOpen },
         { id: "expenses", label: "Expenses", icon: Receipt },
         { id: "salaries", label: "Salaries / Payroll", icon: DollarSign },
-        { id: "investments", label: "Investments", icon: PiggyBank },
+        { id: "investments", label: "Investments & Returns", icon: PiggyBank },
+        { id: "loans", label: "Loans & Borrowings", icon: Landmark },
         { id: "cash-management", label: "Cash Denominations", icon: Coins },
         { id: "company-credit", label: "Company Credit / Payables", icon: Building2 },
         { id: "commissions", label: "Commissions", icon: Landmark },
@@ -142,6 +143,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: "purchases", label: "Purchases & Inward Stock", icon: ShoppingCart },
         { id: "stock", label: "Stock & Inventory", icon: Boxes },
         { id: "company-credit", label: "Company Credit / Payables", icon: Building2 },
+        { id: "investments", label: "Investments & Returns", icon: PiggyBank },
+        { id: "loans", label: "Loans & Borrowings", icon: Landmark },
       ]
     }
   ];

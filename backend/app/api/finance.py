@@ -8,11 +8,14 @@ from app.core.database import get_db
 from app.core.accounting_engine import calculate_profit_and_loss, post_ledger_transaction
 from app.models.models import (
     Company, CompanyCreditAccount, CompanyCreditTransaction, LedgerAccount,
-    LedgerTransaction, LedgerEntry, Investment, Commission, EntryTypeEnum, AuditLog
+    LedgerTransaction, LedgerEntry, Investment, InvestmentReturn, Loan, LoanReturn,
+    Retailer, Commission, EntryTypeEnum, AuditLog
 )
 from app.schemas.schemas import (
     CompanyCreate, CompanyCreditAccountOut, CompanyCreditPaymentCreate,
-    InvestmentCreate, InvestmentOut, CommissionCreate, CommissionOut
+    InvestmentCreate, InvestmentOut, InvestmentReturnCreate, InvestmentReturnOut,
+    LoanCreate, LoanOut, LoanReturnCreate, LoanReturnOut,
+    CommissionCreate, CommissionOut
 )
 
 router = APIRouter(prefix="/finance", tags=["Finance & Accounting"])
@@ -298,6 +301,271 @@ def create_investment(data: InvestmentCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(inv)
     return inv
+
+# --- RETURN OF INVESTMENT ---
+@router.post("/investments/{investment_id}/returns", response_model=InvestmentReturnOut)
+def record_investment_return(
+    investment_id: int,
+    data: InvestmentReturnCreate,
+    db: Session = Depends(get_db)
+):
+    inv = db.query(Investment).filter(Investment.id == investment_id).first()
+    if not inv:
+        raise HTTPException(status_code=404, detail="Investment portfolio not found")
+
+    if data.amount <= Decimal("0.00"):
+        raise HTTPException(status_code=400, detail="Return amount must be greater than zero")
+
+    inv_ret = InvestmentReturn(
+        investment_id=inv.id,
+        amount=data.amount,
+        return_date=data.return_date,
+        return_type=data.return_type,
+        payment_method=data.payment_method,
+        reference=data.reference or f"RET-INV-{int(datetime.utcnow().timestamp())}",
+        remarks=data.remarks
+    )
+    db.add(inv_ret)
+    inv.returns = (inv.returns or Decimal("0.00")) + data.amount
+    inv.remaining = max(Decimal("0.00"), inv.amount_given - inv.returns)
+    if inv.remaining == Decimal("0.00"):
+        inv.status = "Settled"
+
+    # Single-source-of-truth Double entry (NO duplicate expense):
+    # Debit Owner Capital / Dividends (3010), Credit Cash/Bank (1010/1020)
+    cash_or_bank = "1020" if data.payment_method == "Bank Transfer" else "1010"
+    entries = [
+        {
+            "account_code": "3010",
+            "entry_type": EntryTypeEnum.DEBIT.value,
+            "amount": data.amount,
+            "memo": f"Return of Investment to {inv.name}"
+        },
+        {
+            "account_code": cash_or_bank,
+            "entry_type": EntryTypeEnum.CREDIT.value,
+            "amount": data.amount,
+            "memo": f"Disbursement for return to {inv.name}"
+        }
+    ]
+    post_ledger_transaction(
+        db=db,
+        tx_code=f"TX-INVRET-{int(datetime.utcnow().timestamp())}",
+        description=f"Return of Investment to {inv.name}",
+        reference_type="InvestmentReturn",
+        reference_id=str(inv.id),
+        entries=entries
+    )
+    db.commit()
+    db.refresh(inv_ret)
+    return inv_ret
+
+@router.get("/investments/returns", response_model=List[InvestmentReturnOut])
+def list_investment_returns(db: Session = Depends(get_db)):
+    return db.query(InvestmentReturn).order_by(InvestmentReturn.return_date.desc(), InvestmentReturn.id.desc()).all()
+
+# --- LOANS & RETURN OF LOAN ---
+@router.get("/loans", response_model=List[LoanOut])
+def list_loans(db: Session = Depends(get_db)):
+    return db.query(Loan).order_by(Loan.loan_date.desc(), Loan.id.desc()).all()
+
+@router.post("/loans", response_model=LoanOut)
+def create_loan(data: LoanCreate, db: Session = Depends(get_db)):
+    if data.amount <= Decimal("0.00"):
+        raise HTTPException(status_code=400, detail="Loan amount must be greater than zero")
+
+    loan = Loan(
+        lender_name=data.lender_name,
+        phone=data.phone,
+        loan_type=data.loan_type,
+        amount=data.amount,
+        total_returned=Decimal("0.00"),
+        remaining_balance=data.amount,
+        loan_date=data.loan_date,
+        due_date=data.due_date,
+        payment_method=data.payment_method,
+        status="Active",
+        remarks=data.remarks
+    )
+    db.add(loan)
+    db.flush()
+
+    # Double entry: Debit Cash/Bank (1010/1020), Credit Loans Payable (2030)
+    cash_or_bank = "1020" if data.payment_method == "Bank Transfer" else "1010"
+    entries = [
+        {
+            "account_code": cash_or_bank,
+            "entry_type": EntryTypeEnum.DEBIT.value,
+            "amount": data.amount,
+            "memo": f"Loan received from {data.lender_name}"
+        },
+        {
+            "account_code": "2030",
+            "entry_type": EntryTypeEnum.CREDIT.value,
+            "amount": data.amount,
+            "memo": f"Liability: Borrowings from {data.lender_name}"
+        }
+    ]
+    post_ledger_transaction(
+        db=db,
+        tx_code=f"TX-LOAN-{loan.id}-{int(datetime.utcnow().timestamp())}",
+        description=f"Loan received from {data.lender_name}",
+        reference_type="Loan",
+        reference_id=str(loan.id),
+        entries=entries
+    )
+    db.commit()
+    db.refresh(loan)
+    return loan
+
+@router.post("/loans/{loan_id}/returns", response_model=LoanReturnOut)
+def record_loan_return(loan_id: int, data: LoanReturnCreate, db: Session = Depends(get_db)):
+    loan = db.query(Loan).filter(Loan.id == loan_id).first()
+    if not loan:
+        raise HTTPException(status_code=404, detail="Loan record not found")
+
+    if data.amount_returned <= Decimal("0.00"):
+        raise HTTPException(status_code=400, detail="Repayment amount must be greater than zero")
+    if data.amount_returned > loan.remaining_balance:
+        raise HTTPException(status_code=400, detail=f"Repayment amount PKR {data.amount_returned} exceeds remaining balance PKR {loan.remaining_balance}")
+
+    loan_ret = LoanReturn(
+        loan_id=loan.id,
+        amount_returned=data.amount_returned,
+        return_date=data.return_date,
+        payment_method=data.payment_method,
+        reference=data.reference or f"RET-LOAN-{int(datetime.utcnow().timestamp())}",
+        remarks=data.remarks
+    )
+    db.add(loan_ret)
+    loan.total_returned += data.amount_returned
+    loan.remaining_balance -= data.amount_returned
+    if loan.remaining_balance == Decimal("0.00"):
+        loan.status = "Settled"
+    else:
+        loan.status = "Partially Returned"
+
+    # Single-source-of-truth Double entry (NO duplicate expense):
+    # Debit Loans Payable (2030), Credit Cash/Bank (1010/1020)
+    cash_or_bank = "1020" if data.payment_method == "Bank Transfer" else "1010"
+    entries = [
+        {
+            "account_code": "2030",
+            "entry_type": EntryTypeEnum.DEBIT.value,
+            "amount": data.amount_returned,
+            "memo": f"Loan repayment to {loan.lender_name}"
+        },
+        {
+            "account_code": cash_or_bank,
+            "entry_type": EntryTypeEnum.CREDIT.value,
+            "amount": data.amount_returned,
+            "memo": f"Disbursement for loan settlement to {loan.lender_name}"
+        }
+    ]
+    post_ledger_transaction(
+        db=db,
+        tx_code=f"TX-LOANRET-{int(datetime.utcnow().timestamp())}",
+        description=f"Return of loan to {loan.lender_name}",
+        reference_type="LoanReturn",
+        reference_id=str(loan.id),
+        entries=entries
+    )
+    db.commit()
+    db.refresh(loan_ret)
+    return loan_ret
+
+@router.get("/loans/returns", response_model=List[LoanReturnOut])
+def list_loan_returns(db: Session = Depends(get_db)):
+    return db.query(LoanReturn).order_by(LoanReturn.return_date.desc(), LoanReturn.id.desc()).all()
+
+# --- DASHBOARD CREDIT & DEBIT DETAILED SUMMARY ---
+@router.get("/credit-debit-summary")
+def get_credit_debit_summary(db: Session = Depends(get_db)):
+    # Credit: Market Receivables / Debtors (Retailer dues)
+    debtors = db.query(Retailer).filter(Retailer.balance > 0).order_by(Retailer.balance.desc()).all()
+    total_market_credit = sum((d.balance for d in debtors), Decimal("0.00"))
+    
+    debtor_items = [
+        {
+            "id": d.id,
+            "name": d.name,
+            "shop_name": d.shop_name,
+            "phone": d.phone or "N/A",
+            "balance": float(d.balance),
+            "route": d.route or "General Route",
+            "type": "Market Credit / Retailer Due",
+            "status": "Due"
+        }
+        for d in debtors
+    ]
+
+    # External loans & wholesale credit liabilities
+    loans = db.query(Loan).all()
+    total_loans_taken = sum((l.amount for l in loans), Decimal("0.00"))
+    total_loans_returned = sum((l.total_returned for l in loans), Decimal("0.00"))
+    total_loans_remaining = sum((l.remaining_balance for l in loans), Decimal("0.00"))
+
+    company_credit = db.query(CompanyCreditAccount).all()
+    company_credit_outstanding = sum((c.outstanding for c in company_credit), Decimal("0.00"))
+
+    # Debit: Capital Injections & Loans Inward
+    investments = db.query(Investment).all()
+    total_equity_invested = sum((i.amount_given for i in investments), Decimal("0.00"))
+    total_equity_returned = sum((i.returns for i in investments), Decimal("0.00"))
+    total_equity_remaining = sum((i.remaining for i in investments), Decimal("0.00"))
+
+    total_debit_amount = total_equity_invested + total_loans_taken
+
+    debit_items = []
+    for inv in investments:
+        debit_items.append({
+            "id": f"inv-{inv.id}",
+            "name": inv.name,
+            "investor_or_lender": inv.name,
+            "type": "Equity Capital Investment",
+            "amount": float(inv.amount_given),
+            "returned": float(inv.returns),
+            "remaining": float(inv.remaining),
+            "status": inv.status or "Active",
+            "date": str(inv.investment_date)
+        })
+
+    for l in loans:
+        debit_items.append({
+            "id": f"loan-{l.id}",
+            "name": f"{l.lender_name} ({l.loan_type})",
+            "investor_or_lender": l.lender_name,
+            "type": f"Loan ({l.loan_type})",
+            "amount": float(l.amount),
+            "returned": float(l.total_returned),
+            "remaining": float(l.remaining_balance),
+            "status": l.status or "Active",
+            "date": str(l.loan_date)
+        })
+
+    return {
+        "credit": {
+            "total_credit_amount": float(total_market_credit),
+            "total_credit_given": float(total_market_credit),
+            "total_payables_owed": float(total_loans_remaining + company_credit_outstanding),
+            "total_amount": float(total_market_credit),
+            "debtor_count": len(debtor_items),
+            "items": debtor_items,
+            "wholesale_credit": float(company_credit_outstanding),
+            "loans_payable": float(total_loans_remaining)
+        },
+        "debit": {
+            "total_debit_amount": float(total_debit_amount),
+            "total_equity_invested": float(total_equity_invested),
+            "total_equity_returned": float(total_equity_returned),
+            "total_equity_remaining": float(total_equity_remaining),
+            "total_loans_taken": float(total_loans_taken),
+            "total_loans_returned": float(total_loans_returned),
+            "total_loans_remaining": float(total_loans_remaining),
+            "item_count": len(debit_items),
+            "items": debit_items
+        }
+    }
 
 # --- COMMISSIONS ---
 @router.get("/commissions", response_model=List[CommissionOut])

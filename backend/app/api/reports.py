@@ -12,7 +12,8 @@ from app.core.accounting_engine import calculate_profit_and_loss
 from app.models.models import (
     Sale, Purchase, Expense, Salary, Return, RetailerCollection,
     CompanyCreditTransaction, Investment, Commission, Product, RSO, Retailer, Staff, RSOSalary,
-    EasyLoadTransaction, AuditLog, LedgerTransaction, LedgerEntry, LedgerAccount
+    EasyLoadTransaction, AuditLog, LedgerTransaction, LedgerEntry, LedgerAccount,
+    Loan, LoanReturn, InvestmentReturn
 )
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -230,10 +231,13 @@ def get_monthly_report(
 
     # 1. Capital Investments & Working Capital Loans (Debit Details - Rs. 6.64M)
     investments_q = db.query(Investment).all()
+    loans_q = db.query(Loan).all()
+
     investments_list = [
         {
-            "id": inv.id,
+            "id": f"inv-{inv.id}",
             "name": inv.name,
+            "type": "Capital Investment",
             "phone": inv.phone,
             "amount_given": float(inv.amount_given),
             "purchased_amount": float(inv.purchased_amount),
@@ -244,7 +248,23 @@ def get_monthly_report(
         }
         for inv in investments_q
     ]
-    total_capital_loans = sum(i["amount_given"] for i in investments_list)
+    loans_list = [
+        {
+            "id": f"loan-{ln.id}",
+            "name": ln.lender_name,
+            "type": ln.loan_type or "Working Capital Loan",
+            "phone": ln.phone,
+            "amount_given": float(ln.amount),
+            "purchased_amount": float(ln.amount),
+            "returns": float(ln.total_returned),
+            "remaining": float(ln.remaining_balance),
+            "status": ln.status,
+            "remarks": ln.remarks
+        }
+        for ln in loans_q
+    ]
+    combined_capital_loans = investments_list + loans_list
+    total_capital_loans = sum(i["amount_given"] for i in combined_capital_loans)
 
     # 2. Market Outstanding Credit / Receivables (Credit Details - Rs. 719,385)
     retailers_credit_q = db.query(Retailer).filter(Retailer.balance > 0).order_by(Retailer.balance.desc()).all()
@@ -397,7 +417,7 @@ def get_monthly_report(
         "capital_inventory": pnl.get("capital_inventory", 0.0),
         "total_cash_outflows": pnl.get("total_cash_outflows", 0.0),
         # Detailed Tables matching August.xlsx
-        "capital_loans": investments_list,
+        "capital_loans": combined_capital_loans,
         "total_capital_loans": total_capital_loans,
         "market_credit": market_credit_list,
         "total_market_credit": total_market_credit,

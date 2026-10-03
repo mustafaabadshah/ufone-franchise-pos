@@ -23,6 +23,7 @@ import { CompanyCredit } from './pages/finance/CompanyCredit';
 import { Ledger } from './pages/finance/Ledger';
 import { CashManagement } from './pages/finance/CashManagement';
 import Investments from './pages/finance/Investments';
+import Loans from './pages/finance/Loans';
 import Commissions from './pages/finance/Commissions';
 import ReportCenter from './pages/reports/ReportCenter';
 import UsersList from './pages/administration/UsersList';
@@ -55,7 +56,8 @@ const TAB_CONFIG: Record<string, { title: string; subtitle: string }> = {
   'company-credit': { title: 'Company Credit & Payables', subtitle: 'PTCL / Ufone credit line tracking, inward invoice settlements without false cash leakage' },
   ledger: { title: 'General Accounting Ledger', subtitle: 'Double-entry balanced audit transactions for asset, liability, equity, and expense' },
   'cash-management': { title: 'Cash Drawer & Denominations', subtitle: 'Daily physical cash audit from Rs. 5000 down to Rs. 10 notes' },
-  investments: { title: 'Investor Capital Portfolios', subtitle: 'External financing tracking, capital utilization in purchases, and dividend returns' },
+  investments: { title: 'Investor Capital Portfolios & Returns', subtitle: 'External financing tracking, capital utilization, dividends, and return of investment history' },
+  loans: { title: 'Loans & Working Capital Borrowings', subtitle: 'Short-term third-party loans, scheduled debt repayments, and return of loan records' },
   commissions: { title: 'Telecom Commissions & Targets', subtitle: 'Ufone activation incentives, MNP targets, e-load commissions, and payout audit' },
   reports: { title: 'Executive Reporting Hub', subtitle: 'Multi-dimensional daily, monthly, and yearly audits with Excel and PDF export' },
   users: { title: 'Users & Access Control', subtitle: 'Security permissions, role-based access control, and operator accounts' },
@@ -109,7 +111,7 @@ function MainApp() {
     'reports', 'dashboard', 'pnl', 'ledger', 'audit-logs',
     'rso-daily', 'rso-weekly', 'rso-monthly',
     'expenses', 'salaries', 'retailers', 'sales', 'purchases', 'stock', 'company-credit',
-    'fca-performance'
+    'investments', 'loans', 'fca-performance'
   ];
 
   const handleNavigate = (tabId: string) => {
@@ -189,6 +191,8 @@ function MainApp() {
         return <CashManagement />;
       case 'investments':
         return <Investments />;
+      case 'loans':
+        return <Loans />;
       case 'commissions':
         return <Commissions />;
       case 'reports':

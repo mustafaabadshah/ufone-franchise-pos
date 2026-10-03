@@ -3,7 +3,7 @@ from decimal import Decimal
 from fastapi.testclient import TestClient
 from app.main import app
 from app.core.database import SessionLocal
-from app.models.models import Investment, Retailer, Expense, Salary, RSOSalary, Commission, Sale
+from app.models.models import Investment, Retailer, Expense, Salary, RSOSalary, Commission, Sale, Loan
 from app.core.accounting_engine import calculate_profit_and_loss
 
 client = TestClient(app)
@@ -12,12 +12,13 @@ def test_august_investments_and_capital_reconciliation():
     """Validates Rows 15-21 of August.xlsx: Total Injected Funds = Rs. 6,649,340.00"""
     db = SessionLocal()
     investments = db.query(Investment).all()
-    total_invested = sum((inv.amount_given for inv in investments), Decimal("0.00"))
-    assert total_invested == Decimal("6649340.00"), f"Expected 6,649,340, got {total_invested}"
+    loans = db.query(Loan).all()
+    owner_equity = sum((inv.amount_given for inv in investments), Decimal("0.00"))
+    working_loans = sum((ln.amount for ln in loans), Decimal("0.00"))
+    total_injected = owner_equity + working_loans
+    assert total_injected == Decimal("6649340.00"), f"Expected 6,649,340, got {total_injected}"
 
     # Verify Owner Equity vs Working Loans
-    owner_equity = sum((inv.amount_given for inv in investments if "Islam Badshah" in inv.name), Decimal("0.00"))
-    working_loans = sum((inv.amount_given for inv in investments if "Islam Badshah" not in inv.name), Decimal("0.00"))
     assert owner_equity == Decimal("5220410.00"), f"Islam Badshah equity mismatch: {owner_equity}"
     assert working_loans == Decimal("1428930.00"), f"Third party loans mismatch: {working_loans}"
     db.close()

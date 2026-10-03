@@ -10,7 +10,8 @@ from app.models.models import (
     Role, User, Category, Product, Staff, Retailer, RSO,
     RSODailyReport, RSOItem, CashDenomination, Company,
     CompanyCreditAccount, CompanyCreditTransaction, Purchase, PurchaseItem,
-    Sale, SaleItem, Return, ReturnItem, Expense, Salary, Investment,
+    Sale, SaleItem, Return, ReturnItem, Expense, Salary, Investment, InvestmentReturn,
+    Loan, LoanReturn,
     Commission, EasyLoadTransaction, RetailerCollection, AuditLog,
     LedgerAccount, LedgerTransaction, LedgerEntry, RSOSalary
 )
@@ -21,6 +22,9 @@ def wipe_dummy_data_keep_credentials(db: Session):
     # Tables to clear (leaving users and roles intact!)
     tables_to_clear = [
         "audit_logs",
+        "loan_returns",
+        "loans",
+        "investment_returns",
         "sale_items",
         "sales",
         "purchase_items",
@@ -478,28 +482,68 @@ def seed_august_real_data():
 
         # 10. Real Investments & Loans (Debit Details from Row 14-21 of August.xlsx totaling Rs. 6,649,340)
         print("Seeding Capital Investments & Loans (Rs. 6,649,340)...")
-        investments_data = [
-            ("Islam Badshah Sb Total Investment", "Islam Badshah", "+92 333 1122334", Decimal("5220410.00"), "Equity Capital", "Total Equity Investment in Dargai Franchise by Islam Badshah Sb"),
-            ("Muhammad Israr Kiran Loan", "Muhammad Israr Kiran", "+92 333 9004001", Decimal("800000.00"), "Working Capital Loan", "Operational capital loan for franchise expansion"),
-            ("Haris Badshah Loan", "Haris Badshah", "+92 333 9004002", Decimal("191500.00"), "Working Capital Loan", "Short-term operating loan"),
-            ("Behalf Of Shahab Badshah Loan", "Shahab Badshah", "+92 333 9004003", Decimal("156000.00"), "Working Capital Loan", "Operating credit loan"),
-            ("Loos Sims Loan", "Loose SIMs Inventory Fund", "+92 333 9004004", Decimal("221250.00"), "Inventory Financing", "Financing for loose SIM inward batch"),
-            ("SIMs Cash Reserves", "SIMs Cash Reserves", "+92 333 9004005", Decimal("60180.00"), "Cash Capital", "SIMs Cash reserve inflow"),
+        # 10A. Pure Equity Investment: Islam Badshah Sb
+        inv_ib = Investment(
+            name="Islam Badshah",
+            phone="+92 333 1122334",
+            amount_given=Decimal("5220410.00"),
+            purchased_amount=Decimal("5220410.00"),
+            returns=Decimal("103910.00"),  # Owner drawings / return of capital
+            remaining=Decimal("5116500.00"),
+            investment_date=date(2026, 8, 1),
+            payment_method="Bank Transfer",
+            status="Active",
+            remarks="Total Equity Investment in Dargai Franchise by Islam Badshah Sb"
+        )
+        db.add(inv_ib)
+        db.flush()
+
+        inv_ret = InvestmentReturn(
+            investment_id=inv_ib.id,
+            amount=Decimal("103910.00"),
+            return_date=date(2026, 8, 31),
+            return_type="Capital Return",
+            payment_method="Bank Transfer",
+            reference="DRAW-IB-AUG26",
+            remarks="Owner capital return / drawings (IESCO/SNGPL bills, driver salary, personal)"
+        )
+        db.add(inv_ret)
+
+        # 10B. Dedicated Working Capital Loans & Return of Loan
+        loans_data = [
+            ("Muhammad Israr Kiran", "+92 333 9004001", "Working Capital Loan", Decimal("800000.00"), Decimal("0.00"), Decimal("800000.00"), "Operational capital loan for franchise expansion"),
+            ("Haris Badshah", "+92 333 9004002", "Working Capital Loan", Decimal("191500.00"), Decimal("500000.00"), Decimal("0.00"), "Short-term operating loan (Settled with Rs. 500k repayment)"),
+            ("Shahab Badshah", "+92 333 9004003", "Working Capital Loan", Decimal("156000.00"), Decimal("0.00"), Decimal("156000.00"), "Operating credit loan"),
+            ("Loose SIMs Inventory Fund", "+92 333 9004004", "Inventory Financing", Decimal("221250.00"), Decimal("0.00"), Decimal("221250.00"), "Financing for loose SIM inward batch"),
+            ("SIMs Cash Reserves", "+92 333 9004005", "Operating Loan", Decimal("60180.00"), Decimal("0.00"), Decimal("60180.00"), "SIMs Cash reserve inflow"),
         ]
-        for title, investor, phone, amt, i_type, remarks in investments_data:
-            inv = Investment(
-                name=investor,
+        for l_name, phone, l_type, amt, ret, rem, remarks in loans_data:
+            ln = Loan(
+                lender_name=l_name,
                 phone=phone,
-                amount_given=amt,
-                purchased_amount=amt,
-                returns=Decimal("0.00"),
-                remaining=amt,
-                investment_date=date(2026, 8, 1),
+                loan_type=l_type,
+                amount=amt,
+                total_returned=ret,
+                remaining_balance=rem,
+                loan_date=date(2026, 8, 1),
                 payment_method="Bank Transfer",
-                status="Active",
+                status="Settled" if rem == Decimal("0.00") else "Active",
                 remarks=remarks
             )
-            db.add(inv)
+            db.add(ln)
+            db.flush()
+
+            # Record Return of Loan for Haris Badshah (Rs. 500,000 on August 26 per August.xlsx Row 54)
+            if l_name == "Haris Badshah":
+                l_ret = LoanReturn(
+                    loan_id=ln.id,
+                    amount_returned=Decimal("500000.00"),
+                    return_date=date(2026, 8, 26),
+                    payment_method="Bank Transfer",
+                    reference="RET-LOAN-HARIS",
+                    remarks="Partial repayment of working capital loan to Haris Badshah (August.xlsx Row 54)"
+                )
+                db.add(l_ret)
         db.commit()
 
         # 11. Real Expenditures & Cash Outflows (Rows 38-59 of August.xlsx totaling Rs. 1,653,620 across 17 items)

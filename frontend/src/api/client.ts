@@ -245,6 +245,13 @@ export const api = {
   verifyCashDenominations: (data: any) => apiFetch<any>("/finance/cash/verify-denominations", { method: "POST", body: JSON.stringify(data) }),
   getInvestments: () => apiFetch<any[]>("/finance/investments"),
   createInvestment: (data: any) => apiFetch<any>("/finance/investments", { method: "POST", body: JSON.stringify(data) }),
+  recordInvestmentReturn: (investmentId: number, data: any) => apiFetch<any>(`/finance/investments/${investmentId}/returns`, { method: "POST", body: JSON.stringify(data) }),
+  getInvestmentReturns: () => apiFetch<any[]>("/finance/investments/returns"),
+  getLoans: () => apiFetch<any[]>("/finance/loans"),
+  createLoan: (data: any) => apiFetch<any>("/finance/loans", { method: "POST", body: JSON.stringify(data) }),
+  recordLoanReturn: (loanId: number, data: any) => apiFetch<any>(`/finance/loans/${loanId}/returns`, { method: "POST", body: JSON.stringify(data) }),
+  getLoanReturns: () => apiFetch<any[]>("/finance/loans/returns"),
+  getCreditDebitSummary: () => apiFetch<any>("/finance/credit-debit-summary"),
   getCommissions: (commission_type?: string) => apiFetch<any[]>(`/finance/commissions${commission_type ? `?commission_type=${commission_type}` : ''}`),
   createCommission: (data: any) => apiFetch<any>("/finance/commissions", { method: "POST", body: JSON.stringify(data) }),
 

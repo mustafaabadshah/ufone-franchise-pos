@@ -18,6 +18,7 @@ SYSTEM_ACCOUNTS = [
     {"code": "1050", "name": "Merchandise Inventory", "type": "Asset"},
     {"code": "2010", "name": "Company Payables / Credit", "type": "Liability"},
     {"code": "2020", "name": "Accrued Salaries", "type": "Liability"},
+    {"code": "2030", "name": "Loans Payable / Working Capital Borrowings", "type": "Liability"},
     {"code": "3010", "name": "Owner / Investor Capital", "type": "Equity"},
     {"code": "4010", "name": "Sales Revenue", "type": "Revenue"},
     {"code": "4020", "name": "Commission Income", "type": "Revenue"},

@@ -562,7 +562,7 @@ class Expense(Base):
     staff = relationship("Staff")
     user = relationship("User")
 
-# --- INVESTMENTS ---
+# --- INVESTMENTS & RETURN OF INVESTMENT ---
 class Investment(Base):
     __tablename__ = "investments"
     id = Column(Integer, primary_key=True, index=True)
@@ -577,6 +577,54 @@ class Investment(Base):
     status = Column(String(30), default="Active")
     remarks = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    return_records = relationship("InvestmentReturn", back_populates="investment", cascade="all, delete-orphan")
+
+class InvestmentReturn(Base):
+    __tablename__ = "investment_returns"
+    id = Column(Integer, primary_key=True, index=True)
+    investment_id = Column(Integer, ForeignKey("investments.id"), nullable=False, index=True)
+    amount = Column(Numeric(14, 2), nullable=False)
+    return_date = Column(Date, default=date.today)
+    return_type = Column(String(50), default="Capital Return")  # Capital Return, Profit Share, Dividend
+    payment_method = Column(String(50), default="Bank Transfer")
+    reference = Column(String(100), nullable=True)
+    remarks = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    investment = relationship("Investment", back_populates="return_records")
+
+# --- LOANS & RETURN OF LOAN ---
+class Loan(Base):
+    __tablename__ = "loans"
+    id = Column(Integer, primary_key=True, index=True)
+    lender_name = Column(String(120), nullable=False, index=True)  # Haris Badshah, Israr Kiran, etc.
+    phone = Column(String(50), nullable=True)
+    loan_type = Column(String(50), default="Working Capital")  # Working Capital, Short-term, Inventory Financing
+    amount = Column(Numeric(14, 2), nullable=False)
+    total_returned = Column(Numeric(14, 2), default=Decimal("0.00"), nullable=False)
+    remaining_balance = Column(Numeric(14, 2), nullable=False)
+    loan_date = Column(Date, default=date.today)
+    due_date = Column(Date, nullable=True)
+    payment_method = Column(String(50), default="Bank Transfer")
+    status = Column(String(30), default="Active")  # Active, Partially Returned, Settled
+    remarks = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    returns = relationship("LoanReturn", back_populates="loan", cascade="all, delete-orphan")
+
+class LoanReturn(Base):
+    __tablename__ = "loan_returns"
+    id = Column(Integer, primary_key=True, index=True)
+    loan_id = Column(Integer, ForeignKey("loans.id"), nullable=False, index=True)
+    amount_returned = Column(Numeric(14, 2), nullable=False)
+    return_date = Column(Date, default=date.today)
+    payment_method = Column(String(50), default="Bank Transfer")
+    reference = Column(String(100), nullable=True)
+    remarks = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    loan = relationship("Loan", back_populates="returns")
 
 # --- COMMISSIONS ---
 class Commission(Base):

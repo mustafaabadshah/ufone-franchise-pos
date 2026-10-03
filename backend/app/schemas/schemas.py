@@ -632,6 +632,27 @@ class InvestmentCreate(BaseModel):
     payment_method: str = "Cash"
     remarks: Optional[str] = None
 
+class InvestmentReturnCreate(BaseModel):
+    amount: Decimal
+    return_date: dt_date = Field(default_factory=dt_date.today)
+    return_type: str = "Capital Return"  # Capital Return, Profit Share, Dividend
+    payment_method: str = "Bank Transfer"
+    reference: Optional[str] = None
+    remarks: Optional[str] = None
+
+class InvestmentReturnOut(BaseModel):
+    id: int
+    investment_id: int
+    amount: Decimal
+    return_date: dt_date
+    return_type: str
+    payment_method: str
+    reference: Optional[str] = None
+    remarks: Optional[str] = None
+    created_at: dt_datetime
+    class Config:
+        from_attributes = True
+
 class InvestmentOut(BaseModel):
     id: int
     name: str
@@ -645,6 +666,55 @@ class InvestmentOut(BaseModel):
     status: str
     remarks: Optional[str] = None
     created_at: dt_datetime
+    return_records: List[InvestmentReturnOut] = []
+    class Config:
+        from_attributes = True
+
+# --- LOANS & RETURN OF LOAN ---
+class LoanCreate(BaseModel):
+    lender_name: str
+    phone: Optional[str] = None
+    loan_type: str = "Working Capital"
+    amount: Decimal
+    loan_date: dt_date = Field(default_factory=dt_date.today)
+    due_date: Optional[dt_date] = None
+    payment_method: str = "Bank Transfer"
+    remarks: Optional[str] = None
+
+class LoanReturnCreate(BaseModel):
+    amount_returned: Decimal
+    return_date: dt_date = Field(default_factory=dt_date.today)
+    payment_method: str = "Bank Transfer"
+    reference: Optional[str] = None
+    remarks: Optional[str] = None
+
+class LoanReturnOut(BaseModel):
+    id: int
+    loan_id: int
+    amount_returned: Decimal
+    return_date: dt_date
+    payment_method: str
+    reference: Optional[str] = None
+    remarks: Optional[str] = None
+    created_at: dt_datetime
+    class Config:
+        from_attributes = True
+
+class LoanOut(BaseModel):
+    id: int
+    lender_name: str
+    phone: Optional[str] = None
+    loan_type: str
+    amount: Decimal
+    total_returned: Decimal
+    remaining_balance: Decimal
+    loan_date: dt_date
+    due_date: Optional[dt_date] = None
+    payment_method: str
+    status: str
+    remarks: Optional[str] = None
+    created_at: dt_datetime
+    returns: List[LoanReturnOut] = []
     class Config:
         from_attributes = True
 

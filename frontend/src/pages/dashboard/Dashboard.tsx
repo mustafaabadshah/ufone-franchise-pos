@@ -14,6 +14,7 @@ import {
 } from "recharts";
 
 import { FranchiseFinancialEquationCard } from "../../components/dashboard/FranchiseFinancialEquationCard";
+import { CreditDebitModal } from "../../components/dashboard/CreditDebitModal";
 import { ExportPrintButtons } from "../../components/common/ExportPrintButtons";
 
 interface DashboardProps {
@@ -28,6 +29,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [dateFrom, setDateFrom] = useState<string>("2026-08-01");
   const [dateTo, setDateTo] = useState<string>("2026-08-31");
   const [periodPreset, setPeriodPreset] = useState<string>("august_2026");
+  const [creditDebitModal, setCreditDebitModal] = useState<{ isOpen: boolean; type: 'credit' | 'debit' }>({ isOpen: false, type: 'credit' });
   const [isLoading, setIsLoading] = useState(true);
 
   const loadData = async (m = selectedMonth, from = dateFrom, to = dateTo) => {
@@ -223,6 +225,87 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
       {/* Franchise Financial Equation & Net Profit/Loss Health Widget */}
       <FranchiseFinancialEquationCard metrics={metrics} onNavigate={onNavigate} />
+
+      {/* Client Priority: 1st Option (Credit) & 2nd Option (Debit) Interactive Particulars */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* 1st Option: Credit Option Card */}
+        <div
+          onClick={() => setCreditDebitModal({ isOpen: true, type: 'credit' })}
+          className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-900 via-indigo-900 to-indigo-950 p-6 text-white shadow-lg border border-blue-400/30 cursor-pointer hover:shadow-2xl hover:scale-[1.01] transition-all"
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-400/30 shadow-inner group-hover:bg-blue-500/30 transition-colors">
+                <Wallet className="w-6 h-6" />
+              </div>
+              <div>
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-300">
+                  Option 1: Market Credit
+                </span>
+                <h3 className="text-lg font-black font-heading text-white">Credit Receivables</h3>
+              </div>
+            </div>
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-400/20 text-blue-200 border border-blue-300/30">
+              10 Debtors Active
+            </span>
+          </div>
+
+          <div className="mt-4 flex items-baseline justify-between">
+            <div>
+              <p className="text-3xl font-black font-heading font-mono text-white tracking-tight">
+                Rs. {Number(metrics?.credit_amount ?? 719385).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-blue-200/80 mt-1 font-medium">
+                Customer &amp; retailer outstanding dues (August.xlsx Rows 23-34)
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-blue-500/20 flex items-center justify-between text-xs font-bold text-blue-300 group-hover:text-white transition-colors">
+            <span>Click to view itemized debtor particulars</span>
+            <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+
+        {/* 2nd Option: Debit Option Card */}
+        <div
+          onClick={() => setCreditDebitModal({ isOpen: true, type: 'debit' })}
+          className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-purple-950 to-indigo-950 p-6 text-white shadow-lg border border-purple-400/30 cursor-pointer hover:shadow-2xl hover:scale-[1.01] transition-all"
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-400/30 shadow-inner group-hover:bg-purple-500/30 transition-colors">
+                <Landmark className="w-6 h-6" />
+              </div>
+              <div>
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-purple-300">
+                  Option 2: Total Injected Funds
+                </span>
+                <h3 className="text-lg font-black font-heading text-white">Debit (Capital &amp; Loans)</h3>
+              </div>
+            </div>
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-400/20 text-purple-200 border border-purple-300/30">
+              Equity + Borrowings
+            </span>
+          </div>
+
+          <div className="mt-4 flex items-baseline justify-between">
+            <div>
+              <p className="text-3xl font-black font-heading font-mono text-white tracking-tight">
+                Rs. {Number(metrics?.debit_amount ?? 6649340).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-purple-200/80 mt-1 font-medium">
+                Rs. 5.22M Owner Capital + Rs. 1.43M Working Loans (August.xlsx Rows 14-21)
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-purple-500/20 flex items-center justify-between text-xs font-bold text-purple-300 group-hover:text-white transition-colors">
+            <span>Click to view itemized capital &amp; loan particulars</span>
+            <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+      </div>
 
       {/* FCA Monthly Progress Quick Access Banner */}
       <div className="bg-gradient-to-r from-[#17153b] via-[#1e1b4b] to-[#2e1065] rounded-2xl p-4 sm:p-5 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl border border-indigo-500/30">
@@ -567,6 +650,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </table>
         </div>
       </div>
+
+      {/* Credit / Debit Interactive Particulars Modal */}
+      <CreditDebitModal
+        isOpen={creditDebitModal.isOpen}
+        type={creditDebitModal.type}
+        onClose={() => setCreditDebitModal({ ...creditDebitModal, isOpen: false })}
+        onNavigate={onNavigate}
+      />
     </div>
   );
 };
