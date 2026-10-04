@@ -857,7 +857,7 @@ export default function ReportCenter() {
                         { name: 'May', sales: 230000, expenses: 55000, profit: 175000 },
                         { name: 'Jun', sales: 280000, expenses: 62000, profit: 218000 },
                         { name: 'Jul', sales: 310000, expenses: 65000, profit: 245000 },
-                        { name: 'Aug', sales: 849297, expenses: 932370, profit: -83073 },
+                        { name: 'Aug', sales: 849297, expenses: 1153620, profit: -304323 },
                       ]
                     }
                   >
@@ -888,17 +888,17 @@ export default function ReportCenter() {
               />
               <MetricCard
                 title="Total Operating Deductions"
-                value={`Rs. ${Number(yearlyData?.total_expenses || 932370).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
+                value={`Rs. ${Number(yearlyData?.total_expenses || 1153620).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
                 icon={TrendingUp}
                 color="rose"
-                subtitle="Operating expenses & salaries (excl. loan & stock)"
+                subtitle="Operating expenses, SIMs & salaries (excl. loan)"
               />
               <MetricCard
                 title="Net Commercial Franchise Margin"
-                value={`Rs. ${Number(yearlyData?.commercial_net_profit || 283427).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
+                value={`Rs. ${Number(yearlyData?.commercial_net_profit || 62177).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
                 icon={DollarSign}
                 color="emerald"
-                subtitle="Commercial wholesale (Pure Margin: -Rs. 83,073.00)"
+                subtitle="Commercial wholesale (Pure Margin: -Rs. 304,323.00)"
               />
             </div>
           </div>

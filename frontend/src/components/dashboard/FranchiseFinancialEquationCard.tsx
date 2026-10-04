@@ -29,8 +29,8 @@ export const FranchiseFinancialEquationCard: React.FC<FinancialEquationProps> = 
   const retailerDues = Number(metrics?.financial_equation?.retailer_receivable ?? 719385);
 
   // Operating Net Profit metrics
-  const netProfit = Number(metrics?.net_profit ?? -83073);
-  const agencyNetProfit = Number(metrics?.financial_equation?.agency_net_profit ?? -83073);
+  const netProfit = Number(metrics?.net_profit ?? -304323);
+  const agencyNetProfit = Number(metrics?.financial_equation?.agency_net_profit ?? -304323);
 
   // Realizable Working Assets & Solvency Surplus
   const totalAssets = Number(metrics?.financial_equation?.total_assets ?? (stockVal + easyload + cash + retailerDues));

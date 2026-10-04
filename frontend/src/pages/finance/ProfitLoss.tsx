@@ -128,9 +128,11 @@ export const ProfitLoss: React.FC = () => {
 
   const operatingExpensesList = pnl?.itemized_operating_expenses || [
     { id: 3, title: "Pay of FCA (Field Customer Agents & Kiosks)", category: "Commissions", amount: 339700.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 42" },
+    { id: 16, title: "Paired SIMs Order Ufone HQ", category: "Inventory", amount: 172500.0, payment_method: "Bank Transfer", remarks: "Stock asset inward order (August.xlsx Row 50)" },
     { id: 15, title: "Drawings of Islam Badshah Sb (Household & Personal)", category: "Drawings", amount: 103910.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 56 (IESCO/SNGPL, driver, home)" },
     { id: 11, title: "Tax Adjustment (August Sales / WHT)", category: "Tax", amount: 90176.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 52" },
     { id: 12, title: "Loading FCA August 2026", category: "Commissions", amount: 52300.0, payment_method: "Cash", remarks: "August.xlsx Row 57" },
+    { id: 17, title: "Loose SIMs Order Ufone HQ", category: "Inventory", amount: 48750.0, payment_method: "Bank Transfer", remarks: "Stock asset inward order (August.xlsx Row 51)" },
     { id: 13, title: "Office Maintenance & Miscellaneous Supplies", category: "Maintenance", amount: 28650.0, payment_method: "Cash", remarks: "August.xlsx Row 58" },
     { id: 5, title: "Office Rent (Dargai Office August Rent)", category: "Rent", amount: 25300.0, payment_method: "Cash", remarks: "August.xlsx Row 44" },
     { id: 6, title: "Office Entertainment & Hospitality", category: "Office", amount: 16160.0, payment_method: "Cash", remarks: "August.xlsx Row 45" },
@@ -156,22 +158,20 @@ export const ProfitLoss: React.FC = () => {
 
   const nonOperatingList = pnl?.itemized_non_operating || [
     { id: 14, title: "Haris Badshah Loan Return / Settlement", category: "Loan Repayment", amount: 500000.0, payment_method: "Bank Transfer", remarks: "Debt settlement (August.xlsx Row 53)" },
-    { id: 16, title: "Paired SIMs Order Ufone HQ", category: "Inventory", amount: 172500.0, payment_method: "Bank Transfer", remarks: "Stock asset inward order (August.xlsx Row 50)" },
-    { id: 17, title: "Loose SIMs Order Ufone HQ", category: "Inventory", amount: 48750.0, payment_method: "Bank Transfer", remarks: "Stock asset inward order (August.xlsx Row 51)" },
   ];
 
-  // Primary Telecom Franchise Accounting Figures (Excluding Debt & Inventory from Operations)
+  // Primary Telecom Franchise Accounting Figures (SIM Orders & Drawings Included in Operations | Loan Settlement Excluded)
   const commissionIncome = Number(pnl?.commission_income || 849297.0);
   const otherIncome = Number(pnl?.other_operational_income || 50892.0);
   const totalOperatingRevenue = commissionIncome + otherIncome; // 900,189.00
   const salaries = Number(pnl?.salaries || 252324.0);
-  const expenses = Number(pnl?.expenses || pnl?.operating_expenses || 680046.0); // 680,046.00 12 operational heads
-  const totalOperatingDeductions = salaries + expenses; // 932,370.00
+  const expenses = Number(pnl?.expenses || pnl?.operating_expenses || 901296.0); // 901,296.00 14 operational heads incl. Drawings & SIM Orders
+  const totalOperatingDeductions = salaries + expenses; // 1,153,620.00
 
   // Net Operating Margin: Commissions - Deductions
-  const pureCommissionProfit = commissionIncome - totalOperatingDeductions; // -83,073.00
-  const netOperatingProfit = totalOperatingRevenue - totalOperatingDeductions; // -32,181.00
-  const commercialNetProfit = Number(pnl?.commercial_net_profit || 283427.0);
+  const pureCommissionProfit = commissionIncome - totalOperatingDeductions; // -304,323.00
+  const netOperatingProfit = totalOperatingRevenue - totalOperatingDeductions; // -253,431.00
+  const commercialNetProfit = Number(pnl?.commercial_net_profit || 62177.0);
 
   // Bank & Cash Movement Figures
   const openBank = Number(pnl?.opening_bank_balance || 3152601.0);
@@ -180,7 +180,7 @@ export const ProfitLoss: React.FC = () => {
   const totDisbursed = Number(pnl?.total_cash_outflows || 1653620.0);
   const netBankDrain = totInflows - totDisbursed; // -488,181.00
   const commCashDeficit = commissionIncome - totDisbursed; // -804,323.00
-  const nonOperatingTotal = Number(pnl?.non_operating_total || (totDisbursed - totalOperatingDeductions) || 721250.0);
+  const nonOperatingTotal = Number(pnl?.non_operating_total || (totDisbursed - totalOperatingDeductions) || 500000.0);
 
   return (
     <div className="p-3 sm:p-6 space-y-6 max-w-5xl mx-auto">
@@ -332,10 +332,10 @@ export const ProfitLoss: React.FC = () => {
         <div className="p-3.5 sm:p-4 rounded-xl bg-indigo-50/70 border border-indigo-200 font-sans text-xs text-indigo-950">
           <div className="flex items-center gap-2 font-bold text-indigo-900 mb-1">
             <ShieldCheck className="w-4 h-4 text-indigo-600 flex-shrink-0" />
-            <span>Franchise Accounting: Direct Commission &amp; Overhead Measurement (Drawings Included | Debt &amp; SIMs Excluded)</span>
+            <span>Franchise Accounting: Direct Commission &amp; Overhead Measurement (Drawings &amp; SIM Orders Included | Loan Settlement Excluded)</span>
           </div>
           <p className="leading-relaxed">
-            As a telecom franchise agency, net profit is measured directly by comparing total earnings from Ufone Promo &amp; EVC commissions against staff payroll and operational overhead (including Islam Badshah Sb Drawings of Rs. 103,910.00; excluding Haris Badshah Loan Settlement of Rs. 500,000 and SIM Stock Purchases of Rs. 221,250):
+            As a telecom franchise agency, net profit is measured directly by comparing total earnings from Ufone Promo &amp; EVC commissions against staff payroll and operational overhead (including Islam Badshah Sb Drawings of Rs. 103,910, Paired SIMs of Rs. 172,500, and Loose SIMs of Rs. 48,750; excluding Haris Badshah Loan Settlement of Rs. 500,000):
           </p>
           <div className="mt-2 p-2.5 rounded-lg bg-white border border-indigo-200/80 font-mono text-[11px] font-bold text-indigo-950 flex flex-wrap items-center justify-between gap-2">
             <span>Net Operating Margin = Commissions (Rs. {commissionIncome.toLocaleString()}) − Deductions (Rs. {totalOperatingDeductions.toLocaleString()})</span>
@@ -368,7 +368,7 @@ export const ProfitLoss: React.FC = () => {
             <p className="text-lg font-bold text-rose-900 mt-1 font-mono">
               -Rs. {expenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </p>
-            <span className="text-[10px] text-rose-700 font-medium">FCA Pay, Rent, Utilities &amp; Drawings</span>
+            <span className="text-[10px] text-rose-700 font-medium">FCA, Drawings, SIMs, Rent &amp; Utilities</span>
           </div>
 
           <div className="p-4 rounded-xl bg-indigo-50/60 border-2 border-indigo-400">
@@ -513,7 +513,7 @@ export const ProfitLoss: React.FC = () => {
               {/* Part B: Operating Expenses */}
               <div className="space-y-2 pt-2 border-t border-rose-200/60">
                 <div className="flex justify-between items-center text-xs font-bold text-slate-800 font-sans">
-                  <span>B. Operational Overhead, General Expenses &amp; Drawings (12 Heads, August.xlsx Rows 42-49, 52, 56-58):</span>
+                  <span>B. Operational Overhead, General Expenses, Drawings &amp; SIM Orders (14 Heads, August.xlsx Rows 42-52, 56-58):</span>
                   <span className="font-mono text-rose-700 font-bold">Rs. {expenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 </div>
                 {showItemizedTables && (
@@ -546,7 +546,7 @@ export const ProfitLoss: React.FC = () => {
                       <tfoot className="bg-rose-50 font-bold border-t border-rose-200">
                         <tr>
                           <td colSpan={5} className="px-3 py-1.5 text-rose-950 uppercase font-sans">
-                            SUBTOTAL OPERATING EXPENSES (INCL. DRAWINGS):
+                            SUBTOTAL OPERATING EXPENSES (INCL. DRAWINGS &amp; SIM ORDERS):
                           </td>
                           <td className="px-3 py-1.5 text-right text-rose-800 font-black">
                             Rs. {expenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -571,12 +571,12 @@ export const ProfitLoss: React.FC = () => {
                 <CheckCircle2 className="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold text-indigo-900">
-                    Drawings (Rs. 103,910) Included in Operating Expenses | Debt Settlement &amp; Stock Orders Excluded:
+                    Drawings (Rs. 103,910) &amp; SIM Orders (Rs. 221,250) Included in Operating Expenses | Loan Settlement Excluded:
                   </span>
                   <p className="text-[11px] text-indigo-900 mt-1 leading-relaxed">
-                    Per client directive, <strong>Haris Badshah Loan Settlement (Rs. 500,000.00)</strong> and <strong>Paired &amp; Loose SIMs Inventory Orders (Rs. 221,250.00)</strong> are strictly excluded from Operating Expenditures.
-                    <strong>Drawings of Islam Badshah Sb (Rs. 103,910.00)</strong> are counted directly in Operating Expenditures under Part B above.
-                    Total Operating Expenses are <strong>Rs. 680,046.00</strong>, bringing combined operating deductions with salaries (Rs. 252,324.00) to <strong>Rs. 932,370.00</strong>.
+                    Per client directive, <strong>Paired &amp; Loose SIMs Inventory Orders (Rs. 221,250.00)</strong> and <strong>Drawings of Islam Badshah Sb (Rs. 103,910.00)</strong> are counted directly in Operating Expenditures under Part B above.
+                    <strong>Haris Badshah Loan Settlement (Rs. 500,000.00)</strong> is strictly excluded as a non-operating debt repayment.
+                    Total Operating Expenses are <strong>Rs. 901,296.00</strong>, bringing combined operating deductions with salaries (Rs. 252,324.00) to <strong>Rs. 1,153,620.00</strong>.
                   </p>
                 </div>
               </div>
@@ -592,7 +592,7 @@ export const ProfitLoss: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-xs text-slate-800 font-medium">
-                  Commissions (Rs. {commissionIncome.toLocaleString()}) minus Total Salaries &amp; Operating Expenses incl. Drawings (Rs. {totalOperatingDeductions.toLocaleString()}).
+                  Commissions (Rs. {commissionIncome.toLocaleString()}) minus Total Salaries &amp; Operating Expenses incl. Drawings &amp; SIM Orders (Rs. {totalOperatingDeductions.toLocaleString()}).
                 </p>
                 <p className="text-[11px] text-slate-700 font-normal">
                   With standard wholesale pass-through markup (+Rs. 366,500), commercial operating net margin is <strong>{commercialNetProfit >= 0 ? `+Rs. ${commercialNetProfit.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : `-Rs. ${Math.abs(commercialNetProfit).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}</strong>.
@@ -921,8 +921,8 @@ export const ProfitLoss: React.FC = () => {
                 This includes:
               </p>
               <ul className="list-disc pl-5 text-xs text-amber-900 space-y-1 font-medium">
-                <li><strong>Operating Expenditures &amp; Payroll (Rs. 932,370.00):</strong> Staff salaries (252.3k), FCA pay (339.7k), Islam Badshah Drawings (103.9k), tax, rent, utilities, and office maintenance.</li>
-                <li><strong>Non-Operating Debt &amp; Stock Outflows (Rs. 721,250.00):</strong> Haris Badshah loan settlement (500k) and Ufone SIMs inventory stock orders (221.25k).</li>
+                <li><strong>Operating Expenditures &amp; Payroll (Rs. 1,153,620.00):</strong> Staff salaries (252.3k), FCA pay (339.7k), Paired SIMs orders (172.5k), Islam Badshah Drawings (103.9k), Loose SIMs orders (48.75k), tax, rent, utilities, and office maintenance.</li>
+                <li><strong>Non-Operating Debt Outflow (Rs. 500,000.00):</strong> Haris Badshah loan settlement (500k).</li>
               </ul>
             </div>
 
@@ -1015,11 +1015,11 @@ export const ProfitLoss: React.FC = () => {
             {/* Reconciliation Totals */}
             <div className="space-y-1.5 text-xs font-mono pt-2 border-t border-slate-300">
               <div className="flex justify-between text-slate-700">
-                <span className="font-sans">A. Operating Expenditures &amp; Payroll (12 Operating Heads + Staff Payroll):</span>
+                <span className="font-sans">A. Operating Expenditures &amp; Payroll (14 Operating Heads + Staff Payroll):</span>
                 <span className="font-bold text-slate-800 font-mono">Rs. {totalOperatingDeductions.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between text-slate-700">
-                <span className="font-sans">B. Non-Operating Debt &amp; Capital Inventory (Haris Loan Rs. 500k + SIMs Orders Rs. 221.25k):</span>
+                <span className="font-sans">B. Non-Operating Debt Repayment (Haris Badshah Loan Settlement):</span>
                 <span className="font-bold text-slate-800 font-mono">Rs. {nonOperatingTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between font-bold text-slate-950 pt-2 border-t-2 border-slate-900 bg-slate-100 p-2.5 rounded-xl text-sm">
