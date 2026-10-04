@@ -55,8 +55,8 @@ def get_expenses_summary(
         q = q.filter(Expense.paid_date <= date_to)
 
     expenses = q.all()
-    # Operating expenses: All non-salary disbursements are counted in Operating Expenditures per client directive
-    non_operating_cats = ["Salaries"]
+    # Operating expenses exclude loans and inventory per client directive
+    non_operating_cats = ["Loan Repayment", "Salaries", "Inventory"]
     operating_amount = sum((e.amount for e in expenses if e.category not in non_operating_cats), Decimal("0.00"))
     drawings_amount = sum((e.amount for e in expenses if e.category == "Drawings"), Decimal("0.00"))
     debt_and_stock_amount = sum((e.amount for e in expenses if e.category in ["Loan Repayment", "Inventory"]), Decimal("0.00"))

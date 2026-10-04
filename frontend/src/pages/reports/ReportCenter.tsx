@@ -857,7 +857,7 @@ export default function ReportCenter() {
                         { name: 'May', sales: 230000, expenses: 55000, profit: 175000 },
                         { name: 'Jun', sales: 280000, expenses: 62000, profit: 218000 },
                         { name: 'Jul', sales: 310000, expenses: 65000, profit: 245000 },
-                        { name: 'Aug', sales: 849297, expenses: 1653620, profit: -804323 },
+                        { name: 'Aug', sales: 849297, expenses: 932370, profit: -83073 },
                       ]
                     }
                   >
@@ -887,18 +887,18 @@ export default function ReportCenter() {
                 subtitle="Ufone promo & EVC distribution commissions"
               />
               <MetricCard
-                title="Total Franchise Overhead"
-                value={`Rs. ${Number(yearlyData?.total_expenses || 1653620).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
+                title="Total Operating Deductions"
+                value={`Rs. ${Number(yearlyData?.total_expenses || 932370).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
                 icon={TrendingUp}
                 color="rose"
-                subtitle="All 17 expenditure line items (August.xlsx Row 59)"
+                subtitle="Operating expenses & salaries (excl. loan & stock)"
               />
               <MetricCard
                 title="Net Commercial Franchise Margin"
-                value={`Rs. ${Number(yearlyData?.commercial_net_profit || -437823).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
+                value={`Rs. ${Number(yearlyData?.commercial_net_profit || 283427).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`}
                 icon={DollarSign}
-                color="rose"
-                subtitle="Commercial wholesale (Pure Margin: -Rs. 804,323)"
+                color="emerald"
+                subtitle="Commercial wholesale (Pure Margin: -Rs. 83,073.00)"
               />
             </div>
           </div>

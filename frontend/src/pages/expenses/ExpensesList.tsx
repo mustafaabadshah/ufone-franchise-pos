@@ -139,17 +139,17 @@ export const ExpensesList: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <MetricCard
           title="Operating Expenses"
-          value={summary?.operating_amount ?? 1401296}
+          value={summary?.operating_amount ?? 680046}
           prefix="Rs. "
           variant="red"
-          subtitle="All 15 non-salary heads (P&L)"
+          subtitle="12 operational heads (P&L)"
         />
         <MetricCard
-          title="Loan Debt Repayment"
-          value={500000}
+          title="Debt & Stock (Non-Operating)"
+          value={summary?.debt_and_stock_amount ?? 721250}
           prefix="Rs. "
           variant="blue"
-          subtitle="Haris Badshah Loan Settlement"
+          subtitle="Loan Repayment & SIM Orders"
         />
         <MetricCard
           title="Islam Badshah Drawings"
@@ -171,10 +171,10 @@ export const ExpensesList: React.FC = () => {
       <div className="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-200 text-indigo-950 text-xs font-sans flex items-start gap-2.5">
         <Receipt className="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" />
         <div>
-          <span className="font-bold">Operating Expenditures Notice — All Outflows Counted in Operations:</span>
+          <span className="font-bold">Operating Expenditures vs Debt &amp; Capital Inventory:</span>
           <p className="text-[11px] text-indigo-900 mt-0.5 leading-relaxed">
-            Per franchise management directive, <strong>Haris Badshah Loan Settlement (Rs. 500,000.00)</strong>, <strong>Paired &amp; Loose SIMs Orders (Rs. 221,250.00)</strong>, and <strong>Drawings of Islam Badshah Sb (Rs. 103,910.00)</strong> are all counted directly in <strong>Operating Expenditures</strong>.
-            Operating Expenses for the month total <strong>Rs. 1,401,296.00</strong> (plus staff salaries of Rs. 252,324.00 = Total Operating Deductions <strong>Rs. 1,653,620.00</strong> matching August.xlsx Row 59).
+            Per franchise management directive, <strong>Haris Badshah Loan Settlement (Rs. 500,000.00)</strong> and <strong>Paired &amp; Loose SIMs Orders (Rs. 221,250.00)</strong> are strictly excluded from Operating Expenditures. <strong>Drawings of Islam Badshah Sb (Rs. 103,910.00)</strong> are counted directly in <strong>Operating Expenditures</strong>.
+            Operating Expenses for the month total <strong>Rs. 680,046.00</strong> (combined with staff payroll of Rs. 252,324.00 = Total Operating Deductions <strong>Rs. 932,370.00</strong>). Total Cash Disbursed including Debt &amp; Stock is <strong>Rs. 1,401,296.00</strong> (or Rs. 1,653,620.00 including staff payroll).
           </p>
         </div>
       </div>
@@ -295,12 +295,12 @@ export const ExpensesList: React.FC = () => {
                             Drawings (Operating Expenditure)
                           </span>
                         ) : isLoan ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-900 border border-rose-200">
-                            Loan Repayment (Operating Expenditure)
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                            Loan Repayment (Non-Operating)
                           </span>
                         ) : isInventory ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-200">
-                            Inventory (Operating Expenditure)
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-900 border border-blue-200">
+                            Inventory Asset (Non-Operating)
                           </span>
                         ) : (
                           <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
@@ -328,7 +328,7 @@ export const ExpensesList: React.FC = () => {
                   Rs. {expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
                 </td>
                 <td colSpan={3} className="py-3.5 px-6 text-slate-600 font-sans text-[11px] font-normal">
-                  All 15 Non-Salary Expenditures (incl. Drawings, Loans &amp; SIMs): Rs. {(summary?.operating_amount ?? 1401296).toLocaleString()}
+                  Operating Overhead: Rs. {(summary?.operating_amount ?? 680046).toLocaleString()} | Non-Operating (Debt &amp; Stock): Rs. {(summary?.debt_and_stock_amount ?? 721250).toLocaleString()}
                 </td>
               </tr>
             </tfoot>
