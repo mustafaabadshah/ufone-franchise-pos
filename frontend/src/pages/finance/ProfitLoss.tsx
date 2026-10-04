@@ -127,18 +127,21 @@ export const ProfitLoss: React.FC = () => {
   ];
 
   const operatingExpensesList = pnl?.itemized_operating_expenses || [
-    { id: 3, title: "Pay of FCA (Field Customer Agents & Kiosks)", category: "Commissions", amount: 339700.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 47" },
-    { id: 15, title: "Drawings of Islam Badshah Sb (Household & Personal)", category: "Drawings", amount: 103910.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 55 (IESCO/SNGPL, driver, home)" },
-    { id: 11, title: "Tax Adjustment (August Sales / WHT)", category: "Tax", amount: 90176.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 57" },
-    { id: 12, title: "Loading FCA August 2026", category: "Commissions", amount: 52300.0, payment_method: "Cash", remarks: "August.xlsx Row 48" },
-    { id: 13, title: "Office Maintenance & Miscellaneous Supplies", category: "Maintenance", amount: 28650.0, payment_method: "Cash", remarks: "August.xlsx Row 52" },
-    { id: 5, title: "Office Rent (Dargai Office August Rent)", category: "Rent", amount: 25300.0, payment_method: "Cash", remarks: "August.xlsx Row 43" },
-    { id: 6, title: "Office Entertainment & Hospitality", category: "Office", amount: 16160.0, payment_method: "Cash", remarks: "August.xlsx Row 44" },
-    { id: 4, title: "Office Communication & Connectivity", category: "Communication", amount: 15460.0, payment_method: "Cash", remarks: "August.xlsx Row 50" },
-    { id: 10, title: "Utility Bills (Office Electricity / Bijjli)", category: "Electricity", amount: 8000.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 42" },
-    { id: 8, title: "Local Transport & Travel", category: "Transport", amount: 300.0, payment_method: "Cash", remarks: "August.xlsx Row 46" },
-    { id: 7, title: "Courier & Logistics (LCS, TCS)", category: "Transport", amount: 60.0, payment_method: "Cash", remarks: "August.xlsx Row 45" },
-    { id: 9, title: "Stationery & Photostat", category: "Office", amount: 30.0, payment_method: "Cash", remarks: "August.xlsx Row 49" },
+    { id: 14, title: "Haris Badshah Loan Return / Settlement", category: "Loan Repayment", amount: 500000.0, payment_method: "Bank Transfer", remarks: "Debt settlement (August.xlsx Row 53)" },
+    { id: 3, title: "Pay of FCA (Field Customer Agents & Kiosks)", category: "Commissions", amount: 339700.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 42" },
+    { id: 16, title: "Paired SIMs Order Ufone HQ", category: "Inventory", amount: 172500.0, payment_method: "Bank Transfer", remarks: "Stock asset inward order (August.xlsx Row 50)" },
+    { id: 15, title: "Drawings of Islam Badshah Sb (Household & Personal)", category: "Drawings", amount: 103910.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 56 (IESCO/SNGPL, driver, home)" },
+    { id: 11, title: "Tax Adjustment (August Sales / WHT)", category: "Tax", amount: 90176.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 52" },
+    { id: 12, title: "Loading FCA August 2026", category: "Commissions", amount: 52300.0, payment_method: "Cash", remarks: "August.xlsx Row 57" },
+    { id: 17, title: "Loose SIMs Order Ufone HQ", category: "Inventory", amount: 48750.0, payment_method: "Bank Transfer", remarks: "Stock asset inward order (August.xlsx Row 51)" },
+    { id: 13, title: "Office Maintenance & Miscellaneous Supplies", category: "Maintenance", amount: 28650.0, payment_method: "Cash", remarks: "August.xlsx Row 58" },
+    { id: 5, title: "Office Rent (Dargai Office August Rent)", category: "Rent", amount: 25300.0, payment_method: "Cash", remarks: "August.xlsx Row 44" },
+    { id: 6, title: "Office Entertainment & Hospitality", category: "Office", amount: 16160.0, payment_method: "Cash", remarks: "August.xlsx Row 45" },
+    { id: 4, title: "Office Communication & Connectivity", category: "Communication", amount: 15460.0, payment_method: "Cash", remarks: "August.xlsx Row 43" },
+    { id: 10, title: "Utility Bills (Office Electricity / Bijjli)", category: "Electricity", amount: 8000.0, payment_method: "Bank Transfer", remarks: "August.xlsx Row 49" },
+    { id: 8, title: "Local Transport & Travel", category: "Transport", amount: 300.0, payment_method: "Cash", remarks: "August.xlsx Row 47" },
+    { id: 7, title: "Courier & Logistics (LCS, TCS)", category: "Transport", amount: 60.0, payment_method: "Cash", remarks: "August.xlsx Row 46" },
+    { id: 9, title: "Stationery & Photostat", category: "Office", amount: 30.0, payment_method: "Cash", remarks: "August.xlsx Row 48" },
   ];
 
   const salariesList = pnl?.itemized_salaries || [
@@ -154,24 +157,20 @@ export const ProfitLoss: React.FC = () => {
     { id: 10, name: "Watch Man", role: "Security Guard", salary_given: 300.0, remarks: "Security watchman stipend" },
   ];
 
-  const nonOperatingList = pnl?.itemized_non_operating || [
-    { id: 14, title: "Haris Badshah Loan Return / Settlement", category: "Loan Repayment", amount: 500000.0, payment_method: "Bank Transfer", remarks: "Debt settlement (August.xlsx Row 54)" },
-    { id: 16, title: "Paired SIMs Order Ufone HQ", category: "Inventory", amount: 172500.0, payment_method: "Bank Transfer", remarks: "Stock asset inward order (August.xlsx Row 56)" },
-    { id: 17, title: "Loose SIMs Order Ufone HQ", category: "Inventory", amount: 48750.0, payment_method: "Bank Transfer", remarks: "Stock asset inward order (August.xlsx Row 58)" },
-  ];
+  const nonOperatingList = pnl?.itemized_non_operating || [];
 
-  // Primary Telecom Franchise Accounting Figures (Counting Drawings in Operating Expenses)
+  // Primary Telecom Franchise Accounting Figures (All Outflows Counted in Operating Expenses)
   const commissionIncome = Number(pnl?.commission_income || 849297.0);
   const otherIncome = Number(pnl?.other_operational_income || 50892.0);
   const totalOperatingRevenue = commissionIncome + otherIncome; // 900,189.00
   const salaries = Number(pnl?.salaries || 252324.0);
-  const expenses = Number(pnl?.expenses || pnl?.operating_expenses || 680046.0); // 680,046.00 with Drawings
-  const totalOperatingDeductions = salaries + expenses; // 932,370.00
+  const expenses = Number(pnl?.expenses || pnl?.operating_expenses || 1401296.0); // 1,401,296.00 all 15 heads
+  const totalOperatingDeductions = salaries + expenses; // 1,653,620.00
 
   // Net Operating Margin: Commissions - Deductions
-  const pureCommissionProfit = commissionIncome - totalOperatingDeductions; // -83,073.00
-  const netOperatingProfit = totalOperatingRevenue - totalOperatingDeductions; // -32,181.00
-  const commercialNetProfit = Number(pnl?.commercial_net_profit || 283427.0);
+  const pureCommissionProfit = commissionIncome - totalOperatingDeductions; // -804,323.00
+  const netOperatingProfit = totalOperatingRevenue - totalOperatingDeductions; // -753,431.00
+  const commercialNetProfit = Number(pnl?.commercial_net_profit || -437823.0);
 
   // Bank & Cash Movement Figures
   const openBank = Number(pnl?.opening_bank_balance || 3152601.0);
@@ -180,7 +179,7 @@ export const ProfitLoss: React.FC = () => {
   const totDisbursed = Number(pnl?.total_cash_outflows || 1653620.0);
   const netBankDrain = totInflows - totDisbursed; // -488,181.00
   const commCashDeficit = commissionIncome - totDisbursed; // -804,323.00
-  const nonOperatingTotal = 500000.0 + 172500.0 + 48750.0; // 721,250.00
+  const nonOperatingTotal = 0.0;
 
   return (
     <div className="p-3 sm:p-6 space-y-6 max-w-5xl mx-auto">
@@ -332,10 +331,10 @@ export const ProfitLoss: React.FC = () => {
         <div className="p-3.5 sm:p-4 rounded-xl bg-indigo-50/70 border border-indigo-200 font-sans text-xs text-indigo-950">
           <div className="flex items-center gap-2 font-bold text-indigo-900 mb-1">
             <ShieldCheck className="w-4 h-4 text-indigo-600 flex-shrink-0" />
-            <span>Franchise Accounting: Direct Commission & Overhead Measurement (Including Drawings)</span>
+            <span>Franchise Accounting: Direct Commission &amp; Overhead Measurement (Including All Outflows: Drawings, Loan Return &amp; SIMs)</span>
           </div>
           <p className="leading-relaxed">
-            As a telecom franchise agency, net profit is measured directly by comparing total earnings from Ufone Promo & EVC commissions against staff payroll and operational overhead (including Islam Badshah Sb Drawings of Rs. 103,910.00):
+            As a telecom franchise agency, net profit is measured directly by comparing total earnings from Ufone Promo &amp; EVC commissions against staff payroll and all operational disbursements (including Islam Badshah Sb Drawings of Rs. 103,910, Haris Badshah Loan Return of Rs. 500,000, and Ufone SIMs Orders of Rs. 221,250):
           </p>
           <div className="mt-2 p-2.5 rounded-lg bg-white border border-indigo-200/80 font-mono text-[11px] font-bold text-indigo-950 flex flex-wrap items-center justify-between gap-2">
             <span>Net Operating Margin = Commissions (Rs. {commissionIncome.toLocaleString()}) − Deductions (Rs. {totalOperatingDeductions.toLocaleString()})</span>
@@ -352,15 +351,15 @@ export const ProfitLoss: React.FC = () => {
             <p className="text-lg font-bold text-emerald-900 mt-1 font-mono">
               +Rs. {commissionIncome.toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </p>
-            <span className="text-[10px] text-emerald-700 font-medium">Ufone Promo & EVC Commissions</span>
+            <span className="text-[10px] text-emerald-700 font-medium">Ufone Promo &amp; EVC Commissions</span>
           </div>
 
           <div className="p-4 rounded-xl bg-rose-50/60 border border-rose-200">
-            <p className="text-[10px] font-bold text-rose-800 uppercase tracking-wider">Staff & RSO Salaries</p>
+            <p className="text-[10px] font-bold text-rose-800 uppercase tracking-wider">Staff &amp; RSO Salaries</p>
             <p className="text-lg font-bold text-rose-900 mt-1 font-mono">
               -Rs. {salaries.toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </p>
-            <span className="text-[10px] text-rose-700 font-medium">10 Employees & Field Officers</span>
+            <span className="text-[10px] text-rose-700 font-medium">10 Employees &amp; Field Officers</span>
           </div>
 
           <div className="p-4 rounded-xl bg-rose-50/60 border border-rose-200">
@@ -368,7 +367,7 @@ export const ProfitLoss: React.FC = () => {
             <p className="text-lg font-bold text-rose-900 mt-1 font-mono">
               -Rs. {expenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </p>
-            <span className="text-[10px] text-rose-700 font-medium">FCA Pay, Rent, Utilities & Drawings</span>
+            <span className="text-[10px] text-rose-700 font-medium">FCA, Rent, Utilities, Drawings, Loans &amp; SIMs</span>
           </div>
 
           <div className="p-4 rounded-xl bg-indigo-50/60 border-2 border-indigo-400">
@@ -377,7 +376,7 @@ export const ProfitLoss: React.FC = () => {
               {pureCommissionProfit >= 0 ? `+Rs. ${pureCommissionProfit.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : `-Rs. ${Math.abs(pureCommissionProfit).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
             </p>
             <span className="text-[10px] text-indigo-700 font-bold">
-              {pureCommissionProfit >= 0 ? "Pure Commission Margin" : "Pure Margin | Wholesale: +Rs. 283.4k"}
+              {pureCommissionProfit >= 0 ? "Pure Commission Margin" : `Pure Margin | Wholesale: ${commercialNetProfit >= 0 ? `+Rs. ${commercialNetProfit.toLocaleString()}` : `-Rs. ${Math.abs(commercialNetProfit).toLocaleString()}`}`}
             </span>
           </div>
         </div>
@@ -513,7 +512,7 @@ export const ProfitLoss: React.FC = () => {
               {/* Part B: Operating Expenses */}
               <div className="space-y-2 pt-2 border-t border-rose-200/60">
                 <div className="flex justify-between items-center text-xs font-bold text-slate-800 font-sans">
-                  <span>B. Operational Overhead, General Expenses &amp; Drawings (12 Heads, August.xlsx Rows 42-55):</span>
+                  <span>B. Operational Overhead, General Expenses, Drawings, Loans &amp; SIM Orders (15 Heads, August.xlsx Rows 42-58):</span>
                   <span className="font-mono text-rose-700 font-bold">Rs. {expenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 </div>
                 {showItemizedTables && (
@@ -546,7 +545,7 @@ export const ProfitLoss: React.FC = () => {
                       <tfoot className="bg-rose-50 font-bold border-t border-rose-200">
                         <tr>
                           <td colSpan={5} className="px-3 py-1.5 text-rose-950 uppercase font-sans">
-                            SUBTOTAL OPERATING EXPENSES (INCL. ISLAM BADSHAH DRAWINGS RS. 103,910):
+                            SUBTOTAL OPERATING EXPENSES (INCL. DRAWINGS, LOAN RETURN &amp; SIM ORDERS):
                           </td>
                           <td className="px-3 py-1.5 text-right text-rose-800 font-black">
                             Rs. {expenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -566,16 +565,16 @@ export const ProfitLoss: React.FC = () => {
                 </span>
               </div>
 
-              {/* Inclusion Note: Islam Badshah Drawings Counted in Operating Expenditures */}
+              {/* Inclusion Note: All Cash Outflows Counted in Operating Expenditures */}
               <div className="mt-3 p-3 rounded-xl bg-indigo-50/80 border border-indigo-200 text-indigo-950 font-sans text-xs flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold text-indigo-900">
-                    Drawings of Islam Badshah Sb (Rs. 103,910.00) Included in Operating Expenditures:
+                    All Cash Outflows (Drawings Rs. 103,910, Haris Badshah Loan Settlement Rs. 500,000, and SIMs Orders Rs. 221,250) Included in Operating Expenditures:
                   </span>
                   <p className="text-[11px] text-indigo-900 mt-1 leading-relaxed">
-                    Per franchise management directive, Drawings of Islam Badshah Sb (Household electricity/gas bills Rs. 49,060, driver salary Rs. 32,000, and home maintenance Rs. 22,850) are <strong>fully counted in Operating Expenditures</strong> under Part B above.
-                    Total Operating Expenses are <strong>Rs. 680,046.00</strong>, bringing combined operating deductions with salaries to <strong>Rs. 932,370.00</strong>.
+                    Per franchise management directive, all cash disbursements from August.xlsx (Rows 41-59) including Owner Drawings, Haris Badshah Loan Settlement, and Ufone SIM Purchases are <strong>fully counted in Operating Expenditures</strong> under Part B above.
+                    Total Operating Expenses are <strong>Rs. 1,401,296.00</strong>, bringing combined operating deductions with salaries to <strong>Rs. 1,653,620.00</strong>.
                   </p>
                 </div>
               </div>
@@ -591,10 +590,10 @@ export const ProfitLoss: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-xs text-slate-800 font-medium">
-                  Commissions (Rs. {commissionIncome.toLocaleString()}) minus Total Salaries &amp; Expenses incl. Drawings (Rs. {totalOperatingDeductions.toLocaleString()}).
+                  Commissions (Rs. {commissionIncome.toLocaleString()}) minus Total Salaries &amp; Expenses incl. Drawings, Loans &amp; SIMs (Rs. {totalOperatingDeductions.toLocaleString()}).
                 </p>
                 <p className="text-[11px] text-slate-700 font-normal">
-                  With standard wholesale pass-through markup (+Rs. 366,500), commercial operating net profit is <strong>+Rs. {commercialNetProfit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>.
+                  With standard wholesale pass-through markup (+Rs. 366,500), commercial operating net margin is <strong>{commercialNetProfit >= 0 ? `+Rs. ${commercialNetProfit.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : `-Rs. ${Math.abs(commercialNetProfit).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}</strong>.
                 </p>
               </div>
               <div className="text-right">
@@ -920,9 +919,7 @@ export const ProfitLoss: React.FC = () => {
                 This includes:
               </p>
               <ul className="list-disc pl-5 text-xs text-amber-900 space-y-1 font-medium">
-                <li><strong>Operating Overhead &amp; Salaries incl. Drawings (Rs. 932,370.00):</strong> Staff salaries (252.3k), FCA pay, office rent, utilities, and Islam Badshah Sb Drawings (103.9k).</li>
-                <li><strong>Haris Badshah Loan Settlement (Rs. 500,000.00):</strong> Repaid a prior liability; cleared company debt.</li>
-                <li><strong>Paired &amp; Loose SIMs Stock Purchases (Rs. 221,250.00):</strong> Converted bank cash into valuable inventory currently in stock.</li>
+                <li><strong>All Operational &amp; Capital Outflows (Rs. 1,653,620.00):</strong> Staff salaries (252.3k), FCA pay (339.7k), Haris Badshah loan settlement (500k), SIMs stock orders (221.25k), Islam Badshah Drawings (103.9k), tax, rent, utilities, and office maintenance.</li>
               </ul>
             </div>
 
@@ -1015,11 +1012,11 @@ export const ProfitLoss: React.FC = () => {
             {/* Reconciliation Totals */}
             <div className="space-y-1.5 text-xs font-mono pt-2 border-t border-slate-300">
               <div className="flex justify-between text-slate-700">
-                <span className="font-sans">A. Operational Overhead &amp; Payroll (Salaries + Expenses incl. Drawings):</span>
+                <span className="font-sans">A. Operational Overhead &amp; Payroll (All 17 Sheet Heads incl. Loans, SIMs &amp; Drawings):</span>
                 <span className="font-bold text-slate-800 font-mono">Rs. {totalOperatingDeductions.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between text-slate-700">
-                <span className="font-sans">B. Non-Operating Capital &amp; Debt Disbursements (Loan Return + SIMs Stock):</span>
+                <span className="font-sans">B. Non-Operating Capital &amp; Debt Disbursements (Counted Above):</span>
                 <span className="font-bold text-slate-800 font-mono">Rs. {nonOperatingTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between font-bold text-slate-950 pt-2 border-t-2 border-slate-900 bg-slate-100 p-2.5 rounded-xl text-sm">

@@ -470,9 +470,9 @@ def calculate_profit_and_loss(
     gross_sales_margin = net_revenue - net_cogs
     gross_profit = gross_sales_margin + total_commission
 
-    # Operating expenses exclude non-operating categories (Loan Repayment, Salaries, Inventory).
-    # Per client requirement, Drawings of Islam Badshah Sb (Household & Personal Rs. 103,910) is counted in Operating Expenditures.
-    non_operating_cats = ["Loan Repayment", "Salaries", "Inventory"]
+    # Operating expenses: All 15 non-salary expenses (Overhead, Drawings, Haris Badshah Loan Settlement, and SIMs Orders)
+    # are counted in Operating Expenditures per client directive. Only Salaries are separated into the salaries line.
+    non_operating_cats = ["Salaries"]
     operating_expenses = sum((e.amount for e in expenses if e.category not in non_operating_cats), Decimal("0.00"))
     
     # Below-the-line / Financing & Capital cash movements
@@ -574,8 +574,8 @@ def calculate_profit_and_loss(
     # August.xlsx Bank & Cash Ledger Reconciliation (Rows 4-12, 14-21, 40-59)
     opening_bank_balance = Decimal("3152601.00")
     closing_bank_balance = Decimal("2664420.00")
-    # Total monthly cash disbursements: operating deductions (incl. Drawings) + debt settlement + inventory
-    total_cash_disbursements = total_operating_deductions + loan_repayments + capital_inventory
+    # Total monthly cash disbursements: equals total operating deductions (Rs. 1,653,620.00) matching August.xlsx Row 59
+    total_cash_disbursements = total_operating_deductions
     external_cash_inflows = Decimal("316142.00")
     total_realized_inflows = total_commission + external_cash_inflows
     net_cash_depletion = total_realized_inflows - total_cash_disbursements
@@ -762,8 +762,8 @@ def get_balance_sheet(
     owner_drawings = Decimal("103910.00")
     owner_net_capital = owner_gross_investment - owner_drawings  # 5,116,500.00
 
-    # Net Operating Margin with Drawings in Operations: -Rs. 83,073.00
-    current_operating_profit = Decimal("-83073.00")
+    # Net Operating Margin with all cash disbursements in Operations: -Rs. 804,323.00
+    current_operating_profit = Decimal("-804323.00")
 
     # Solvency & Net Surplus:
     working_capital_surplus = total_assets - total_liabilities  # 1,956,740.00
