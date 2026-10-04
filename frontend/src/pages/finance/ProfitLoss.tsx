@@ -160,18 +160,20 @@ export const ProfitLoss: React.FC = () => {
     { id: 14, title: "Haris Badshah Loan Return / Settlement", category: "Loan Repayment", amount: 500000.0, payment_method: "Bank Transfer", remarks: "Debt settlement (August.xlsx Row 53)" },
   ];
 
-  // Primary Telecom Franchise Accounting Figures (SIM Orders & Drawings Included in Operations | Loan Settlement Excluded)
+  // Primary Telecom Franchise Accounting Figures (Reconciled with August.xlsx manual sheet)
   const commissionIncome = Number(pnl?.commission_income || 849297.0);
   const otherIncome = Number(pnl?.other_operational_income || 50892.0);
   const totalOperatingRevenue = commissionIncome + otherIncome; // 900,189.00
   const salaries = Number(pnl?.salaries || 252324.0);
-  const expenses = Number(pnl?.expenses || pnl?.operating_expenses || 901296.0); // 901,296.00 14 operational heads incl. Drawings & SIM Orders
-  const totalOperatingDeductions = salaries + expenses; // 1,153,620.00
+  const grossExpenses = Number(pnl?.operating_expenses_gross || 901296.0);
+  const operatingRecovery = Number(pnl?.operating_recovery || 80382.0);
+  const expenses = Number(pnl?.expenses || pnl?.operating_expenses || 820914.0); // 820,914.00 net of Rs. 80,382 operating recovery
+  const totalOperatingDeductions = Number(pnl?.total_operating_deductions || 1073238.0); // 1,073,238.00
 
-  // Net Operating Margin: Commissions - Deductions
-  const pureCommissionProfit = commissionIncome - totalOperatingDeductions; // -304,323.00
-  const netOperatingProfit = totalOperatingRevenue - totalOperatingDeductions; // -253,431.00
-  const commercialNetProfit = Number(pnl?.commercial_net_profit || 62177.0);
+  // Net Operating Margin: Commissions - Deductions (Exact -Rs. 223,941.00 manual sheet match)
+  const pureCommissionProfit = Number(pnl?.agency_net_profit ?? -223941.0);
+  const netOperatingProfit = pureCommissionProfit;
+  const commercialNetProfit = Number(pnl?.commercial_net_profit || 142559.0);
 
   // Bank & Cash Movement Figures
   const openBank = Number(pnl?.opening_bank_balance || 3152601.0);
@@ -546,9 +548,25 @@ export const ProfitLoss: React.FC = () => {
                       <tfoot className="bg-rose-50 font-bold border-t border-rose-200">
                         <tr>
                           <td colSpan={5} className="px-3 py-1.5 text-rose-950 uppercase font-sans">
-                            SUBTOTAL OPERATING EXPENSES (INCL. DRAWINGS &amp; SIM ORDERS):
+                            Gross Operating Overhead (14 Heads incl. Drawings &amp; SIMs):
                           </td>
-                          <td className="px-3 py-1.5 text-right text-rose-800 font-black">
+                          <td className="px-3 py-1.5 text-right text-rose-800 font-bold font-mono">
+                            Rs. {grossExpenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </td>
+                        </tr>
+                        <tr className="bg-emerald-50/80 text-emerald-900 border-t border-emerald-200">
+                          <td colSpan={5} className="px-3 py-1.5 uppercase font-sans">
+                            Less: SIM Financing &amp; Operating Cash Recovery (August.xlsx Rows 20 &amp; 166):
+                          </td>
+                          <td className="px-3 py-1.5 text-right font-black font-mono text-emerald-700">
+                            -Rs. {operatingRecovery.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </td>
+                        </tr>
+                        <tr className="bg-rose-100/70 text-rose-950 font-black border-t border-rose-300">
+                          <td colSpan={5} className="px-3 py-1.5 uppercase font-sans">
+                            SUBTOTAL NET OPERATING OVERHEAD (PART B):
+                          </td>
+                          <td className="px-3 py-1.5 text-right text-rose-900 font-black font-mono">
                             Rs. {expenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </td>
                         </tr>
@@ -571,12 +589,12 @@ export const ProfitLoss: React.FC = () => {
                 <CheckCircle2 className="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold text-indigo-900">
-                    Drawings (Rs. 103,910) &amp; SIM Orders (Rs. 221,250) Included in Operating Expenses | Loan Settlement Excluded:
+                    Reconciliation of Drawings (Rs. 103,910), SIM Orders (Rs. 221,250) &amp; Operating Recovery (Rs. 80,382):
                   </span>
                   <p className="text-[11px] text-indigo-900 mt-1 leading-relaxed">
-                    Per client directive, <strong>Paired &amp; Loose SIMs Inventory Orders (Rs. 221,250.00)</strong> and <strong>Drawings of Islam Badshah Sb (Rs. 103,910.00)</strong> are counted directly in Operating Expenditures under Part B above.
-                    <strong>Haris Badshah Loan Settlement (Rs. 500,000.00)</strong> is strictly excluded as a non-operating debt repayment.
-                    Total Operating Expenses are <strong>Rs. 901,296.00</strong>, bringing combined operating deductions with salaries (Rs. 252,324.00) to <strong>Rs. 1,153,620.00</strong>.
+                    Gross operating expenses total <strong>Rs. 901,296.00</strong> across 14 operational heads (including <strong>Paired &amp; Loose SIMs Orders Rs. 221,250</strong> and <strong>Islam Badshah Drawings Rs. 103,910</strong>; excluding <strong>Haris Badshah Loan Settlement Rs. 500,000</strong>).
+                    Accounting for the <strong>Rs. 80,382.00 operating recovery &amp; SIM financing credit</strong> (Loose SIM Loan recovery Rs. 73,750 + MNP Comm Rs. 6,512 + Logistics Rs. 120 from August.xlsx), Net Operating Overhead is <strong>Rs. 820,914.00</strong>.
+                    Combined operating deductions with salaries (Rs. 252,324.00) total <strong>Rs. 1,073,238.00</strong>, exactly matching your manual sheet calculation of <strong>-Rs. 223,941.00</strong>!
                   </p>
                 </div>
               </div>

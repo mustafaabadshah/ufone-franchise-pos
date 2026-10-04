@@ -139,17 +139,17 @@ export const ExpensesList: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <MetricCard
           title="Operating Expenses"
-          value={summary?.operating_amount ?? 901296}
+          value={summary?.operating_amount ?? 820914}
           prefix="Rs. "
           variant="red"
-          subtitle="14 operational heads (incl. SIMs & Drawings)"
+          subtitle="Net operational heads (Gross Rs. 901.3k − Inflow Recovery Rs. 80.4k)"
         />
         <MetricCard
-          title="Loan Debt Repayment"
-          value={summary?.debt_and_stock_amount ?? 500000}
+          title="Loan Debt & Non-Op Outflow"
+          value={summary?.debt_and_stock_amount ?? 580382}
           prefix="Rs. "
           variant="blue"
-          subtitle="Haris Badshah Loan Settlement (Non-Operating)"
+          subtitle="Haris Badshah Loan Settlement (Rs. 500k) + Capital Recovery (Rs. 80,382)"
         />
         <MetricCard
           title="Islam Badshah Drawings"
@@ -327,7 +327,7 @@ export const ExpensesList: React.FC = () => {
                   Rs. {expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
                 </td>
                 <td colSpan={3} className="py-3.5 px-6 text-slate-600 font-sans text-[11px] font-normal">
-                  Operating Overhead: Rs. {(summary?.operating_amount ?? 901296).toLocaleString()} | Non-Operating Debt Repayment: Rs. {(summary?.debt_and_stock_amount ?? 500000).toLocaleString()}
+                  Operating Overhead (Net): Rs. {(summary?.operating_amount ?? 820914).toLocaleString()} | Debt & Non-Op Outflow: Rs. {(summary?.debt_and_stock_amount ?? 580382).toLocaleString()}
                 </td>
               </tr>
             </tfoot>

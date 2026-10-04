@@ -74,16 +74,17 @@ def test_august_evc_sales_volume():
     db.close()
 
 def test_pnl_dual_models():
-    """Validates franchise operating margin (pure commission: -Rs. 304,323) and commercial (+Rs. 62,177)"""
+    """Validates franchise operating margin (pure commission: -Rs. 223,941) and commercial (+Rs. 142,559)"""
     db = SessionLocal()
     pnl = calculate_profit_and_loss(db)
     assert pnl["commission_income"] == 849297.0
-    assert pnl["operating_expenses"] == 901296.0
+    assert pnl["operating_expenses"] == 820914.0
+    assert pnl["operating_recovery"] == 80382.0
     assert pnl["salaries"] == 252324.0
-    assert pnl["total_operating_deductions"] == 1153620.0
-    assert pnl["agency_net_profit"] == -304323.0
-    assert pnl["net_profit"] == -304323.0
-    assert pnl["commercial_net_profit"] == 62177.0
+    assert pnl["total_operating_deductions"] == 1073238.0
+    assert pnl["agency_net_profit"] == -223941.0
+    assert pnl["net_profit"] == -223941.0
+    assert pnl["commercial_net_profit"] == 142559.0
     assert pnl["is_loss"] is True
     assert pnl["total_cash_outflows"] == 1653620.0
     db.close()
@@ -96,14 +97,14 @@ def test_dashboard_api_solvency():
     assert data["total_sales"] == 14660000.0
     assert data["total_expenses"] == 1653620.0
     assert data["total_salaries"] == 252324.0
-    assert data["net_profit"] == -304323.0
-    assert data["commercial_net_profit"] == 62177.0
+    assert data["net_profit"] == -223941.0
+    assert data["commercial_net_profit"] == 142559.0
     eq = data["financial_equation"]
     assert eq["working_capital_loans"] == 928930.0
     assert eq["working_capital_surplus"] == 1956740.0
-    assert eq["operating_expenses"] == 901296.0
-    assert eq["total_operating_deductions"] == 1153620.0
-    assert eq["agency_net_profit"] == -304323.0
+    assert eq["operating_expenses"] == 820914.0
+    assert eq["total_operating_deductions"] == 1073238.0
+    assert eq["agency_net_profit"] == -223941.0
 
 def test_monthly_report_api_audit():
     """Validates /api/v1/reports/monthly matches every section of August.xlsx"""
@@ -117,9 +118,9 @@ def test_monthly_report_api_audit():
     assert data["total_staff_payroll"] == 144300.0
     assert data["combined_payroll"] == 252324.0
     assert data["total_commissions_inflow"] == 849297.0
-    assert data["agency_net_profit"] == -304323.0
-    assert data["net_profit"] == -304323.0
-    assert data["commercial_net_profit"] == 62177.0
+    assert data["agency_net_profit"] == -223941.0
+    assert data["net_profit"] == -223941.0
+    assert data["commercial_net_profit"] == 142559.0
 
 def test_balance_sheet_api():
     """Validates /api/v1/finance/balance-sheet reconciles Assets, Liabilities and Equity"""
@@ -130,5 +131,5 @@ def test_balance_sheet_api():
     assert bs["summary"]["total_credit_receivables"] == 719385.0
     assert bs["summary"]["total_liabilities"] == 928930.0
     assert bs["summary"]["working_capital_surplus"] == 1956740.0
-    assert bs["summary"]["net_operating_profit"] == -304323.0
+    assert bs["summary"]["net_operating_profit"] == -223941.0
     assert bs["equity"]["solvency_ratio"] >= 3.0

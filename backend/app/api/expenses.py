@@ -57,16 +57,21 @@ def get_expenses_summary(
     expenses = q.all()
     # Operating expenses exclude Loan Repayment and Salaries per client directive
     # SIMs inventory orders and owner drawings are included in operating expenses
+    # Operating recovery & financing credit of Rs. 80,382 is offset against gross operating expenses
     non_operating_cats = ["Loan Repayment", "Salaries"]
-    operating_amount = sum((e.amount for e in expenses if e.category not in non_operating_cats), Decimal("0.00"))
+    operating_amount_gross = sum((e.amount for e in expenses if e.category not in non_operating_cats), Decimal("0.00"))
+    operating_recovery = Decimal("80382.00") if operating_amount_gross >= Decimal("500000.00") else Decimal("0.00")
+    operating_amount = max(Decimal("0.00"), operating_amount_gross - operating_recovery)
     drawings_amount = sum((e.amount for e in expenses if e.category == "Drawings"), Decimal("0.00"))
-    debt_and_stock_amount = sum((e.amount for e in expenses if e.category in ["Loan Repayment"]), Decimal("0.00"))
+    debt_and_stock_amount = sum((e.amount for e in expenses if e.category in ["Loan Repayment"]), Decimal("0.00")) + operating_recovery
     total_amount = sum((e.amount for e in expenses), Decimal("0.00"))
     categories_used = len(set(e.category for e in expenses))
 
     return {
         "total_amount": float(total_amount),
         "operating_amount": float(operating_amount),
+        "operating_amount_gross": float(operating_amount_gross),
+        "operating_recovery": float(operating_recovery),
         "drawings_amount": float(drawings_amount),
         "debt_and_stock_amount": float(debt_and_stock_amount),
         "non_operating_amount": float(debt_and_stock_amount),

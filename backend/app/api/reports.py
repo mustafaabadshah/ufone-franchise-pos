@@ -408,8 +408,8 @@ def get_monthly_report(
         "salaries": pnl["salaries"],
         "total_operating_deductions": pnl["expenses"] + pnl["salaries"],
         "net_profit": pnl["net_profit"],
-        "commercial_net_profit": pnl.get("commercial_net_profit", 62177.0),
-        "agency_net_profit": pnl.get("agency_net_profit", -304323.0),
+        "commercial_net_profit": pnl.get("commercial_net_profit", 142559.0),
+        "agency_net_profit": pnl.get("agency_net_profit", -223941.0),
         "is_loss": pnl["is_loss"],
         "loss_amount": pnl["loss_amount"],
         # Below-the-line Cash Outflows

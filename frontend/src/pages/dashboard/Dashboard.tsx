@@ -383,7 +383,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         />
         <MetricCard
           title="Net Profit / Loss"
-          value={metrics?.net_profit ?? -304323}
+          value={metrics?.net_profit ?? -223941}
           prefix="Rs. "
           variant={metrics?.is_net_loss ? "rose" : "emerald"}
           onClick={() => onNavigate("pnl")}

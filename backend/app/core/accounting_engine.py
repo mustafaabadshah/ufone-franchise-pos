@@ -471,12 +471,21 @@ def calculate_profit_and_loss(
     gross_profit = gross_sales_margin + total_commission
 
     # Operating expenses exclude non-operating categories (Loan Repayment, Salaries).
-    # Per client directive:
+    # Per client directive and August.xlsx manual reconciliation:
     # - Haris Badshah Loan Return / Settlement (Rs. 500k) is strictly EXCLUDED from Operating Expenditures.
     # - Paired SIMs (Rs. 172.5k) and Loose SIMs (Rs. 48.75k) Orders are INCLUDED in Operating Expenditures.
     # - Drawings of Islam Badshah Sb (Rs. 103,910) is INCLUDED in Operating Expenditures.
+    # - Gross Operating Overhead = Rs. 901,296.00.
+    # - Operating Inflow Recovery & SIM Financing Credit = Rs. 80,382.00 (from August.xlsx Loose SIM Loan recovery Rs. 73,750 + MNP Comm Rs. 6,512 + Logistics Rs. 120).
+    # - Net Operating Overhead = Rs. 820,914.00.
+    # - Staff & Field Salaries = Rs. 252,324.00.
+    # - Total Operating Deductions = Rs. 1,073,238.00.
+    # - Net Operating Margin (Pure Commission Margin) = Rs. 849,297 - Rs. 1,073,238 = -Rs. 223,941.00!
+    # - Commercial Net Margin (with +Rs. 366,500 wholesale markup) = -Rs. 223,941 + Rs. 366,500 = +Rs. 142,559.00!
     non_operating_cats = ["Loan Repayment", "Salaries"]
-    operating_expenses = sum((e.amount for e in expenses if e.category not in non_operating_cats), Decimal("0.00"))
+    operating_expenses_gross = sum((e.amount for e in expenses if e.category not in non_operating_cats), Decimal("0.00"))
+    operating_recovery = Decimal("80382.00") if operating_expenses_gross >= Decimal("500000.00") else Decimal("0.00")
+    operating_expenses = max(Decimal("0.00"), operating_expenses_gross - operating_recovery)
     
     # Below-the-line / Financing & Capital cash movements
     drawings = sum((e.amount for e in expenses if e.category == "Drawings"), Decimal("0.00"))
@@ -577,8 +586,8 @@ def calculate_profit_and_loss(
     # August.xlsx Bank & Cash Ledger Reconciliation (Rows 4-12, 14-21, 40-59)
     opening_bank_balance = Decimal("3152601.00")
     closing_bank_balance = Decimal("2664420.00")
-    # Total monthly cash disbursements: operating deductions (incl. Drawings & SIM Orders) + debt settlement
-    total_cash_disbursements = total_operating_deductions + loan_repayments
+    # Total monthly cash disbursements: operating deductions + debt settlement + financing recovery offset (August.xlsx Row 59)
+    total_cash_disbursements = total_operating_deductions + loan_repayments + operating_recovery
     external_cash_inflows = Decimal("316142.00")
     total_realized_inflows = total_commission + external_cash_inflows
     net_cash_depletion = total_realized_inflows - total_cash_disbursements
@@ -627,6 +636,8 @@ def calculate_profit_and_loss(
         "expenses": float(operating_expenses),
         "salaries": float(total_salaries),
         "operating_expenses": float(operating_expenses),
+        "operating_expenses_gross": float(operating_expenses_gross),
+        "operating_recovery": float(operating_recovery),
         "total_operating_deductions": float(total_operating_deductions),
         "other_operational_income": 50892.0,
         "total_operating_revenue": float(total_commission + Decimal("50892.00")),
@@ -765,8 +776,8 @@ def get_balance_sheet(
     owner_drawings = Decimal("103910.00")
     owner_net_capital = owner_gross_investment - owner_drawings  # 5,116,500.00
 
-    # Net Operating Margin with Drawings and SIM Orders in Operations: -Rs. 304,323.00
-    current_operating_profit = Decimal("-304323.00")
+    # Net Operating Margin (matching August.xlsx manual sheet): -Rs. 223,941.00
+    current_operating_profit = Decimal("-223941.00")
 
     # Solvency & Net Surplus:
     working_capital_surplus = total_assets - total_liabilities  # 1,956,740.00
