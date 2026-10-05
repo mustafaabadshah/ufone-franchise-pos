@@ -75,7 +75,7 @@ export default function ReportCenter() {
   }, [activeTab, selectedDate, selectedMonth, selectedYear]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -356,7 +356,7 @@ export default function ReportCenter() {
                 </span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full min-w-[700px] text-left text-xs">
                   <thead className="bg-slate-100/80 text-slate-700 uppercase font-semibold border-b border-slate-200">
                     <tr>
                       <th className="px-4 py-2.5">#</th>
@@ -420,7 +420,7 @@ export default function ReportCenter() {
                 </span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full min-w-[600px] text-left text-xs">
                   <thead className="bg-slate-100/80 text-slate-700 uppercase font-semibold border-b border-slate-200">
                     <tr>
                       <th className="px-4 py-2.5">#</th>
@@ -469,7 +469,7 @@ export default function ReportCenter() {
                 </span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full min-w-[700px] text-left text-xs">
                   <thead className="bg-slate-100/80 text-slate-700 uppercase font-semibold border-b border-slate-200">
                     <tr>
                       <th className="px-4 py-2.5">#</th>
@@ -532,7 +532,7 @@ export default function ReportCenter() {
                 </span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full min-w-[650px] text-left text-xs">
                   <thead className="bg-slate-100/80 text-slate-700 uppercase font-semibold border-b border-slate-200">
                     <tr>
                       <th className="px-4 py-2.5">#</th>
@@ -594,7 +594,7 @@ export default function ReportCenter() {
                 </span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full min-w-[650px] text-left text-xs">
                   <thead className="bg-slate-100/80 text-slate-700 uppercase font-semibold border-b border-slate-200">
                     <tr>
                       <th className="px-4 py-2.5">#</th>
@@ -647,7 +647,7 @@ export default function ReportCenter() {
                 </span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full min-w-[650px] text-left text-xs">
                   <thead className="bg-slate-100/80 text-slate-700 uppercase font-semibold border-b border-slate-200">
                     <tr>
                       <th className="px-4 py-2.5">#</th>
@@ -703,7 +703,7 @@ export default function ReportCenter() {
                 </span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full min-w-[500px] text-left text-xs">
                   <thead className="bg-slate-100/80 text-slate-700 uppercase font-semibold border-b border-slate-200">
                     <tr>
                       <th className="px-4 py-2.5">#</th>

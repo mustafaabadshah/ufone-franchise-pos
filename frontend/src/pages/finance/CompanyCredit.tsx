@@ -82,7 +82,7 @@ export const CompanyCredit: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -130,7 +130,7 @@ export const CompanyCredit: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full min-w-[750px] text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200/60 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="py-3 px-6">Reference Line</th>
@@ -293,8 +293,8 @@ export const CompanyCredit: React.FC = () => {
 
             <div>
               <h4 className="font-bold text-slate-800 text-sm mb-2">Transaction History</h4>
-              <div className="rounded-xl border border-slate-200 overflow-hidden">
-                <table className="w-full text-left text-xs">
+              <div className="rounded-xl border border-slate-200 overflow-x-auto">
+                <table className="w-full min-w-[500px] text-left text-xs">
                   <thead className="bg-slate-100 font-bold text-slate-700">
                     <tr>
                       <th className="py-2 px-3">Date</th>

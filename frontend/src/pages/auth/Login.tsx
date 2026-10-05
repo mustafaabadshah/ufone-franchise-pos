@@ -33,7 +33,7 @@ export const Login: React.FC = () => {
       <div className="absolute -right-20 bottom-10 h-96 w-96 rounded-full bg-indigo-500/20 blur-3xl" />
 
       <div className="relative w-full max-w-md">
-        <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl p-8 sm:p-10">
+        <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl p-6 sm:p-10">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-extrabold text-2xl font-heading shadow-lg shadow-orange-500/25 mb-4">

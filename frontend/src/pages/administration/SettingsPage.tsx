@@ -47,7 +47,7 @@ export default function SettingsPage() {
   const categories = Array.from(new Set(settings.map((s) => s.category || 'general')));
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 w-full max-w-5xl">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>

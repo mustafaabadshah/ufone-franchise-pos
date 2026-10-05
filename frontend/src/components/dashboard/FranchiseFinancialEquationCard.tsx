@@ -66,7 +66,7 @@ export const FranchiseFinancialEquationCard: React.FC<FinancialEquationProps> = 
 
       {/* Main Table with Dedicated Net Profit / Loss Column */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs border-collapse">
+        <table className="w-full min-w-[750px] text-left text-xs border-collapse">
           <thead>
             <tr className="bg-slate-50/80 border-b border-slate-200/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               <th className="py-3 px-4">
@@ -165,10 +165,10 @@ export const FranchiseFinancialEquationCard: React.FC<FinancialEquationProps> = 
       </div>
 
       {/* Formula Summary Footer */}
-      <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-600">
+      <div className="px-4 sm:px-6 py-3 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-600">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold text-slate-700">Audited Balance Sheet Equation:</span>
-          <code className="px-2 py-0.5 bg-white border border-slate-200 rounded font-mono text-slate-800 text-[11px]">
+          <span className="font-semibold text-slate-700 shrink-0">Audited Balance Sheet Equation:</span>
+          <code className="px-2 py-0.5 bg-white border border-slate-200 rounded font-mono text-slate-800 text-[11px] break-words">
             Realizable Assets (Rs. {totalAssets.toLocaleString()}) − Outstanding Debt (Rs. {workingLoans.toLocaleString()}) = +Rs. {workingCapitalSurplus.toLocaleString()} Solvency Surplus | Net Operating Profit: {netProfit >= 0 ? `+Rs. ${netProfit.toLocaleString()}` : `-Rs. ${Math.abs(netProfit).toLocaleString()}`}
           </code>
         </div>

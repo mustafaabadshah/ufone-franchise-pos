@@ -61,21 +61,21 @@ export const CreditDebitModal: React.FC<CreditDebitModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header Banner */}
-        <div className={`p-6 border-b border-slate-100 flex items-start justify-between ${
+        <div className={`p-4 sm:p-6 border-b border-slate-100 flex items-start justify-between ${
           isCredit
             ? 'bg-gradient-to-r from-blue-900 via-indigo-900 to-indigo-950 text-white'
             : 'bg-gradient-to-r from-slate-900 via-purple-950 to-indigo-950 text-white'
         }`}>
           <div>
             <div className="flex items-center gap-2.5">
-              <div className={`p-2.5 rounded-xl ${isCredit ? 'bg-blue-500/20 text-blue-300' : 'bg-purple-500/20 text-purple-300'} border border-white/10`}>
-                {isCredit ? <Wallet className="w-6 h-6" /> : <Landmark className="w-6 h-6" />}
+              <div className={`p-2 sm:p-2.5 rounded-xl ${isCredit ? 'bg-blue-500/20 text-blue-300' : 'bg-purple-500/20 text-purple-300'} border border-white/10 shrink-0`}>
+                {isCredit ? <Wallet className="w-5 h-5 sm:w-6 sm:h-6" /> : <Landmark className="w-5 h-5 sm:w-6 sm:h-6" />}
               </div>
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-300">
+                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-indigo-300">
                   {isCredit ? '1st Dashboard Option: Credit Particulars' : '2nd Dashboard Option: Debit Particulars'}
                 </span>
-                <h2 className="text-2xl font-black font-heading tracking-tight mt-0.5">
+                <h2 className="text-xl sm:text-2xl font-black font-heading tracking-tight mt-0.5">
                   {isCredit ? 'Market Credit / Outstanding Debtors' : 'Total Injected Capital & Working Loans'}
                 </h2>
               </div>
@@ -97,7 +97,7 @@ export const CreditDebitModal: React.FC<CreditDebitModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/50">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/50">
           {/* Top Summary Stat Cards */}
           {isCredit ? (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -196,7 +196,7 @@ export const CreditDebitModal: React.FC<CreditDebitModalProps> = ({
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
             <div className="overflow-x-auto max-h-[380px]">
               {isCredit ? (
-                <table className="w-full text-left border-collapse text-xs">
+                <table className="w-full min-w-[650px] text-left border-collapse text-xs">
                   <thead className="sticky top-0 bg-slate-100/90 backdrop-blur-xs border-b border-slate-200 font-bold uppercase tracking-wider text-slate-600">
                     <tr>
                       <th className="py-3 px-4">#</th>
@@ -243,7 +243,7 @@ export const CreditDebitModal: React.FC<CreditDebitModalProps> = ({
                   </tbody>
                 </table>
               ) : (
-                <table className="w-full text-left border-collapse text-xs">
+                <table className="w-full min-w-[650px] text-left border-collapse text-xs">
                   <thead className="sticky top-0 bg-slate-100/90 backdrop-blur-xs border-b border-slate-200 font-bold uppercase tracking-wider text-slate-600">
                     <tr>
                       <th className="py-3 px-4">#</th>

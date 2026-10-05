@@ -55,7 +55,7 @@ export default function AuditLogsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -182,7 +182,7 @@ export default function AuditLogsPage() {
         </div>
 
         <div className="overflow-x-auto" id="audit-logs-table">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full min-w-[750px] text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 <th className="py-3 px-4">Timestamp</th>

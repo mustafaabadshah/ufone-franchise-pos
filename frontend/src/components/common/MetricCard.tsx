@@ -93,28 +93,35 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         onClick ? "cursor-pointer hover:shadow-md hover:-translate-y-0.5 active:translate-y-0" : ""
       }`}
     >
-      <div className="flex items-start justify-between">
-        <div>
-          <span className={`text-xs font-bold uppercase tracking-wider ${styles.title}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <span className={`text-[11px] sm:text-xs font-bold uppercase tracking-wider block truncate ${styles.title}`}>
             {title}
           </span>
-          <div className="mt-2 flex items-baseline gap-1">
-            {prefix && <span className="text-sm font-semibold text-slate-500">{prefix}</span>}
-            <span className={`text-2xl font-extrabold font-heading tracking-tight ${styles.value}`}>
+          <div className="mt-1.5 flex items-baseline gap-1 flex-wrap">
+            {prefix && <span className="text-xs sm:text-sm font-semibold text-slate-500">{prefix}</span>}
+            <span className={`text-xl sm:text-2xl font-extrabold font-heading tracking-tight break-words ${styles.value}`}>
               {typeof value === "number" ? value.toLocaleString() : value}
             </span>
             {suffix && <span className="text-xs font-semibold text-slate-500">{suffix}</span>}
           </div>
           {subtitle && (
-            <p className="mt-1 text-[11px] text-slate-500 font-medium">{subtitle}</p>
+            <p className="mt-1 text-[11px] text-slate-500 font-medium line-clamp-2">{subtitle}</p>
           )}
         </div>
 
-        {onClick && (
-          <div className="p-1 rounded-lg bg-white/60 text-slate-400 group-hover:text-slate-600 transition-colors">
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </div>
-        )}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {Icon && (
+            <div className={`p-2 rounded-xl sm:p-2.5 ${styles.iconBg} shadow-2xs`}>
+              <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+          )}
+          {onClick && (
+            <div className="p-1 rounded-lg bg-white/70 text-slate-400 group-hover:text-slate-600 transition-colors">
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </div>
+          )}
+        </div>
       </div>
 
       {trend && (

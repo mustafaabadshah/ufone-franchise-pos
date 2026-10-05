@@ -133,7 +133,7 @@ export const SalariesList: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -289,7 +289,7 @@ export const SalariesList: React.FC = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-center text-xs border-collapse">
+            <table className="w-full min-w-[700px] text-center text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-300 font-bold text-slate-800 text-[11px]">
                   <th className="py-3 px-4 border-r border-slate-300 text-left font-bold">Salesman</th>
@@ -372,7 +372,7 @@ export const SalariesList: React.FC = () => {
         /* Standard Salaries Table */
         <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full min-w-[850px] text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200/60 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="py-3 px-6">S.No</th>

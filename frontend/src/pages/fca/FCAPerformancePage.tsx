@@ -246,7 +246,7 @@ export const FCAPerformancePage: React.FC = () => {
   }, [agents, allMonths]);
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 no-print">
         <div>
@@ -478,7 +478,7 @@ export const FCAPerformancePage: React.FC = () => {
 
         {/* Table */}
         <div className="overflow-x-auto border border-slate-200 rounded-xl bg-white print:border-none">
-          <table className="w-full text-left text-xs border-collapse print:text-[6.8pt]">
+          <table className="w-full min-w-[950px] text-left text-xs border-collapse print:text-[6.8pt] print:min-w-0">
             <thead className="bg-slate-900 text-white uppercase text-[11px] font-bold print:text-[6.8pt]">
               <tr>
                 <th className="px-2 py-2 text-center w-8 print:w-5 print:px-1">#</th>

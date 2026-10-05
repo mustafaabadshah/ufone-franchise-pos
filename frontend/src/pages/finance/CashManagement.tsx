@@ -22,7 +22,7 @@ export const CashManagement: React.FC = () => {
   const cashDiff = physicalCashTotal - expNum;
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 w-full max-w-4xl mx-auto">
       <div>
         <h2 className="text-2xl font-bold font-heading text-slate-900 tracking-tight">Physical Cash & Denominations</h2>
         <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -71,23 +71,23 @@ export const CashManagement: React.FC = () => {
       </div>
 
       {/* Denomination Counter Card */}
-      <div className="rounded-2xl bg-white border border-slate-200 shadow-xs p-6 space-y-4">
+      <div className="rounded-2xl bg-white border border-slate-200 shadow-xs p-4 sm:p-6 space-y-4">
         <h3 className="text-base font-bold font-heading text-slate-800">Banknote Quantities</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           {[5000, 1000, 500, 100, 50, 20, 10].map(val => (
-            <div key={val} className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-              <span className="font-bold text-slate-800 font-mono text-sm w-24">Rs. {val}</span>
-              <div className="flex items-center gap-2">
+            <div key={val} className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-1 sm:gap-2">
+              <span className="font-bold text-slate-800 font-mono text-xs sm:text-sm w-16 sm:w-24">Rs. {val}</span>
+              <div className="flex items-center gap-1 sm:gap-2">
                 <span className="text-slate-400">&times;</span>
                 <input
                   type="number"
                   min="0"
                   value={denominations[val]}
                   onChange={(e) => setDenominations({ ...denominations, [val]: Number(e.target.value) || 0 })}
-                  className="w-20 px-2 py-1.5 text-center font-mono font-bold rounded-lg border border-slate-200 bg-white"
+                  className="w-16 sm:w-20 px-2 py-1.5 text-center font-mono font-bold rounded-lg border border-slate-200 bg-white"
                 />
               </div>
-              <span className="font-mono font-bold text-slate-900 text-right w-28">
+              <span className="font-mono font-bold text-slate-900 text-right text-xs sm:text-sm min-w-[70px] sm:w-28">
                 = Rs. {(val * (denominations[val] || 0)).toLocaleString()}
               </span>
             </div>

@@ -185,7 +185,7 @@ export const ProfitLoss: React.FC = () => {
   const nonOperatingTotal = Number(pnl?.non_operating_total || (totDisbursed - totalOperatingDeductions) || 500000.0);
 
   return (
-    <div className="p-3 sm:p-6 space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 w-full" id="pnl-printable-area">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
         <div>
@@ -404,7 +404,7 @@ export const ProfitLoss: React.FC = () => {
               {/* Commissions Itemized Table */}
               {showItemizedTables && (
                 <div className="overflow-x-auto mt-2 border border-emerald-200 rounded-lg bg-white">
-                  <table className="w-full text-left text-[11px]">
+                  <table className="w-full min-w-[550px] text-left text-[11px]">
                     <thead className="bg-emerald-100/60 text-emerald-950 uppercase font-bold border-b border-emerald-200 font-sans">
                       <tr>
                         <th className="px-3 py-1.5">#</th>
@@ -471,7 +471,7 @@ export const ProfitLoss: React.FC = () => {
                 </div>
                 {showItemizedTables && (
                   <div className="overflow-x-auto border border-rose-200 rounded-lg bg-white">
-                    <table className="w-full text-left text-[11px]">
+                    <table className="w-full min-w-[550px] text-left text-[11px]">
                       <thead className="bg-rose-100/60 text-rose-950 uppercase font-bold border-b border-rose-200 font-sans">
                         <tr>
                           <th className="px-3 py-1.5">#</th>
@@ -520,7 +520,7 @@ export const ProfitLoss: React.FC = () => {
                 </div>
                 {showItemizedTables && (
                   <div className="overflow-x-auto border border-rose-200 rounded-lg bg-white">
-                    <table className="w-full text-left text-[11px]">
+                    <table className="w-full min-w-[600px] text-left text-[11px]">
                       <thead className="bg-rose-100/60 text-rose-950 uppercase font-bold border-b border-rose-200 font-sans">
                         <tr>
                           <th className="px-3 py-1.5">#</th>
@@ -698,7 +698,7 @@ export const ProfitLoss: React.FC = () => {
                     <span className="font-mono text-slate-900">Rs. 718,966.00</span>
                   </div>
                   <div className="border border-slate-200 rounded-lg bg-white overflow-x-auto">
-                    <table className="w-full text-left text-[11px]">
+                    <table className="w-full min-w-[450px] text-left text-[11px]">
                       <thead className="bg-slate-100 text-slate-700 uppercase font-bold font-sans">
                         <tr>
                           <th className="px-2.5 py-1">Holder / Float Head</th>
@@ -763,7 +763,7 @@ export const ProfitLoss: React.FC = () => {
                     <span className="font-mono text-cyan-800 font-bold">Rs. 719,385.00</span>
                   </div>
                   <div className="border border-slate-200 rounded-lg bg-white overflow-x-auto max-h-48 overflow-y-auto">
-                    <table className="w-full text-left text-[11px]">
+                    <table className="w-full min-w-[450px] text-left text-[11px]">
                       <thead className="bg-slate-100 text-slate-700 uppercase font-bold font-sans sticky top-0">
                         <tr>
                           <th className="px-2.5 py-1">#</th>
@@ -822,7 +822,7 @@ export const ProfitLoss: React.FC = () => {
                     <span className="font-mono text-rose-800 font-bold">Rs. 1,428,930.00</span>
                   </div>
                   <div className="border border-slate-200 rounded-lg bg-white overflow-x-auto">
-                    <table className="w-full text-left text-[11px]">
+                    <table className="w-full min-w-[450px] text-left text-[11px]">
                       <thead className="bg-rose-50 text-rose-950 uppercase font-bold font-sans">
                         <tr>
                           <th className="px-2.5 py-1">Lender / Loan Title</th>
@@ -952,7 +952,7 @@ export const ProfitLoss: React.FC = () => {
               </div>
               {showItemizedTables && (
                 <div className="overflow-x-auto border border-emerald-200 rounded-lg bg-white">
-                  <table className="w-full text-left text-[11px]">
+                  <table className="w-full min-w-[550px] text-left text-[11px]">
                     <thead className="bg-emerald-100/60 text-emerald-950 uppercase font-bold border-b border-emerald-200 font-sans">
                       <tr>
                         <th className="px-3 py-1.5">#</th>
@@ -994,7 +994,7 @@ export const ProfitLoss: React.FC = () => {
               </div>
               {showItemizedTables && (
                 <div className="overflow-x-auto border border-blue-200 rounded-lg bg-white">
-                  <table className="w-full text-left text-[11px]">
+                  <table className="w-full min-w-[600px] text-left text-[11px]">
                     <thead className="bg-blue-100/60 text-blue-950 uppercase font-bold border-b border-blue-200 font-sans">
                       <tr>
                         <th className="px-3 py-1.5">#</th>

@@ -163,7 +163,7 @@ export default function Loans() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -309,7 +309,7 @@ export default function Loans() {
       {activeTab === 'loans' && (
         <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden" id="loans-printable-table">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-sm">
+            <table className="w-full min-w-[850px] text-left border-collapse text-sm">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200/80 text-xs font-semibold uppercase tracking-wider text-slate-500">
                   <th className="py-3 px-4">#</th>
@@ -407,7 +407,7 @@ export default function Loans() {
       {activeTab === 'returns' && (
         <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-sm">
+            <table className="w-full min-w-[700px] text-left border-collapse text-sm">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200/80 text-xs font-semibold uppercase tracking-wider text-slate-500">
                   <th className="py-3 px-4">#</th>

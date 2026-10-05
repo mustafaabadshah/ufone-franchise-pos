@@ -111,7 +111,7 @@ export const ExpensesList: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -173,7 +173,7 @@ export const ExpensesList: React.FC = () => {
         <div>
           <span className="font-bold">Operating Expenditures Notice — SIM Orders &amp; Drawings Included | Loan Settlement Excluded:</span>
           <p className="text-[11px] text-indigo-900 mt-0.5 leading-relaxed">
-            Per franchise management directive, <strong>Paired SIMs Order (Rs. 172,500.00)</strong>, <strong>Loose SIMs Order (Rs. 48,750.00)</strong>, and <strong>Drawings of Islam Badshah Sb (Rs. 103,910.00)</strong> are counted directly in <strong>Operating Expenditures</strong>. <strong>Haris Badshah Loan Settlement (Rs. 500,000.00)</strong> is strictly excluded from Operating Expenditures as a debt settlement / liability reduction. Operating Expenses for the month total <strong>Rs. 901,296.00</strong> (combined with staff payroll of Rs. 252,324.00 = Total Operating Deductions <strong>Rs. 1,153,620.00</strong>). Total Cash Disbursed is <strong>Rs. 1,401,296.00</strong> (or Rs. 1,653,620.00 including staff payroll).
+            Per franchise management directive, <strong>Paired SIMs Order (Rs. 172,500.00)</strong>, <strong>Loose SIMs Order (Rs. 48,750.00)</strong>, and <strong>Drawings of Islam Badshah Sb (Rs. 103,910.00)</strong> are counted directly in <strong>Operating Expenditures</strong>. <strong>Haris Badshah Loan Settlement (Rs. 500,000.00)</strong> is strictly excluded from Operating Expenditures as a debt settlement / liability reduction. Gross Operating Expenses total <strong>Rs. 901,296.00</strong>, less Rs. 80,382.00 operating cash inflow recovery = Net Operating Overhead <strong>Rs. 820,914.00</strong>. Combined with staff payroll of Rs. 252,324.00, Total Operating Deductions equal <strong>Rs. 1,073,238.00</strong> (Pure Operating Net Margin: <strong>-Rs. 223,941.00</strong>; Commercial Wholesale Net Margin: <strong>+Rs. 142,559.00</strong>). Total Cash Disbursed is <strong>Rs. 1,401,296.00</strong> (or Rs. 1,653,620.00 including staff payroll).
           </p>
         </div>
       </div>
@@ -259,7 +259,7 @@ export const ExpensesList: React.FC = () => {
       {/* Expenses Table (Matching Reference Columns: S.No, Title, Amount Paid, Paid By, Paid Date, Actions) */}
       <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden" id="expenses-table">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full min-w-[750px] text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200/60 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="py-3 px-6">S.No</th>

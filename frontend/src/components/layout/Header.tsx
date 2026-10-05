@@ -35,31 +35,33 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         )}
 
-        <div className="min-w-0">
-          <h2 className="text-base sm:text-xl font-bold font-heading text-slate-800 tracking-tight flex items-center gap-1.5 sm:gap-2 truncate">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm sm:text-lg md:text-xl font-bold font-heading text-slate-800 tracking-tight truncate block" title={title}>
             {title}
           </h2>
           {subtitle && (
-            <p className="hidden sm:block text-xs text-slate-500 font-medium truncate">{subtitle}</p>
+            <p className="hidden md:block text-xs text-slate-500 font-medium truncate">{subtitle}</p>
           )}
         </div>
 
         {/* Branch tag */}
-        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-medium flex-shrink-0">
+        <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-medium flex-shrink-0">
           <MapPin className="w-3.5 h-3.5 text-indigo-500" />
           <span>Dargai Malakand Branch</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
         {/* Quick POS Terminal Button (Hidden for Read-Only Viewers and Shakeel) */}
         {onOpenPos && !isViewer && !isShakeel && (
           <button
             onClick={onOpenPos}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium text-xs shadow-md shadow-indigo-600/20 hover:from-indigo-700 hover:to-violet-700 active:scale-98 transition-all"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium text-xs shadow-md shadow-indigo-600/20 hover:from-indigo-700 hover:to-violet-700 active:scale-98 transition-all shrink-0 cursor-pointer"
+            title="Open POS Terminal"
           >
             <ShoppingBag className="w-3.5 h-3.5" />
-            <span className="font-semibold tracking-wide">POS Terminal</span>
+            <span className="font-semibold tracking-wide hidden sm:inline">POS Terminal</span>
+            <span className="font-semibold tracking-wide inline sm:hidden">POS</span>
           </button>
         )}
 

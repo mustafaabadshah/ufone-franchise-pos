@@ -230,19 +230,19 @@ function MainApp() {
           onToggleMobileSidebar={() => setMobileSidebarOpen(prev => !prev)}
         />
 
-        <main className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8 bg-slate-100/70">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-6 lg:p-8 bg-slate-100/70 min-w-0">
+          <div className="w-full max-w-7xl mx-auto min-w-0">
             {isViewer && (
-              <div className="mb-6 p-3.5 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 shadow-xs flex items-center justify-between">
+              <div className="mb-6 p-3.5 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-xs font-semibold text-emerald-900">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span className="text-xs font-semibold text-emerald-900 leading-relaxed">
                     Logged in as <strong>Islam Badshah</strong> (Role: Franchise Owner - Audit & Reports View). You have full access to view all reports, financial summaries, security logs, and print or download documents.
                   </span>
                 </div>
                 <button
                   onClick={() => handleNavigate('reports')}
-                  className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer"
+                  className="self-start sm:self-auto px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer shrink-0 shadow-2xs"
                 >
                   Go to Report Center
                 </button>
@@ -251,8 +251,8 @@ function MainApp() {
             {isShakeel && (
               <div className="mb-6 p-3.5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 shadow-xs flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
-                  <span className="text-xs font-semibold text-amber-900">
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                  <span className="text-xs font-semibold text-amber-900 leading-relaxed">
                     Logged in as <strong>Shakeel Ahmad</strong> (Role: FCA Operations Specialist). Access is restricted exclusively to <strong>FCA Monthly Progress</strong> tracking and monthly Excel uploads. POS, Stock, Sales, Purchases, P&L, Reports, and Ledgers are restricted.
                   </span>
                 </div>

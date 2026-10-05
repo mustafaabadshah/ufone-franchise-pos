@@ -31,7 +31,7 @@ export const Ledger: React.FC = () => {
   }, [refType]);
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -103,9 +103,8 @@ export const Ledger: React.FC = () => {
                 </span>
               </div>
 
-              {/* Line Entries */}
-              <div className="rounded-xl border border-slate-200 overflow-hidden bg-white">
-                <table className="w-full text-left text-[11px]">
+              <div className="rounded-xl border border-slate-200 overflow-x-auto bg-white">
+                <table className="w-full min-w-[500px] text-left text-[11px]">
                   <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
                     <tr>
                       <th className="py-1.5 px-3">Account</th>

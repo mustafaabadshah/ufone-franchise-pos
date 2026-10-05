@@ -122,12 +122,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto" id="dashboard-printable-area">
+    <div className="space-y-6 w-full" id="dashboard-printable-area">
       {/* Overview & Specific Month Filter Banner */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="rounded-2xl bg-white border border-slate-200/80 p-4 sm:p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-2xl font-bold font-heading text-slate-900 tracking-tight">Shop Dashboard</h2>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold font-heading text-slate-900 tracking-tight">Shop Dashboard</h2>
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
               {selectedMonth === "2026-08"
                 ? "August 2026 (Live Closed Month)"
@@ -191,19 +191,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </div>
 
           {/* Custom Date Range */}
-          <div className="flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-200 p-1 rounded-xl">
+          <div className="flex flex-wrap items-center gap-1.5 text-xs bg-slate-50 border border-slate-200 p-1 rounded-xl">
             <input
               type="date"
               value={dateFrom}
               onChange={(e) => { setDateFrom(e.target.value); setSelectedMonth(""); setPeriodPreset("custom"); }}
-              className="px-2 py-1 rounded-lg border border-slate-200 bg-white text-xs"
+              className="px-2 py-1 rounded-lg border border-slate-200 bg-white text-xs w-28 sm:w-auto"
             />
             <span className="text-slate-400 text-xs">to</span>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => { setDateTo(e.target.value); setSelectedMonth(""); setPeriodPreset("custom"); }}
-              className="px-2 py-1 rounded-lg border border-slate-200 bg-white text-xs"
+              className="px-2 py-1 rounded-lg border border-slate-200 bg-white text-xs w-28 sm:w-auto"
             />
             <button
               onClick={handleApplyCustomDates}
@@ -603,7 +603,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full min-w-[650px] text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200/60 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="py-3 px-6">Product</th>
